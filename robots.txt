@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tr1stan.de/sitemap.xml

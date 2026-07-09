@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 · tr1stan.de</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    const path = window.location.pathname.toLowerCase();
+    if (path.endsWith("/pages/impressum.html")) window.location.replace("/impressum.html");
+    if (path.endsWith("/pages/datenschutz.html")) window.location.replace("/datenschutz.html");
+  </script>
+</head>
+<body>
+  <div class="background-grid"></div>
+  <div class="aurora aurora-one"></div>
+  <main class="section contact" style="padding-top: 12vh;">
+    <div class="contact-shell">
+      <p class="kicker">404</p>
+      <h2>Datei nicht gefunden.</h2>
+      <p>Die Seite existiert nicht oder wurde verschoben.</p>
+      <p><a class="btn btn-primary" href="index.html">Zur Startseite</a></p>
+    </div>
+  </main>
+</body>
+</html>

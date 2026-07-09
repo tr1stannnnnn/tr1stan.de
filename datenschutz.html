@@ -3,25 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Datenschutz – tr1stan.de</title>
+  <meta name="theme-color" content="#070A12" />
+  <title>Datenschutz · tr1stan.de</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="section split" style="min-height: 80vh;">
-    <div>
-      <p class="eyebrow">Privacy</p>
-      <h2>Datenschutz</h2>
-    </div>
-    <div class="text-block">
-      <p>
-        Diese statische Website nutzt aktuell keine Cookies, kein Tracking und kein Kontaktformular.
-        Beim Aufruf werden technisch notwendige Server-/Hosting-Logs durch den Hoster verarbeitet.
-      </p>
-      <p>
-        Kontakt: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
-      </p>
-      <p><a class="button ghost" href="index.html">Zurück</a></p>
-    </div>
+  <div class="background-grid"></div>
+  <div class="aurora aurora-one"></div>
+  <div class="aurora aurora-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Zur Startseite">
+      <span class="brand-logo">t1</span>
+      <span class="brand-copy">
+        <strong>tr1stan.de</strong>
+        <small>private tech space</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Seitennavigation">
+      <a href="index.html#projects">Projekte</a>
+      <a href="index.html#contact">Kontakt</a>
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section split" style="min-height: 72vh;">
+      <div class="section-title reveal is-visible">
+        <p class="kicker">Privacy</p>
+        <h2>Datenschutz</h2>
+      </div>
+
+      <div class="panel reveal is-visible">
+        
+        <p>
+          Diese statische Website nutzt aktuell keine Cookies, kein Tracking und kein Kontaktformular.
+        </p>
+        <p>
+          Beim Aufruf können technisch notwendige Server- und Hosting-Logs durch den Hoster verarbeitet
+          werden. Diese Website wird über GitHub Pages ausgeliefert.
+        </p>
+        <p>
+          Kontakt: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
+        </p>
+
+        <p style="margin-top: 28px;">
+          <a class="btn btn-secondary" href="index.html">← Zurück zur Startseite</a>
+        </p>
+      </div>
+    </section>
   </main>
 </body>
 </html>
