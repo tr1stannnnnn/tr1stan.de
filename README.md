@@ -1,2 +1,8 @@
-# tr1stan.de
-Die Website Domain Website für tr1stan.de, hier ist der Anfang
+# tr1stan.de Website
+
+Statische Onepage für GitHub Pages.
+
+## Deployment
+
+Alle Dateien/Ordner in den Root deines GitHub-Repos hochladen.
+GitHub Pages ist bereits auf `main` und `/(root)` gesetzt.

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="tr1stan.de — private Tech-Seite, Projekte, Homelab und Systemintegration." />
+  <title>tr1stan.de</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="tr1stan.de Startseite">
+      <span class="brand-mark">t1</span>
+      <span>tr1stan.de</span>
+    </a>
+
+    <nav class="nav" aria-label="Hauptnavigation">
+      <a href="#about">Über mich</a>
+      <a href="#stack">Stack</a>
+      <a href="#projects">Projekte</a>
+      <a href="#contact">Kontakt</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy">
+        <p class="eyebrow">Systemintegration · Homelab · Automation</p>
+        <h1>
+          Ich bau IT-Kram.
+          <span>Bis er läuft.</span>
+        </h1>
+        <p class="subtitle">
+          Private Tech-Seite von Tristan. Hier landen später Projekte, Setup-Notes,
+          Homelab-Kram, kleine Tools und alles, was ich technisch ausprobieren will.
+        </p>
+
+        <div class="hero-actions">
+          <a class="button primary" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
+          <a class="button ghost" href="#projects">Projekte ansehen</a>
+        </div>
+      </div>
+
+      <aside class="terminal-card" aria-label="Terminal Vorschau">
+        <div class="terminal-bar">
+          <span></span><span></span><span></span>
+        </div>
+        <pre><code><span class="muted">$ whoami</span>
+tr1stan
+
+<span class="muted">$ focus --now</span>
+Systemintegration
+Linux / Windows
+DNS / Mail / Web
+Homelab / Automation
+
+<span class="muted">$ status</span>
+online<span class="blink">_</span></code></pre>
+      </aside>
+    </section>
+
+    <section class="quick-grid section" aria-label="Highlights">
+      <article class="stat-card">
+        <span class="label">Domain</span>
+        <strong>tr1stan.de</strong>
+        <p>Eigene Mail, eigene Website, eigener Tech-Space.</p>
+      </article>
+
+      <article class="stat-card">
+        <span class="label">Mail</span>
+        <strong>Proton</strong>
+        <p>Catch-All aktiv: alles an @tr1stan.de landet sauber bei mir.</p>
+      </article>
+
+      <article class="stat-card">
+        <span class="label">Mode</span>
+        <strong>Build first</strong>
+        <p>Lieber testen, fixen, dokumentieren — statt endlos planen.</p>
+      </article>
+    </section>
+
+    <section class="section split" id="about">
+      <div>
+        <p class="eyebrow">Über mich</p>
+        <h2>Fachinformatiker Systemintegration i. A.</h2>
+      </div>
+      <div class="text-block">
+        <p>
+          Ich interessiere mich für Netzwerke, Server, Linux, Windows, Automatisierung,
+          Security, Web und Homelab. Diese Seite ist mein privater Platz für alles,
+          was ich ausprobiere, lerne oder später als Projekt zeigen will.
+        </p>
+        <p>
+          Kein perfektes Hochglanz-Portfolio. Eher ein sauberer Tech-Hub, der mit mir wächst.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="stack">
+      <div class="section-head">
+        <p class="eyebrow">Stack</p>
+        <h2>Was hier später reinpasst</h2>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="icon">⚙</div>
+          <h3>Systemintegration</h3>
+          <p>Windows Clients, Server, Netzwerk, DNS, Mail-Setup und saubere Doku.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">⌘</div>
+          <h3>Automation</h3>
+          <p>Skripte, kleine Tools, wiederkehrende Aufgaben und Workflows.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">◈</div>
+          <h3>Homelab</h3>
+          <p>Docker, Home Assistant, NAS-Ideen, Linux-Kisten und Experimente.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">▣</div>
+          <h3>Web</h3>
+          <p>HTML, CSS, kleine Apps, Landingpages und später Sidehustle-Kram.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <div class="section-head">
+        <p class="eyebrow">Projekte</p>
+        <h2>Aktuelle Baustellen</h2>
+      </div>
+
+      <div class="project-list">
+        <article class="project">
+          <div>
+            <span class="project-tag">Live</span>
+            <h3>Private Domain + Proton Mail</h3>
+            <p>tr1stan.de mit eigener Mail, DNS, SPF, DKIM, DMARC und Catch-All.</p>
+          </div>
+          <span class="arrow">→</span>
+        </article>
+
+        <article class="project">
+          <div>
+            <span class="project-tag">Next</span>
+            <h3>Website V1</h3>
+            <p>Persönliche Onepage mit Dark-Design, Projektbereich und Kontakt.</p>
+          </div>
+          <span class="arrow">→</span>
+        </article>
+
+        <article class="project">
+          <div>
+            <span class="project-tag">Später</span>
+            <h3>Homelab / Setup</h3>
+            <p>Hardware, Tools, Netzwerk, Selfhosting und technische Notizen.</p>
+          </div>
+          <span class="arrow">→</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section split" id="contact">
+      <div>
+        <p class="eyebrow">Kontakt</p>
+        <h2>Schreib an den Chef.</h2>
+      </div>
+      <div class="contact-card">
+        <p>Für privaten Kram, Projekte oder Tests:</p>
+        <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
+        <small>Catch-All läuft später für alles, was vor @tr1stan.de steht.</small>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> tr1stan.de</span>
+    <div>
+      <a href="pages/impressum.html">Impressum</a>
+      <a href="pages/datenschutz.html">Datenschutz</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
