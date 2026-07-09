@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="20" fill="#05070d"/><path d="M14 14h74l26 26v74H14z" fill="url(#g)" opacity=".95"/><path d="M88 14v26h26" fill="#05070d" opacity=".45"/><text x="64" y="78" font-family="Arial, sans-serif" font-size="43" font-weight="900" text-anchor="middle" fill="#041018">t1</text><defs><linearGradient id="g" x1="14" x2="114" y1="14" y2="114"><stop stop-color="#00e5ff"/><stop offset=".55" stop-color="#78ffd6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="tr1stan.de favicon">
+  <rect width="128" height="128" fill="#05070d"/>
+  <path d="M12 12h78l26 26v78H38L12 90z" fill="#07111f" stroke="#00e5ff" stroke-width="4"/>
+  <path d="M90 12v26h26" fill="#10233a" stroke="#6fffd2" stroke-width="3"/>
+  <path d="M25 93h78M25 35h39M25 48h24M80 78h24" stroke="#9b7cff" stroke-width="4" stroke-linecap="square"/>
+  <path d="M39 57h50v28H39z" fill="url(#panel)" stroke="#00e5ff" stroke-width="3"/>
+  <text x="64" y="78" font-family="ui-sans-serif, system-ui, Arial, sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#031018">t1</text>
+  <defs>
+    <linearGradient id="panel" x1="39" x2="89" y1="57" y2="85" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00e5ff"/>
+      <stop offset=".55" stop-color="#6fffd2"/>
+      <stop offset="1" stop-color="#9b7cff"/>
+    </linearGradient>
+  </defs>
+</svg>
