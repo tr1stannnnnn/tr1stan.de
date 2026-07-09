@@ -4,16 +4,13 @@
 
 :root {
   --bg: #070a12;
-  --bg-soft: #0d1220;
   --card: rgba(255, 255, 255, 0.065);
   --card-strong: rgba(255, 255, 255, 0.1);
   --border: rgba(255, 255, 255, 0.13);
   --text: #eef2ff;
   --muted: #9aa4b2;
   --muted-2: #6f7a89;
-  --accent: #7c3aed;
   --accent-2: #00e5ff;
-  --accent-3: #22c55e;
   --shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
 }
 
