@@ -1,241 +1,276 @@
-const qs = (selector, scope = document) => scope.querySelector(selector);
-const qsa = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ============================================================================
+   tr1stan.de — behaviour
+   Progressive enhancement only. Every block guards its own elements, so the
+   same file runs unchanged on the legal pages and on 404.
+   Nothing here animates on its own: reveals are scroll-triggered, the progress
+   hairline follows scroll position, everything else reacts to input.
+   ========================================================================== */
+(function () {
+  "use strict";
 
-const year = qs("#year");
-if (year) {
-  year.textContent = String(new Date().getFullYear());
-}
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var isApple = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || "");
 
-const clock = qs("#clock");
-const updateClock = () => {
-  if (!clock) return;
-  clock.textContent = new Intl.DateTimeFormat("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  }).format(new Date());
-};
-updateClock();
-window.setInterval(updateClock, 1000);
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 
-const header = qs("[data-header]");
-const setHeaderState = () => {
-  if (!header) return;
-  header.classList.toggle("is-scrolled", window.scrollY > 12);
-};
-setHeaderState();
-window.addEventListener("scroll", setHeaderState, { passive: true });
-
-const navToggle = qs("#navToggle");
-const siteNav = qs("#siteNav");
-const closeNav = () => {
-  if (!navToggle || !siteNav) return;
-  navToggle.setAttribute("aria-expanded", "false");
-  siteNav.classList.remove("is-open");
-};
-
-if (navToggle && siteNav) {
-  navToggle.addEventListener("click", () => {
-    const isOpen = navToggle.getAttribute("aria-expanded") === "true";
-    navToggle.setAttribute("aria-expanded", String(!isOpen));
-    siteNav.classList.toggle("is-open", !isOpen);
-  });
-
-  qsa("a", siteNav).forEach((link) => {
-    link.addEventListener("click", closeNav);
-  });
-}
-
-const palette = qs("#commandPalette");
-const openPalette = qs("#openPalette");
-const closePalette = qs("#closePalette");
-const paletteStatus = qs("#paletteStatus");
-
-const showPalette = () => {
-  if (!palette) return;
-  if (typeof palette.showModal === "function") {
-    if (!palette.open) palette.showModal();
-  } else {
-    palette.setAttribute("open", "");
+  function announce(msg) {
+    var live = $("#liveStatus");
+    if (!live) return;
+    live.textContent = "";
+    window.setTimeout(function () { live.textContent = msg; }, 40);
   }
-  paletteStatus && (paletteStatus.textContent = "Command Deck aktiv");
-  qs(".palette-links a", palette)?.focus();
-};
 
-const hidePalette = () => {
-  if (!palette) return;
-  if (palette.open && typeof palette.close === "function") {
-    palette.close();
-  } else {
-    palette.removeAttribute("open");
+  /* --------------------------------------------------------------------------
+     Footer year
+     ------------------------------------------------------------------------ */
+  var yearEl = $("#year");
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+  /* --------------------------------------------------------------------------
+     Keyboard hint: show the platform's real modifier
+     ------------------------------------------------------------------------ */
+  if (isApple) {
+    $$("[data-kbd-hint]").forEach(function (el) { el.textContent = "⌘ K"; });
   }
-  paletteStatus && (paletteStatus.textContent = "Bereit fuer Navigation");
-  openPalette?.focus({ preventScroll: true });
-};
 
-openPalette?.addEventListener("click", showPalette);
-closePalette?.addEventListener("click", hidePalette);
-palette?.addEventListener("click", (event) => {
-  if (event.target === palette) hidePalette();
-});
-qsa(".palette-links a").forEach((link) => {
-  link.addEventListener("click", hidePalette);
-});
+  /* --------------------------------------------------------------------------
+     Mobile navigation
+     ------------------------------------------------------------------------ */
+  (function mobileNav() {
+    var toggle = $("#navToggle");
+    var nav = $("#siteNav");
+    if (!toggle || !nav) return;
 
-window.addEventListener("keydown", (event) => {
-  const key = event.key.toLowerCase();
-  if ((event.ctrlKey || event.metaKey) && key === "k") {
-    event.preventDefault();
-    showPalette();
-  }
-  if (event.key === "Escape") {
-    closeNav();
-    hidePalette();
-  }
-});
-
-const copyButton = qs("#copyMail");
-const copyHint = qs("#copyHint");
-const fallbackCopy = (text) => {
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.left = "-999px";
-  document.body.appendChild(textArea);
-  textArea.select();
-  const copied = document.execCommand("copy");
-  textArea.remove();
-  return copied;
-};
-
-copyButton?.addEventListener("click", async () => {
-  const mail = copyButton.dataset.copy || "chef@tr1stan.de";
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(mail);
-    } else if (!fallbackCopy(mail)) {
-      throw new Error("copy failed");
+    function setOpen(open) {
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Navigation schließen" : "Navigation öffnen");
+      if (open) nav.setAttribute("data-open", "true");
+      else nav.removeAttribute("data-open");
     }
 
-    copyButton.textContent = "Kopiert";
-    copyHint && (copyHint.textContent = `${mail} liegt in der Zwischenablage.`);
-    window.setTimeout(() => {
-      copyButton.textContent = "Mail kopieren";
-      copyHint && (copyHint.textContent = "Kopieren nutzt die Zwischenablage deines Browsers.");
-    }, 2200);
-  } catch {
-    copyHint && (copyHint.textContent = "Kopieren ging nicht. Die Mail-Adresse kann manuell markiert werden.");
-  }
-});
-
-const revealItems = qsa("[data-reveal]");
-if ("IntersectionObserver" in window) {
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add("is-visible");
-      revealObserver.unobserve(entry.target);
+    toggle.addEventListener("click", function () {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
     });
-  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
 
-  revealItems.forEach((item) => revealObserver.observe(item));
-} else {
-  revealItems.forEach((item) => item.classList.add("is-visible"));
-}
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setOpen(false);
+    });
 
-const navLinks = qsa(".site-nav a[href^='#']");
-const sections = navLinks
-  .map((link) => qs(link.getAttribute("href")))
-  .filter(Boolean);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
 
-if ("IntersectionObserver" in window && sections.length) {
-  const activeObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      navLinks.forEach((link) => {
-        link.classList.toggle("is-active", link.getAttribute("href") === `#${entry.target.id}`);
+    document.addEventListener("click", function (e) {
+      if (toggle.getAttribute("aria-expanded") !== "true") return;
+      if (!nav.contains(e.target) && !toggle.contains(e.target)) setOpen(false);
+    });
+
+    // Leaving the mobile breakpoint must not strand an open panel.
+    var wide = window.matchMedia("(min-width: 861px)");
+    var onChange = function (e) { if (e.matches) setOpen(false); };
+    if (wide.addEventListener) wide.addEventListener("change", onChange);
+    else if (wide.addListener) wide.addListener(onChange);
+  })();
+
+  /* --------------------------------------------------------------------------
+     Copy the mail address
+     ------------------------------------------------------------------------ */
+  (function copyMail() {
+    var buttons = $$(".copy[data-copy]");
+    if (!buttons.length) return;
+
+    function legacyCopy(text) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    buttons.forEach(function (btn) {
+      var out = $("[data-copy-text]", btn) || btn;
+      var idle = btn.getAttribute("data-label") || out.textContent;
+      var timer = null;
+
+      function feedback(ok) {
+        out.textContent = ok ? "kopiert" : "fehlgeschlagen";
+        announce(ok ? "Mail-Adresse kopiert." : "Kopieren nicht möglich.");
+        window.clearTimeout(timer);
+        timer = window.setTimeout(function () { out.textContent = idle; }, 2000);
+      }
+
+      btn.addEventListener("click", function () {
+        var text = btn.getAttribute("data-copy") || "";
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(
+            function () { feedback(true); },
+            function () { feedback(legacyCopy(text)); }
+          );
+        } else {
+          feedback(legacyCopy(text));
+        }
       });
     });
-  }, { rootMargin: "-42% 0px -48% 0px", threshold: 0.01 });
+  })();
 
-  sections.forEach((section) => activeObserver.observe(section));
-}
+  /* --------------------------------------------------------------------------
+     Command palette
+     ------------------------------------------------------------------------ */
+  (function palette() {
+    var dlg = $("#commandPalette");
+    var open = $("#openPalette");
+    var close = $("#closePalette");
+    var input = $("#cmdInput");
+    var list = $("#cmdList");
+    var empty = $("#cmdEmpty");
+    if (!dlg || !input || !list || typeof dlg.showModal !== "function") return;
 
-const hoverPanels = qsa(".identity-manifest div, .module-row, .mission-card, .contact-panel, .legal-panel");
-hoverPanels.forEach((panel) => {
-  panel.addEventListener("pointermove", (event) => {
-    const rect = panel.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-    panel.style.setProperty("--mx", `${x}%`);
-    panel.style.setProperty("--my", `${y}%`);
-  });
-});
+    var items = $$(".cmd-item", list);
+    var visible = items.slice();
+    var index = 0;
 
-const canvas = qs("#gridCanvas");
-const ctx = canvas?.getContext("2d");
-let drops = [];
-let rafId = 0;
-let running = false;
-const glyphs = "01<>[]{}#:/TR1STAN";
+    function paint() {
+      items.forEach(function (el) { el.removeAttribute("data-active"); });
+      var el = visible[index];
+      if (el) {
+        el.setAttribute("data-active", "true");
+        if (el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+      }
+    }
 
-const resizeCanvas = () => {
-  if (!canvas || !ctx) return;
-  const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
-  canvas.width = Math.floor(window.innerWidth * ratio);
-  canvas.height = Math.floor(window.innerHeight * ratio);
-  canvas.style.width = `${window.innerWidth}px`;
-  canvas.style.height = `${window.innerHeight}px`;
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  const columnCount = Math.max(12, Math.floor(window.innerWidth / 30));
-  drops = Array.from({ length: columnCount }, () => Math.random() * window.innerHeight);
-};
+    function filter(q) {
+      var needle = q.trim().toLowerCase();
+      visible = items.filter(function (el) {
+        var hay = (el.textContent + " " + (el.getAttribute("data-k") || "")).toLowerCase();
+        var hit = !needle || hay.indexOf(needle) !== -1;
+        el.hidden = !hit;
+        return hit;
+      });
+      index = 0;
+      if (empty) empty.hidden = visible.length > 0;
+      paint();
+    }
 
-const drawCanvas = () => {
-  if (!canvas || !ctx || !running) return;
-  ctx.fillStyle = "rgba(5, 7, 13, 0.12)";
-  ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-  ctx.font = "700 12px ui-monospace, SFMono-Regular, Consolas, monospace";
+    function show() {
+      if (dlg.open) return;
+      dlg.showModal();
+      input.value = "";
+      filter("");
+      input.focus();
+    }
 
-  drops.forEach((y, index) => {
-    const x = index * 30;
-    const char = glyphs[Math.floor(Math.random() * glyphs.length)];
-    ctx.fillStyle = Math.random() > 0.96 ? "rgba(111, 255, 210, 0.82)" : "rgba(0, 229, 255, 0.18)";
-    ctx.fillText(char, x, y);
-    drops[index] = y > window.innerHeight + 120 ? Math.random() * -180 : y + 13;
-  });
+    function hide() { if (dlg.open) dlg.close(); }
 
-  rafId = window.requestAnimationFrame(drawCanvas);
-};
+    if (open) open.addEventListener("click", show);
+    if (close) close.addEventListener("click", hide);
 
-const startCanvas = () => {
-  if (!canvas || !ctx || prefersReducedMotion || window.innerWidth < 540) return;
-  if (running) return;
-  running = true;
-  resizeCanvas();
-  drawCanvas();
-};
+    input.addEventListener("input", function () { filter(input.value); });
 
-const stopCanvas = () => {
-  running = false;
-  if (rafId) window.cancelAnimationFrame(rafId);
-};
+    dlg.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!visible.length) return;
+        index = (index + (e.key === "ArrowDown" ? 1 : -1) + visible.length) % visible.length;
+        paint();
+      } else if (e.key === "Enter") {
+        var target = visible[index];
+        if (target) { e.preventDefault(); hide(); target.click(); }
+      }
+    });
 
-if (canvas && ctx) {
-  startCanvas();
-  window.addEventListener("resize", () => {
-    if (window.innerWidth < 540) {
-      stopCanvas();
+    // Click on the backdrop closes.
+    dlg.addEventListener("click", function (e) { if (e.target === dlg) hide(); });
+    list.addEventListener("click", function (e) { if (e.target.closest("a")) hide(); });
+
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        if (dlg.open) hide(); else show();
+      }
+    });
+  })();
+
+  /* --------------------------------------------------------------------------
+     Scroll reveal — the only entrance motion
+     ------------------------------------------------------------------------ */
+  (function reveal() {
+    var targets = $$("[data-reveal]");
+    if (!targets.length) return;
+
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      targets.forEach(function (el) { el.classList.add("is-in"); });
       return;
     }
-    resizeCanvas();
-    startCanvas();
-  }, { passive: true });
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopCanvas();
-    else startCanvas();
-  });
-}
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+
+  /* --------------------------------------------------------------------------
+     Scroll progress hairline + active section
+     ------------------------------------------------------------------------ */
+  (function scrollState() {
+    var bar = $("#scrollProgress");
+    var sections = $$("main section[id]");
+    var links = $$('.nav a[href^="#"], .rail a[href^="#"]');
+    if (!bar && !sections.length) return;
+
+    var ticking = false;
+
+    function update() {
+      ticking = false;
+      if (bar) {
+        var doc = document.documentElement;
+        var max = doc.scrollHeight - window.innerHeight;
+        var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+      }
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+
+    if (!sections.length || !links.length || !("IntersectionObserver" in window)) return;
+
+    var current = "";
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var id = entry.target.id;
+        if (id === current) return;
+        current = id;
+        links.forEach(function (a) {
+          var match = a.getAttribute("href") === "#" + id;
+          if (match) a.setAttribute("aria-current", "true");
+          else a.removeAttribute("aria-current");
+        });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+
+    sections.forEach(function (s) { io.observe(s); });
+  })();
+})();

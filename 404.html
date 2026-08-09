@@ -1,72 +1,134 @@
 <!doctype html>
-<html lang="de" class="no-js">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#05070d" />
+  <meta name="theme-color" content="#0B0B0C" />
   <meta name="color-scheme" content="dark" />
-  <title>404 - tr1stan.de</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css" />
+  <title>404 · tr1stan.de</title>
+  <link rel="icon" href="/favicon.svg?v=9" type="image/svg+xml" />
+
+  <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/style.css?v=9" />
+
   <script>
-    document.documentElement.classList.replace('no-js','js');
-    const path = location.pathname.toLowerCase();
-    if (path.endsWith('/pages/impressum.html')) location.replace('/impressum.html');
-    if (path.endsWith('/pages/datenschutz.html')) location.replace('/datenschutz.html');
+    /* Legacy-Pfade sauber auf die Root-Dateien umleiten.
+       Läuft vor dem Rendern, damit keine 404-Seite aufblitzt. */
+    (function () {
+      document.documentElement.classList.add("has-js");
+
+      var path = (location.pathname || "").toLowerCase();
+      var tail = location.search + location.hash;
+      var target = "";
+
+      var alias = {
+        "/impressum": "/impressum.html",
+        "/imprint": "/impressum.html",
+        "/legal": "/impressum.html",
+        "/datenschutz": "/datenschutz.html",
+        "/privacy": "/datenschutz.html",
+        "/privacy-policy": "/datenschutz.html",
+        "/home": "/",
+        "/start": "/"
+      };
+
+      var legacy = path.match(/^\/pages\/([a-z0-9_-]+)(?:\.html)?$/);
+      if (legacy) {
+        target = legacy[1] === "index" ? "/" : "/" + legacy[1] + ".html";
+      } else if (Object.prototype.hasOwnProperty.call(alias, path.replace(/\/+$/, ""))) {
+        target = alias[path.replace(/\/+$/, "")];
+      }
+
+      if (target && target !== path) location.replace(target + tail);
+    })();
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#content">Zum Inhalt springen</a>
-  <canvas id="gridCanvas" aria-hidden="true"></canvas>
-  <div class="background-system" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-scan"></div>
-    <div class="bg-corners"></div>
-  </div>
+  <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <header class="site-header" data-header>
-    <a class="brand" href="index.html" aria-label="Zur Startseite">
-      <span class="brand-mark" aria-hidden="true">t1</span>
-      <span class="brand-copy">
-        <strong>tr1stan.de</strong>
-        <small>missing route</small>
-      </span>
-    </a>
-    <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation oeffnen" aria-controls="siteNav" aria-expanded="false">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </button>
-    <nav class="site-nav" id="siteNav" aria-label="Seitennavigation">
-      <a href="index.html">Home</a>
-      <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Datenschutz</a>
-    </nav>
+  <header class="hdr" data-header>
+    <div class="hdr-inner shell">
+      <a class="brand" href="/index.html">
+        <span class="brand-mark" aria-hidden="true">t1</span>
+        <span class="brand-copy">
+          <span class="brand-name">tr1stan.de</span>
+          <small class="brand-sub">missing route</small>
+        </span>
+      </a>
+
+      <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html">Datenschutz</a>
+      </nav>
+
+      <div class="hdr-tools">
+        <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <main class="error-main" id="content">
-    <section class="error-panel" data-reveal aria-labelledby="errorTitle">
-      <div class="error-code" aria-hidden="true">404</div>
-      <p class="eyebrow"><span class="led"></span> route not found</p>
-      <h1 id="errorTitle">Diese Route antwortet nicht.</h1>
-      <p>
+  <main class="shell" id="content">
+    <section class="nf" aria-labelledby="errTitle">
+      <p class="nf-code" aria-hidden="true">404</p>
+      <div>
+        <p class="sec-kicker">route not found</p>
+        <h1 id="errTitle" class="page-title">Diese Route antwortet nicht.</h1>
+      </div>
+      <p class="nf-text">
         Die Datei existiert nicht, wurde verschoben oder war nie Teil dieses Nodes.
-        Zurueck zur Startseite bringt dich wieder in den aktiven Bereich.
+        Alte <code>/pages/…</code>-Adressen werden automatisch auf die aktuellen Root-Pfade
+        umgeleitet — der Rest führt zurück auf die Startseite.
       </p>
-      <div class="hero-actions">
-        <a class="button button-primary" href="index.html">
-          <span class="button-code">BACK</span>
+
+      <noscript>
+        <div class="legal-note">
+          <p>
+            Ohne JavaScript erfolgt keine automatische Weiterleitung. Die Legal-Seiten sind direkt
+            erreichbar unter <a href="/impressum.html">/impressum.html</a> und
+            <a href="/datenschutz.html">/datenschutz.html</a>.
+          </p>
+        </div>
+      </noscript>
+
+      <div class="nf-actions">
+        <a class="btn btn--solid" href="/index.html">
+          <span class="btn-k">BACK</span>
           <span>Startseite</span>
         </a>
-        <a class="button button-secondary" href="mailto:chef@tr1stan.de">
-          <span class="button-code">MAIL</span>
+        <a class="btn" href="/impressum.html">
+          <span class="btn-k">§ 5</span>
+          <span>Impressum</span>
+        </a>
+        <a class="btn" href="/datenschutz.html">
+          <span class="btn-k">DSGVO</span>
+          <span>Datenschutz</span>
+        </a>
+        <a class="btn" href="mailto:chef@tr1stan.de">
+          <span class="btn-k">MAIL</span>
           <span>Problem melden</span>
         </a>
       </div>
     </section>
   </main>
 
-  <script src="script.js" defer></script>
+  <footer class="ftr">
+    <div class="ftr-inner shell">
+      <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
+      <nav class="ftr-nav" aria-label="Footer-Navigation">
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+  </footer>
+
+  <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
+
+  <script src="/script.js?v=9" defer></script>
 </body>
 </html>
