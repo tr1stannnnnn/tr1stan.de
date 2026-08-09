@@ -1,31 +1,262 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex" /><meta name="theme-color" content="#05070d" />
-  <title>Datenschutz · tr1stan.de</title><link rel="icon" href="favicon.svg" type="image/svg+xml" /><link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Datenschutzhinweise nach Art. 13 DSGVO für die statische Website tr1stan.de — ohne Cookies, ohne Tracking, ohne Kontaktformular." />
+  <meta name="theme-color" content="#04060b" />
+  <meta name="color-scheme" content="dark" />
+  <title>Datenschutz · tr1stan.de</title>
+  <link rel="canonical" href="https://tr1stan.de/datenschutz.html" />
+  <link rel="icon" href="favicon.svg?v=8" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body>
-  <canvas id="matrixCanvas" aria-hidden="true"></canvas><div class="grain"></div>
-  <header class="nav-shell"><a class="brand" href="index.html"><span class="brand-glyph">t1</span><span class="brand-text"><strong>tr1stan.de</strong><small>personal cyberdeck</small></span></a><nav class="nav-links"><a href="index.html">Home</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav></header>
-  <main class="deck" style="min-height:72vh"><article class="deck-panel deck-main reveal visible"><div class="panel-label">PRIVACY</div><h2>Datenschutz</h2>
-<h3>1. Verantwortlicher</h3>
-<p><strong>Tristan Witt</strong><br>Coswiger Straße 20<br>06886 Lutherstadt Wittenberg<br>Deutschland<br>E-Mail: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a></p>
-<h3>2. Allgemeine Hinweise</h3>
-<p>Diese Website ist eine statische Website. Sie nutzt aktuell keine Cookies, kein Tracking, keine Analyse-Tools, keinen Newsletter und kein Kontaktformular.</p>
-<h3>3. Hosting über GitHub Pages</h3>
-<p>Diese Website wird über GitHub Pages bereitgestellt. Anbieter ist GitHub, Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA.</p>
-<p>Beim Aufruf dieser Website können technisch notwendige Zugriffsdaten verarbeitet werden. Dazu können insbesondere IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seiten, Referrer-Informationen sowie Browser- und Geräteinformationen gehören.</p>
-<h3>4. Zweck und Rechtsgrundlage</h3>
-<p>Die Verarbeitung technisch notwendiger Zugriffsdaten erfolgt, um diese Website sicher, stabil und funktionsfähig bereitzustellen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>
-<h3>5. Kontakt per E-Mail</h3>
-<p>Wenn du mir per E-Mail schreibst, werden die von dir übermittelten Daten verarbeitet, um deine Anfrage zu lesen und zu beantworten.</p>
-<h3>6. Speicherdauer</h3>
-<p>E-Mails und Anfragen werden nur so lange gespeichert, wie es für die Bearbeitung erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen.</p>
-<p></p>
-<h3>7. Deine Rechte</h3>
-<p>Du hast nach der DSGVO grundsätzlich das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch.</p>
-<h3>8. Stand</h3><p>09.07.2026</p>
-<p style="margin-top:28px"><a class="command" href="index.html"><span>BACK</span><strong>Zur Startseite</strong></a></p></article></main>
+  <a class="skip" href="#content">Zum Inhalt springen</a>
+
+  <div class="bgfx" aria-hidden="true">
+    <i class="bgfx-glow"></i>
+    <i class="bgfx-grid"></i>
+    <i class="bgfx-noise"></i>
+  </div>
+
+  <header class="hdr" data-header>
+    <div class="hdr-inner shell">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">t1</span>
+        <span class="brand-copy">
+          <strong>tr1stan.de</strong>
+          <small>privacy / art. 13 dsgvo</small>
+        </span>
+      </a>
+
+      <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
+        <a href="index.html">Start</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html" aria-current="page">Datenschutz</a>
+      </nav>
+
+      <div class="hdr-tools">
+        <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
+          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <div class="hdr-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
+  </header>
+
+  <main class="legal shell" id="content">
+    <div class="legal-head" data-reveal>
+      <p class="eyebrow"><span class="led"></span> privacy · datenschutzhinweise</p>
+      <h1>Datenschutz</h1>
+      <p>
+        Informationen zur Verarbeitung personenbezogener Daten nach Art. 13 DSGVO beim Aufruf
+        von <strong>tr1stan.de</strong>. Diese Website ist statisch: kein Tracking, keine
+        Analyse-Tools, keine Cookies, kein Kontaktformular und kein Newsletter.
+      </p>
+    </div>
+
+    <div class="legal-wrap">
+      <aside class="legal-toc" aria-label="Inhalt dieser Seite">
+        <p>Inhalt</p>
+        <ol>
+          <li><a href="#verantwortlicher">Verantwortlicher</a></li>
+          <li><a href="#ueberblick">Allgemeine Hinweise</a></li>
+          <li><a href="#hosting">Hosting über GitHub Pages</a></li>
+          <li><a href="#zweck">Zweck und Rechtsgrundlage</a></li>
+          <li><a href="#kontakt">Kontakt per E-Mail</a></li>
+          <li><a href="#speicherdauer">Speicherdauer</a></li>
+          <li><a href="#empfaenger">Empfänger und Drittland</a></li>
+          <li><a href="#rechte">Deine Rechte</a></li>
+          <li><a href="#widerspruch">Widerspruchsrecht</a></li>
+          <li><a href="#stand">Stand</a></li>
+        </ol>
+      </aside>
+
+      <article class="legal-panel brk" data-reveal>
+        <section id="verantwortlicher">
+          <h2><span>01</span>Verantwortlicher</h2>
+          <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
+          <address class="legal-address">
+            <strong>Tristan Witt</strong><br />
+            Coswiger Straße 20<br />
+            06886 Lutherstadt Wittenberg<br />
+            Deutschland<br />
+            E-Mail: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
+          </address>
+        </section>
+
+        <section id="ueberblick">
+          <h2><span>02</span>Allgemeine Hinweise</h2>
+          <p>
+            Diese Website ist eine statische Website. Sie nutzt aktuell keine Cookies, kein
+            Tracking, keine Analyse-Tools, keinen Newsletter und kein Kontaktformular.
+          </p>
+          <p>Konkret bedeutet das:</p>
+          <ul>
+            <li>Es werden keine Cookies gesetzt, die nicht technisch notwendig sind.</li>
+            <li>Es sind keine Analyse-, Werbe- oder Social-Media-Dienste eingebunden.</li>
+            <li>Es werden keine externen Schriftarten oder externen Skripte nachgeladen.</li>
+            <li>Es findet keine Profilbildung und keine automatisierte Entscheidungsfindung statt.</li>
+          </ul>
+          <p>
+            Aus diesem Grund wird auf dieser Website kein Cookie-Banner angezeigt: Es werden keine
+            einwilligungspflichtigen Cookies oder Tracker eingesetzt.
+          </p>
+        </section>
+
+        <section id="hosting">
+          <h2><span>03</span>Hosting über GitHub Pages</h2>
+          <p>
+            Diese Website wird über GitHub Pages bereitgestellt. Anbieter ist GitHub, Inc.,
+            88 Colin P Kelly Jr St, San Francisco, CA 94107, USA.
+          </p>
+          <p>
+            Beim Aufruf dieser Website können technisch notwendige Zugriffsdaten verarbeitet werden.
+            Dazu können insbesondere IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seiten,
+            Referrer-Informationen sowie Browser- und Geräteinformationen gehören.
+          </p>
+          <p>
+            Diese Verarbeitung erfolgt durch den Hosting-Anbieter und ist technisch erforderlich,
+            damit die Website überhaupt ausgeliefert werden kann. Auf den genauen Umfang und die
+            Speicherdauer dieser serverseitigen Protokolle habe ich keinen unmittelbaren Einfluss.
+          </p>
+        </section>
+
+        <section id="zweck">
+          <h2><span>04</span>Zweck und Rechtsgrundlage</h2>
+          <p>
+            Die Verarbeitung technisch notwendiger Zugriffsdaten erfolgt, um diese Website sicher,
+            stabil und funktionsfähig bereitzustellen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f
+            DSGVO. Mein berechtigtes Interesse liegt in der technisch fehlerfreien Darstellung und
+            der Sicherheit der Website.
+          </p>
+        </section>
+
+        <section id="kontakt">
+          <h2><span>05</span>Kontakt per E-Mail</h2>
+          <p>
+            Wenn du mir per E-Mail schreibst, werden die von dir übermittelten Daten verarbeitet,
+            um deine Anfrage zu lesen und zu beantworten.
+          </p>
+          <p>
+            Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Steht die Anfrage im Zusammenhang mit
+            einem Vertrag oder mit vorvertraglichen Maßnahmen, ist Rechtsgrundlage zusätzlich
+            Art. 6 Abs. 1 lit. b DSGVO.
+          </p>
+          <p>
+            Ein Kontaktformular gibt es auf dieser Website nicht. Der Kontakt läuft ausschließlich
+            über <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>.
+          </p>
+          <div class="legal-contact">
+            <button class="copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+              <span data-copy-text>Adresse kopieren</span>
+            </button>
+          </div>
+        </section>
+
+        <section id="speicherdauer">
+          <h2><span>06</span>Speicherdauer</h2>
+          <p>
+            E-Mails und Anfragen werden nur so lange gespeichert, wie es für die Bearbeitung
+            erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen.
+          </p>
+          <p>
+            Technisch notwendige Zugriffsdaten werden vom Hosting-Anbieter nach dessen Vorgaben
+            verarbeitet und gelöscht.
+          </p>
+        </section>
+
+        <section id="empfaenger">
+          <h2><span>07</span>Empfänger und Drittlandübermittlung</h2>
+          <p>
+            Empfänger von Daten ist der Hosting-Anbieter, der die Website technisch ausliefert.
+            Für den E-Mail-Kontakt kommt der jeweilige E-Mail-Anbieter hinzu.
+          </p>
+          <p>
+            Da der Hosting-Anbieter seinen Sitz in den USA hat, kann eine Übermittlung von Daten in
+            ein Drittland außerhalb der EU beziehungsweise des EWR nicht ausgeschlossen werden.
+            Für solche Übermittlungen gelten die Anforderungen der Art. 44 ff. DSGVO.
+          </p>
+        </section>
+
+        <section id="rechte">
+          <h2><span>08</span>Deine Rechte</h2>
+          <p>
+            Du hast nach der DSGVO grundsätzlich das Recht auf Auskunft, Berichtigung, Löschung,
+            Einschränkung der Verarbeitung, Datenübertragbarkeit sowie Widerspruch.
+          </p>
+          <ul>
+            <li>Auskunft über die verarbeiteten Daten (Art. 15 DSGVO)</li>
+            <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+            <li>Löschung (Art. 17 DSGVO)</li>
+            <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+            <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+            <li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+          </ul>
+          <p>
+            Zur Ausübung dieser Rechte genügt eine Nachricht an
+            <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>.
+          </p>
+          <p>
+            Unabhängig davon besteht nach Art. 77 DSGVO ein Beschwerderecht bei einer
+            Datenschutz-Aufsichtsbehörde, insbesondere bei der Behörde am Ort des gewöhnlichen
+            Aufenthalts, am Arbeitsplatz oder am Ort des mutmaßlichen Verstoßes.
+          </p>
+        </section>
+
+        <section id="widerspruch">
+          <h2><span>09</span>Widerspruchsrecht</h2>
+          <p>
+            Soweit Daten auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO verarbeitet werden, kann der
+            Verarbeitung aus Gründen, die sich aus der besonderen Situation der betroffenen Person
+            ergeben, nach Art. 21 DSGVO widersprochen werden.
+          </p>
+        </section>
+
+        <section id="stand">
+          <h2><span>10</span>Stand</h2>
+          <p>
+            Diese Datenschutzhinweise beziehen sich auf den aktuellen Funktionsumfang der Website.
+            Werden künftig weitere Dienste eingebunden, werden die Hinweise entsprechend angepasst.
+          </p>
+          <div class="legal-note">
+            <p><strong>Stand:</strong> 09.08.2026</p>
+          </div>
+        </section>
+
+        <div class="legal-meta">
+          <span>Cookies: keine</span>
+          <span>Tracking: keins</span>
+          <span>Kontaktformular: keins</span>
+          <span>Hosting: GitHub Pages</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="legal-back">
+      <a class="btn" href="index.html">
+        <span class="btn-k">BACK</span>
+        <span>Zur Startseite</span>
+      </a>
+    </div>
+  </main>
+
+  <footer class="ftr">
+    <div class="ftr-inner shell">
+      <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
+      <nav class="ftr-nav" aria-label="Footer-Navigation">
+        <a href="index.html">Start</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+  </footer>
+
+  <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
+
+  <script src="script.js?v=8" defer></script>
 </body>
 </html>

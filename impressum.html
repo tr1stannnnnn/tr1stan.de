@@ -1,28 +1,172 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex" /><meta name="theme-color" content="#05070d" />
-  <title>Impressum · tr1stan.de</title><link rel="icon" href="favicon.svg" type="image/svg+xml" /><link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Impressum und Anbieterkennzeichnung nach § 5 DDG für die private Website tr1stan.de." />
+  <meta name="theme-color" content="#04060b" />
+  <meta name="color-scheme" content="dark" />
+  <title>Impressum · tr1stan.de</title>
+  <link rel="canonical" href="https://tr1stan.de/impressum.html" />
+  <link rel="icon" href="favicon.svg?v=8" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body>
-  <canvas id="matrixCanvas" aria-hidden="true"></canvas><div class="grain"></div>
-  <header class="nav-shell"><a class="brand" href="index.html"><span class="brand-glyph">t1</span><span class="brand-text"><strong>tr1stan.de</strong><small>personal cyberdeck</small></span></a><nav class="nav-links"><a href="index.html">Home</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav></header>
-  <main class="deck" style="min-height:72vh"><article class="deck-panel deck-main reveal visible"><div class="panel-label">LEGAL</div><h2>Impressum</h2>
-<h3>Angaben gemäß § 5 DDG</h3>
-<p><strong>Tristan Witt</strong></strong><br>Coswiger Straße 20<br>06886 Lutherstadt Wittenberg<br>Deutschland</p>
-<h3>Kontakt</h3>
-<p>E-Mail: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a><br></p>
-<h3>Verantwortlich für den Inhalt</h3>
-<p>Tristan Witt<br>Coswiger Straße 20<br>06886 Lutherstadt Wittenberg</p>
-<h3>Haftung für Inhalte</h3>
-<p>Die Inhalte dieser Website wurden mit Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte übernehme ich jedoch keine Gewähr.</p>
-<h3>Haftung für Links</h3>
-<p>Diese Website kann Links zu externen Websites enthalten. Auf deren Inhalte habe ich keinen Einfluss.</p>
-<h3>Urheberrecht</h3>
-<p>Die durch mich erstellten Inhalte und Werke auf dieser Website unterliegen dem deutschen Urheberrecht.</p>
-<h3>Hinweis</h3>
-<p>Diese Website ist aktuell als private Tech-Seite gedacht. Sobald die Website geschäftlich, als Portfolio, für Dienstleistungen oder ein Sidehustle genutzt wird, sollten die Angaben vollständig ergänzt werden.</p>
-<p style="margin-top:28px"><a class="command" href="index.html"><span>BACK</span><strong>Zur Startseite</strong></a></p></article></main>
+  <a class="skip" href="#content">Zum Inhalt springen</a>
+
+  <div class="bgfx" aria-hidden="true">
+    <i class="bgfx-glow"></i>
+    <i class="bgfx-grid"></i>
+    <i class="bgfx-noise"></i>
+  </div>
+
+  <header class="hdr" data-header>
+    <div class="hdr-inner shell">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">t1</span>
+        <span class="brand-copy">
+          <strong>tr1stan.de</strong>
+          <small>legal / § 5 DDG</small>
+        </span>
+      </a>
+
+      <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
+        <a href="index.html">Start</a>
+        <a href="impressum.html" aria-current="page">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+
+      <div class="hdr-tools">
+        <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
+          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <div class="hdr-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
+  </header>
+
+  <main class="legal shell" id="content">
+    <div class="legal-head" data-reveal>
+      <p class="eyebrow"><span class="led"></span> legal · anbieterkennzeichnung</p>
+      <h1>Impressum</h1>
+      <p>Pflichtangaben für die private Website <strong>tr1stan.de</strong> nach § 5 Digitale-Dienste-Gesetz (DDG).</p>
+    </div>
+
+    <div class="legal-wrap">
+      <aside class="legal-toc" aria-label="Inhalt dieser Seite">
+        <p>Inhalt</p>
+        <ol>
+          <li><a href="#anbieter">Anbieter</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+          <li><a href="#verantwortlich">Verantwortlich für den Inhalt</a></li>
+          <li><a href="#haftung-inhalte">Haftung für Inhalte</a></li>
+          <li><a href="#haftung-links">Haftung für Links</a></li>
+          <li><a href="#urheberrecht">Urheberrecht</a></li>
+          <li><a href="#hinweis">Hinweis</a></li>
+        </ol>
+      </aside>
+
+      <article class="legal-panel brk" data-reveal>
+        <section id="anbieter">
+          <h2><span>01</span>Angaben gemäß § 5 DDG</h2>
+          <address class="legal-address">
+            <strong>Tristan Witt</strong><br />
+            Coswiger Straße 20<br />
+            06886 Lutherstadt Wittenberg<br />
+            Deutschland
+          </address>
+        </section>
+
+        <section id="kontakt">
+          <h2><span>02</span>Kontakt</h2>
+          <p>E-Mail: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a></p>
+          <div class="legal-contact">
+            <a class="btn btn-primary" href="mailto:chef@tr1stan.de">
+              <span class="btn-k">MAIL</span>
+              <span>Nachricht schreiben</span>
+            </a>
+            <button class="copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+              <span data-copy-text>Adresse kopieren</span>
+            </button>
+          </div>
+        </section>
+
+        <section id="verantwortlich">
+          <h2><span>03</span>Verantwortlich für den Inhalt</h2>
+          <address class="legal-address">
+            Tristan Witt<br />
+            Coswiger Straße 20<br />
+            06886 Lutherstadt Wittenberg
+          </address>
+        </section>
+
+        <section id="haftung-inhalte">
+          <h2><span>04</span>Haftung für Inhalte</h2>
+          <p>
+            Die Inhalte dieser Website wurden mit Sorgfalt erstellt. Für die Richtigkeit,
+            Vollständigkeit und Aktualität der Inhalte übernehme ich jedoch keine Gewähr.
+          </p>
+        </section>
+
+        <section id="haftung-links">
+          <h2><span>05</span>Haftung für Links</h2>
+          <p>
+            Diese Website kann Links zu externen Websites enthalten. Auf deren Inhalte habe ich
+            keinen Einfluss. Für die Inhalte verlinkter Seiten ist stets der jeweilige Anbieter
+            oder Betreiber verantwortlich.
+          </p>
+        </section>
+
+        <section id="urheberrecht">
+          <h2><span>06</span>Urheberrecht</h2>
+          <p>
+            Die durch mich erstellten Inhalte und Werke auf dieser Website unterliegen dem
+            deutschen Urheberrecht.
+          </p>
+        </section>
+
+        <section id="hinweis">
+          <h2><span>07</span>Hinweis</h2>
+          <div class="legal-note">
+            <p>
+              Diese Website ist aktuell als private Tech-Seite gedacht. Sobald die Website
+              geschäftlich, als Portfolio, für Dienstleistungen oder ein Sidehustle genutzt wird,
+              sollten die Angaben vollständig ergänzt werden.
+            </p>
+          </div>
+        </section>
+
+        <div class="legal-meta">
+          <span>Domain: tr1stan.de</span>
+          <span>Hosting: GitHub Pages</span>
+          <span>Kontakt: chef@tr1stan.de</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="legal-back">
+      <a class="btn" href="index.html">
+        <span class="btn-k">BACK</span>
+        <span>Zur Startseite</span>
+      </a>
+    </div>
+  </main>
+
+  <footer class="ftr">
+    <div class="ftr-inner shell">
+      <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
+      <nav class="ftr-nav" aria-label="Footer-Navigation">
+        <a href="index.html">Start</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+  </footer>
+
+  <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
+
+  <script src="script.js?v=8" defer></script>
 </body>
 </html>
