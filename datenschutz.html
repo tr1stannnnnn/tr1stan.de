@@ -4,63 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Datenschutzhinweise nach Art. 13 DSGVO für die statische Website tr1stan.de — ohne Cookies, ohne Tracking, ohne Kontaktformular." />
-  <meta name="theme-color" content="#04060b" />
+  <meta name="theme-color" content="#0B0B0C" />
   <meta name="color-scheme" content="dark" />
   <title>Datenschutz · tr1stan.de</title>
   <link rel="canonical" href="https://tr1stan.de/datenschutz.html" />
-  <link rel="icon" href="favicon.svg?v=8" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=8" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="tr1stan.de" />
+  <meta property="og:title" content="Datenschutz · tr1stan.de" />
+  <meta property="og:description" content="Datenschutzhinweise nach Art. 13 DSGVO für die statische Website tr1stan.de — ohne Cookies, ohne Tracking, ohne Kontaktformular." />
+  <meta property="og:url" content="https://tr1stan.de/datenschutz.html" />
+  <meta property="og:locale" content="de_DE" />
+
+  <link rel="icon" href="/favicon.svg?v=9" type="image/svg+xml" />
+
+  <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/style.css?v=9" />
+
+  <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <div class="bgfx" aria-hidden="true">
-    <i class="bgfx-glow"></i>
-    <i class="bgfx-grid"></i>
-    <i class="bgfx-noise"></i>
-  </div>
-
   <header class="hdr" data-header>
     <div class="hdr-inner shell">
-      <a class="brand" href="index.html">
+      <a class="brand" href="/index.html">
         <span class="brand-mark" aria-hidden="true">t1</span>
         <span class="brand-copy">
-          <strong>tr1stan.de</strong>
-          <small>privacy / art. 13 dsgvo</small>
+          <span class="brand-name">tr1stan.de</span>
+          <small class="brand-sub">privacy / art. 13 dsgvo</small>
         </span>
       </a>
 
       <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
-        <a href="index.html">Start</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html" aria-current="page">Datenschutz</a>
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html" aria-current="page">Datenschutz</a>
       </nav>
 
       <div class="hdr-tools">
         <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
-          <i aria-hidden="true"></i>
-          <i aria-hidden="true"></i>
-          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
         </button>
       </div>
     </div>
     <div class="hdr-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
   </header>
 
-  <main class="legal shell" id="content">
-    <div class="legal-head" data-reveal>
-      <p class="eyebrow"><span class="led"></span> privacy · datenschutzhinweise</p>
-      <h1>Datenschutz</h1>
-      <p>
+  <main class="shell" id="content">
+    <div class="page-head" data-reveal>
+      <p class="sec-kicker">privacy · datenschutzhinweise</p>
+      <h1 class="page-title">Datenschutz</h1>
+      <p class="page-lead">
         Informationen zur Verarbeitung personenbezogener Daten nach Art. 13 DSGVO beim Aufruf
         von <strong>tr1stan.de</strong>. Diese Website ist statisch: kein Tracking, keine
         Analyse-Tools, keine Cookies, kein Kontaktformular und kein Newsletter.
       </p>
     </div>
 
-    <div class="legal-wrap">
-      <aside class="legal-toc" aria-label="Inhalt dieser Seite">
-        <p>Inhalt</p>
+    <div class="legal">
+      <nav class="toc" aria-label="Inhalt dieser Seite">
+        <p class="toc-title">Inhalt</p>
         <ol>
           <li><a href="#verantwortlicher">Verantwortlicher</a></li>
           <li><a href="#ueberblick">Allgemeine Hinweise</a></li>
@@ -73,13 +78,13 @@
           <li><a href="#widerspruch">Widerspruchsrecht</a></li>
           <li><a href="#stand">Stand</a></li>
         </ol>
-      </aside>
+      </nav>
 
-      <article class="legal-panel brk" data-reveal>
+      <article class="legal-body" data-reveal>
         <section id="verantwortlicher">
           <h2><span>01</span>Verantwortlicher</h2>
           <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:</p>
-          <address class="legal-address">
+          <address>
             <strong>Tristan Witt</strong><br />
             Coswiger Straße 20<br />
             06886 Lutherstadt Wittenberg<br />
@@ -150,8 +155,8 @@
             Ein Kontaktformular gibt es auf dieser Website nicht. Der Kontakt läuft ausschließlich
             über <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>.
           </p>
-          <div class="legal-contact">
-            <button class="copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+          <div class="legal-actions">
+            <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
               <span data-copy-text>Adresse kopieren</span>
             </button>
           </div>
@@ -237,7 +242,7 @@
     </div>
 
     <div class="legal-back">
-      <a class="btn" href="index.html">
+      <a class="btn" href="/index.html">
         <span class="btn-k">BACK</span>
         <span>Zur Startseite</span>
       </a>
@@ -248,15 +253,15 @@
     <div class="ftr-inner shell">
       <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
       <nav class="ftr-nav" aria-label="Footer-Navigation">
-        <a href="index.html">Start</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html">Datenschutz</a>
       </nav>
     </div>
   </footer>
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="script.js?v=8" defer></script>
+  <script src="/script.js?v=9" defer></script>
 </body>
 </html>

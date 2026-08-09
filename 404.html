@@ -4,15 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#04060b" />
+  <meta name="theme-color" content="#0B0B0C" />
   <meta name="color-scheme" content="dark" />
   <title>404 · tr1stan.de</title>
-  <link rel="icon" href="favicon.svg?v=8" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=8" />
+  <link rel="icon" href="/favicon.svg?v=9" type="image/svg+xml" />
+
+  <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/style.css?v=9" />
+
   <script>
     /* Legacy-Pfade sauber auf die Root-Dateien umleiten.
        Läuft vor dem Rendern, damit keine 404-Seite aufblitzt. */
     (function () {
+      document.documentElement.classList.add("has-js");
+
       var path = (location.pathname || "").toLowerCase();
       var tail = location.search + location.hash;
       var target = "";
@@ -42,45 +48,38 @@
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <div class="bgfx" aria-hidden="true">
-    <i class="bgfx-glow"></i>
-    <i class="bgfx-grid"></i>
-    <i class="bgfx-scan"></i>
-    <i class="bgfx-noise"></i>
-  </div>
-
   <header class="hdr" data-header>
     <div class="hdr-inner shell">
-      <a class="brand" href="index.html">
+      <a class="brand" href="/index.html">
         <span class="brand-mark" aria-hidden="true">t1</span>
         <span class="brand-copy">
-          <strong>tr1stan.de</strong>
-          <small>missing route</small>
+          <span class="brand-name">tr1stan.de</span>
+          <small class="brand-sub">missing route</small>
         </span>
       </a>
 
       <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
-        <a href="index.html">Start</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html">Datenschutz</a>
       </nav>
 
       <div class="hdr-tools">
         <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
-          <i aria-hidden="true"></i>
-          <i aria-hidden="true"></i>
-          <i aria-hidden="true"></i>
+          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="err shell" id="content">
-    <section class="err-panel brk" aria-labelledby="errTitle">
-      <div class="err-code" aria-hidden="true">404</div>
-      <p class="eyebrow"><span class="led"></span> route not found</p>
-      <h1 id="errTitle">Diese Route antwortet nicht.</h1>
-      <p>
+  <main class="shell" id="content">
+    <section class="nf" aria-labelledby="errTitle">
+      <p class="nf-code" aria-hidden="true">404</p>
+      <div>
+        <p class="sec-kicker">route not found</p>
+        <h1 id="errTitle" class="page-title">Diese Route antwortet nicht.</h1>
+      </div>
+      <p class="nf-text">
         Die Datei existiert nicht, wurde verschoben oder war nie Teil dieses Nodes.
         Alte <code>/pages/…</code>-Adressen werden automatisch auf die aktuellen Root-Pfade
         umgeleitet — der Rest führt zurück auf die Startseite.
@@ -96,20 +95,20 @@
         </div>
       </noscript>
 
-      <div class="err-links">
-        <a class="btn btn-primary" href="index.html">
+      <div class="nf-actions">
+        <a class="btn btn--solid" href="/index.html">
           <span class="btn-k">BACK</span>
           <span>Startseite</span>
         </a>
-        <a class="btn" href="impressum.html">
+        <a class="btn" href="/impressum.html">
           <span class="btn-k">§ 5</span>
           <span>Impressum</span>
         </a>
-        <a class="btn" href="datenschutz.html">
+        <a class="btn" href="/datenschutz.html">
           <span class="btn-k">DSGVO</span>
           <span>Datenschutz</span>
         </a>
-        <a class="btn btn-violet" href="mailto:chef@tr1stan.de">
+        <a class="btn" href="mailto:chef@tr1stan.de">
           <span class="btn-k">MAIL</span>
           <span>Problem melden</span>
         </a>
@@ -121,15 +120,15 @@
     <div class="ftr-inner shell">
       <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
       <nav class="ftr-nav" aria-label="Footer-Navigation">
-        <a href="index.html">Start</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
+        <a href="/index.html">Start</a>
+        <a href="/impressum.html">Impressum</a>
+        <a href="/datenschutz.html">Datenschutz</a>
       </nav>
     </div>
   </footer>
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="script.js?v=8" defer></script>
+  <script src="/script.js?v=9" defer></script>
 </body>
 </html>
