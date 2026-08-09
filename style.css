@@ -35,7 +35,7 @@
   --c-ink:           #F2F0EC;  /* body and headings   ~17.0:1 on --c-bg */
   --c-ink-2:         #C6C3BD;  /* secondary prose     ~10.6:1 */
   --c-ink-3:         #94918B;  /* labels, meta        ~ 5.6:1 (AA normal) */
-  --c-ink-4:         #55534F;  /* decoration only — never carries text */
+  --c-ink-4:         #7E7B76;  /* dimmest text tone       ~ 4.7:1 (AA normal) */
 
   /* --- the single accent ------------------------------------------------ */
   --c-accent:        #FF6A2A;  /* signal amber        ~ 6.9:1 on --c-bg */
@@ -555,7 +555,7 @@ hr {
   margin-bottom: var(--sp-md);
   text-wrap: pretty;
 }
-.hero-title span { display: block; }
+.hero-title > span { display: block; }
 .hero-title .muted { color: var(--c-ink-3); font-weight: 400; }
 .hero-title .dot { color: var(--c-accent); }
 
@@ -675,7 +675,7 @@ hr {
 /* drawing primitives */
 .dwg { width: 100%; height: auto; }
 .dwg-rule    { stroke: var(--c-rule); stroke-width: 1; fill: none; }
-.dwg-tick    { stroke: var(--c-ink-4); stroke-width: 1; }
+.dwg-tick    { stroke: var(--c-rule-strong); stroke-width: 1; }
 .dwg-link    { stroke: var(--c-rule-strong); stroke-width: 1; fill: none; }
 .dwg-box     { stroke: var(--c-rule-strong); fill: var(--c-surface-2); stroke-width: 1; }
 .dwg-box-key { stroke: var(--c-accent); fill: var(--c-accent-wash); stroke-width: 1; }
