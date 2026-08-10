@@ -1,25 +1,17 @@
 /* ============================================================================
    tr1stan.de — behaviour
-   Progressive enhancement only. Every block guards its own elements, so the
-   same file runs unchanged on the legal pages and on 404.
-   Nothing here animates on its own: reveals are scroll-triggered, the progress
-   hairline follows scroll position, everything else reacts to input.
+   Progressive enhancement only. Every block guards its own elements so this
+   file runs unchanged on the legal pages and on 404. Nothing here is required
+   to read or operate the site.
    ========================================================================== */
 (function () {
   "use strict";
 
+  var root = document.documentElement;
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var isApple = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || "");
 
-  function $(sel, root) { return (root || document).querySelector(sel); }
-  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-
-  function announce(msg) {
-    var live = $("#liveStatus");
-    if (!live) return;
-    live.textContent = "";
-    window.setTimeout(function () { live.textContent = msg; }, 40);
-  }
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $$(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 
   /* --------------------------------------------------------------------------
      Footer year
@@ -28,14 +20,16 @@
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
   /* --------------------------------------------------------------------------
-     Keyboard hint: show the platform's real modifier
+     Pause the ambient drift whenever the tab is not being looked at
      ------------------------------------------------------------------------ */
-  if (isApple) {
-    $$("[data-kbd-hint]").forEach(function (el) { el.textContent = "⌘ K"; });
-  }
+  (function pauseWhenHidden() {
+    function sync() { root.classList.toggle("is-hidden", document.hidden); }
+    document.addEventListener("visibilitychange", sync);
+    sync();
+  })();
 
   /* --------------------------------------------------------------------------
-     Mobile navigation
+     Mobile navigation (legal pages and 404 only — the home page has no nav)
      ------------------------------------------------------------------------ */
   (function mobileNav() {
     var toggle = $("#navToggle");
@@ -53,9 +47,7 @@
       setOpen(toggle.getAttribute("aria-expanded") !== "true");
     });
 
-    nav.addEventListener("click", function (e) {
-      if (e.target.closest("a")) setOpen(false);
-    });
+    nav.addEventListener("click", function (e) { if (e.target.closest("a")) setOpen(false); });
 
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
@@ -69,8 +61,7 @@
       if (!nav.contains(e.target) && !toggle.contains(e.target)) setOpen(false);
     });
 
-    // Leaving the mobile breakpoint must not strand an open panel.
-    var wide = window.matchMedia("(min-width: 861px)");
+    var wide = window.matchMedia("(min-width: 761px)");
     var onChange = function (e) { if (e.matches) setOpen(false); };
     if (wide.addEventListener) wide.addEventListener("change", onChange);
     else if (wide.addListener) wide.addListener(onChange);
@@ -91,10 +82,10 @@
       ta.style.opacity = "0";
       document.body.appendChild(ta);
       ta.select();
-      var ok = false;
-      try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+      var done = false;
+      try { done = document.execCommand("copy"); } catch (err) { done = false; }
       document.body.removeChild(ta);
-      return ok;
+      return done;
     }
 
     buttons.forEach(function (btn) {
@@ -102,9 +93,15 @@
       var idle = btn.getAttribute("data-label") || out.textContent;
       var timer = null;
 
-      function feedback(ok) {
-        out.textContent = ok ? "kopiert" : "fehlgeschlagen";
-        announce(ok ? "Mail-Adresse kopiert." : "Kopieren nicht möglich.");
+      function feedback(done) {
+        out.textContent = done ? "kopiert" : "fehlgeschlagen";
+        var live = $("#liveStatus");
+        if (live) {
+          live.textContent = "";
+          window.setTimeout(function () {
+            live.textContent = done ? "Mail-Adresse kopiert." : "Kopieren nicht möglich.";
+          }, 40);
+        }
         window.clearTimeout(timer);
         timer = window.setTimeout(function () { out.textContent = idle; }, 2000);
       }
@@ -124,84 +121,7 @@
   })();
 
   /* --------------------------------------------------------------------------
-     Command palette
-     ------------------------------------------------------------------------ */
-  (function palette() {
-    var dlg = $("#commandPalette");
-    var open = $("#openPalette");
-    var close = $("#closePalette");
-    var input = $("#cmdInput");
-    var list = $("#cmdList");
-    var empty = $("#cmdEmpty");
-    if (!dlg || !input || !list || typeof dlg.showModal !== "function") return;
-
-    var items = $$(".cmd-item", list);
-    var visible = items.slice();
-    var index = 0;
-
-    function paint() {
-      items.forEach(function (el) { el.removeAttribute("data-active"); });
-      var el = visible[index];
-      if (el) {
-        el.setAttribute("data-active", "true");
-        if (el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
-      }
-    }
-
-    function filter(q) {
-      var needle = q.trim().toLowerCase();
-      visible = items.filter(function (el) {
-        var hay = (el.textContent + " " + (el.getAttribute("data-k") || "")).toLowerCase();
-        var hit = !needle || hay.indexOf(needle) !== -1;
-        el.hidden = !hit;
-        return hit;
-      });
-      index = 0;
-      if (empty) empty.hidden = visible.length > 0;
-      paint();
-    }
-
-    function show() {
-      if (dlg.open) return;
-      dlg.showModal();
-      input.value = "";
-      filter("");
-      input.focus();
-    }
-
-    function hide() { if (dlg.open) dlg.close(); }
-
-    if (open) open.addEventListener("click", show);
-    if (close) close.addEventListener("click", hide);
-
-    input.addEventListener("input", function () { filter(input.value); });
-
-    dlg.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        e.preventDefault();
-        if (!visible.length) return;
-        index = (index + (e.key === "ArrowDown" ? 1 : -1) + visible.length) % visible.length;
-        paint();
-      } else if (e.key === "Enter") {
-        var target = visible[index];
-        if (target) { e.preventDefault(); hide(); target.click(); }
-      }
-    });
-
-    // Click on the backdrop closes.
-    dlg.addEventListener("click", function (e) { if (e.target === dlg) hide(); });
-    list.addEventListener("click", function (e) { if (e.target.closest("a")) hide(); });
-
-    document.addEventListener("keydown", function (e) {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
-        e.preventDefault();
-        if (dlg.open) hide(); else show();
-      }
-    });
-  })();
-
-  /* --------------------------------------------------------------------------
-     Scroll reveal — the only entrance motion
+     Scroll reveal
      ------------------------------------------------------------------------ */
   (function reveal() {
     var targets = $$("[data-reveal]");
@@ -218,59 +138,89 @@
         entry.target.classList.add("is-in");
         io.unobserve(entry.target);
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
 
     targets.forEach(function (el) { io.observe(el); });
   })();
 
   /* --------------------------------------------------------------------------
-     Scroll progress hairline + active section
+     Custom cursor
+
+     Deliberately narrow entry conditions: a real hovering pointer, no reduced
+     motion request, and a browser that can run this at all. Only once every
+     condition holds does `has-cursor` go on the root element, and only that
+     class hides the native pointer. Any failure above leaves the native
+     cursor untouched.
      ------------------------------------------------------------------------ */
-  (function scrollState() {
-    var bar = $("#scrollProgress");
-    var sections = $$("main section[id]");
-    var links = $$('.nav a[href^="#"], .rail a[href^="#"]');
-    if (!bar && !sections.length) return;
+  (function customCursor() {
+    if (reduceMotion) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!window.requestAnimationFrame) return;
 
-    var ticking = false;
+    var dot = document.createElement("div");
+    var ring = document.createElement("div");
+    dot.className = "cursor-dot";
+    ring.className = "cursor-ring";
+    dot.setAttribute("aria-hidden", "true");
+    ring.setAttribute("aria-hidden", "true");
+    document.body.appendChild(ring);
+    document.body.appendChild(dot);
 
-    function update() {
-      ticking = false;
-      if (bar) {
-        var doc = document.documentElement;
-        var max = doc.scrollHeight - window.innerHeight;
-        var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-        bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+    var rx = tx, ry = ty;
+    var running = false;
+    var armed = false;   // stay invisible until the pointer has actually moved
+
+    function frame() {
+      // ring trails the pointer; the crosshair itself stays exact
+      rx += (tx - rx) * 0.16;
+      ry += (ty - ry) * 0.16;
+      ring.style.transform = "translate3d(" + rx.toFixed(2) + "px," + ry.toFixed(2) + "px,0)";
+      dot.style.transform = "translate3d(" + tx.toFixed(2) + "px," + ty.toFixed(2) + "px,0)";
+
+      if (Math.abs(tx - rx) < 0.1 && Math.abs(ty - ry) < 0.1) { running = false; return; }
+      window.requestAnimationFrame(frame);
+    }
+
+    function kick() {
+      if (running || document.hidden) return;
+      running = true;
+      window.requestAnimationFrame(frame);
+    }
+
+    document.addEventListener("mousemove", function (e) {
+      tx = e.clientX;
+      ty = e.clientY;
+      dot.style.transform = "translate3d(" + tx + "px," + ty + "px,0)";
+      if (!armed) {
+        // first real movement: place the ring under the pointer, then reveal
+        armed = true;
+        rx = tx;
+        ry = ty;
+        ring.style.transform = "translate3d(" + tx + "px," + ty + "px,0)";
+        root.classList.add("has-cursor");
       }
-    }
+      kick();
+    }, { passive: true });
 
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(update);
-    }
+    // state change over anything the visitor can actually act on
+    document.addEventListener("mouseover", function (e) {
+      if (e.target.closest("a, button, [role='button']")) root.classList.add("cursor-hot");
+    }, { passive: true });
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    update();
+    document.addEventListener("mouseout", function (e) {
+      if (e.target.closest("a, button, [role='button']")) root.classList.remove("cursor-hot");
+    }, { passive: true });
 
-    if (!sections.length || !links.length || !("IntersectionObserver" in window)) return;
+    document.addEventListener("mouseleave", function () {
+      dot.style.opacity = "0";
+      ring.style.opacity = "0";
+    });
+    document.addEventListener("mouseenter", function () {
+      dot.style.opacity = "";
+      ring.style.opacity = "";
+    });
 
-    var current = "";
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        var id = entry.target.id;
-        if (id === current) return;
-        current = id;
-        links.forEach(function (a) {
-          var match = a.getAttribute("href") === "#" + id;
-          if (match) a.setAttribute("aria-current", "true");
-          else a.removeAttribute("aria-current");
-        });
-      });
-    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
-
-    sections.forEach(function (s) { io.observe(s); });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });
   })();
 })();

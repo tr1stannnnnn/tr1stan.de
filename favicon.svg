@@ -1,15 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="tr1stan.de favicon">
-  <rect width="128" height="128" fill="#05070d"/>
-  <path d="M12 12h78l26 26v78H38L12 90z" fill="#07111f" stroke="#00e5ff" stroke-width="4"/>
-  <path d="M90 12v26h26" fill="#10233a" stroke="#6fffd2" stroke-width="3"/>
-  <path d="M25 93h78M25 35h39M25 48h24M80 78h24" stroke="#9b7cff" stroke-width="4" stroke-linecap="square"/>
-  <path d="M39 57h50v28H39z" fill="url(#panel)" stroke="#00e5ff" stroke-width="3"/>
-  <text x="64" y="78" font-family="ui-sans-serif, system-ui, Arial, sans-serif" font-size="32" font-weight="900" text-anchor="middle" fill="#031018">t1</text>
-  <defs>
-    <linearGradient id="panel" x1="39" x2="89" y1="57" y2="85" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#00e5ff"/>
-      <stop offset=".55" stop-color="#6fffd2"/>
-      <stop offset="1" stop-color="#9b7cff"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="tr1stan.de">
+  <rect width="128" height="128" fill="#0A0A0A"/>
+  <path d="M64 30v68M30 64h68" stroke="#ECEAE6" stroke-width="6"/>
 </svg>
