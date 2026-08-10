@@ -3,429 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>tr1stan.de — Privater Systemraum</title>
-  <meta name="description" content="tr1stan.de ist ein privater Tech-, Homelab- und Automation-Space für Systemintegration, Netzwerke, DNS, Mail und eigene Projekte." />
-  <meta name="theme-color" content="#0B0B0C" />
+  <title>Tristan Witt — tr1stan.de</title>
+  <meta name="description" content="Private Seite von Tristan Witt über Technik, Basteleien und Automatisierung." />
+  <meta name="theme-color" content="#0A0A0A" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://tr1stan.de/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tr1stan.de" />
-  <meta property="og:title" content="tr1stan.de — Privater Systemraum" />
-  <meta property="og:description" content="Privater Tech-, Homelab- und Automation-Space für Systemintegration, Netzwerke, DNS, Mail und eigene Projekte." />
+  <meta property="og:title" content="Tristan Witt — tr1stan.de" />
+  <meta property="og:description" content="Private Seite von Tristan Witt über Technik, Basteleien und Automatisierung." />
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=9" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=10" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=9" />
+  <link rel="stylesheet" href="/style.css?v=10" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <header class="hdr" data-header>
+  <!-- background layers: behind everything, never interactive -->
+  <div class="ambient" aria-hidden="true"></div>
+  <svg class="grain" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <filter id="grainFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grainFilter)" />
+  </svg>
+
+  <header class="hdr">
     <div class="hdr-inner shell">
-      <a class="brand" href="#top">
-        <span class="brand-mark" aria-hidden="true">t1</span>
+      <a class="brand" href="#top" aria-label="tr1stan.de, zum Seitenanfang">
+        <span class="mark" aria-hidden="true"></span>
         <span class="brand-name">tr1stan.de</span>
       </a>
-
-      <nav class="nav" id="siteNav" aria-label="Hauptnavigation">
-        <a href="#identity">Identity</a>
-        <a href="#stack">Stack</a>
-        <a href="#missions">Vorhaben</a>
-        <a href="#lab">Lab</a>
-        <a href="#contact">Kontakt</a>
-      </nav>
-
-      <div class="hdr-tools">
-        <button class="kbd-btn js-only" id="openPalette" type="button" aria-keyshortcuts="Control+K Meta+K">
-          <span>Befehle</span> <b data-kbd-hint>Ctrl K</b>
-        </button>
-        <button class="nav-toggle js-only" id="navToggle" type="button" aria-label="Navigation öffnen" aria-controls="siteNav" aria-expanded="false">
-          <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
-        </button>
-      </div>
     </div>
-    <div class="hdr-progress" aria-hidden="true"><i id="scrollProgress"></i></div>
   </header>
-
-  <nav class="rail" id="sectionRail" aria-label="Sektionsnavigation">
-    <a href="#identity">01<span>Identity</span></a>
-    <a href="#stack">02<span>Stack</span></a>
-    <a href="#missions">03<span>Vorhaben</span></a>
-    <a href="#lab">04<span>Lab</span></a>
-    <a href="#contact">05<span>Kontakt</span></a>
-  </nav>
 
   <main id="content">
 
-    <!-- ===================== MASTHEAD ===================== -->
-    <section class="masthead shell ruled" id="top">
-      <div class="masthead-top">
-        <p class="masthead-id">Node <b>tr1stan.de</b></p>
-        <p class="masthead-doc">Datenblatt · Stand 2026-08</p>
-      </div>
-
-      <div class="masthead-grid">
-        <div data-reveal>
-          <h1 class="hero-title">
-            <span class="muted">Kein Portfolio.</span>
-            <span>Ein privater</span>
-            <span>Systemraum<span class="dot">.</span></span>
-          </h1>
-
-          <p class="hero-lead">
-            tr1stan.de ist meine eigene digitale Basis: private Tech-Seite, Systemintegration-Log,
-            Homelab-Notizbuch und Startpunkt für Automation, Netzwerk-Setups und spätere Projekte.
-          </p>
-
-          <div class="hero-actions">
-            <a class="btn btn--solid" href="mailto:chef@tr1stan.de">
-              <span class="btn-k">Mail</span>
-              <span>chef@tr1stan.de</span>
-            </a>
-            <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
-              <span class="btn-k">Copy</span>
-              <span data-copy-text>Adresse kopieren</span>
-            </button>
-            <a class="btn" href="#stack">
-              <span class="btn-k">Open</span>
-              <span>Stack ansehen</span>
-            </a>
-          </div>
-
-          <dl class="specbar">
-            <div><dt>Host</dt><dd>GitHub Pages</dd></div>
-            <div><dt>Domain</dt><dd>tr1stan.de</dd></div>
-            <div><dt>Mail</dt><dd>Proton</dd></div>
-            <div><dt>Build</dt><dd>keiner</dd></div>
-          </dl>
-        </div>
-
-        <!-- static technical drawing; no animation, no live values -->
-        <figure class="plate" data-reveal>
-          <figcaption class="plate-head">
-            <span>Abb. 01 — Node-Schema</span>
-            <b>t1</b>
-          </figcaption>
-
-          <div class="plate-body">
-            <svg class="dwg" viewBox="0 0 420 300" role="img"
-                 aria-label="Schema: Die Domain tr1stan.de verzweigt auf drei Zweige — DNS mit A- und AAAA-Records, Web über GitHub Pages und Mail über Proton.">
-              <!-- ruler ticks, top edge -->
-              <g class="dwg-tick">
-                <path d="M18 6v6M78 6v4M138 6v4M198 6v6M258 6v4M318 6v4M378 6v6" />
-              </g>
-              <path class="dwg-rule" d="M18 12h384" />
-
-              <!-- root -->
-              <rect class="dwg-box-key" x="140" y="26" width="140" height="36" />
-              <text class="dwg-label dwg-label-key" x="210" y="48" text-anchor="middle">tr1stan.de</text>
-
-              <!-- bus -->
-              <path class="dwg-link" d="M210 62v26M70 88h280M70 88v26M210 88v26M350 88v26" />
-
-              <!-- branches -->
-              <rect class="dwg-box" x="18" y="114" width="104" height="38" />
-              <text class="dwg-label" x="70" y="138" text-anchor="middle">DNS</text>
-
-              <rect class="dwg-box" x="158" y="114" width="104" height="38" />
-              <text class="dwg-label" x="210" y="138" text-anchor="middle">WEB</text>
-
-              <rect class="dwg-box" x="298" y="114" width="104" height="38" />
-              <text class="dwg-label" x="350" y="138" text-anchor="middle">MAIL</text>
-
-              <!-- leaders + leaf labels -->
-              <path class="dwg-tick" d="M70 152v16M210 152v16M350 152v16" />
-              <text class="dwg-dim" x="70" y="180" text-anchor="middle">A + AAAA</text>
-              <text class="dwg-dim" x="210" y="180" text-anchor="middle">GITHUB PAGES</text>
-              <text class="dwg-dim" x="350" y="180" text-anchor="middle">PROTON</text>
-
-              <!-- dimension line -->
-              <path class="dwg-tick" d="M18 210v10M402 210v10M18 215h384" />
-              <text class="dwg-dim" x="210" y="236" text-anchor="middle">STATISCH · KEIN BUILD · KEINE TRACKER</text>
-
-              <path class="dwg-rule" d="M18 258h384" />
-              <text class="dwg-dim" x="18" y="276">MASSSTAB — SCHEMATISCH</text>
-              <text class="dwg-dim" x="402" y="276" text-anchor="end">REV 04</text>
-            </svg>
-          </div>
-
-          <figcaption class="plate-foot">
-            <span>statisch ausgeliefert</span>
-            <span>keine externen Requests</span>
-          </figcaption>
-        </figure>
-      </div>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero shell" id="top">
+      <span class="passmark passmark--tr" aria-hidden="true"></span>
+      <h1 class="hero-name" data-reveal>Tristan Witt</h1>
+      <p class="hero-line" data-reveal>Private Seite über Technik, Basteleien und Automatisierung.</p>
     </section>
 
-    <!-- ===================== 01 IDENTITY ===================== -->
-    <section class="section section--mid" id="identity" aria-labelledby="identityTitle">
-      <div class="shell">
-        <div class="sec-head" data-reveal>
-          <p class="sec-index">01</p>
-          <div>
-            <p class="sec-kicker">Identity</p>
-            <h2 class="sec-title" id="identityTitle">Private IT-Fläche statt Template-Visitenkarte.</h2>
-          </div>
+    <!-- ===================== ÜBER MICH ===================== -->
+    <section class="section shell" id="ueber" aria-labelledby="ueberTitle">
+      <h2 class="sec-kicker" id="ueberTitle">Über mich</h2>
+
+      <div class="about">
+        <div class="block" data-reveal>
+          <h3 class="block-title">Pros</h3>
+          <ul class="lines">
+            <li>Linux und Docker im Alltag</li>
+            <li>Homelab-Bastler mit Raspberry Pi und Home Assistant</li>
+            <li>Netzwerk und Fernzugriff</li>
+            <li>Automatisierung statt Handarbeit</li>
+            <li>kleine Tools in Python und PHP wenn mich was nervt</li>
+          </ul>
         </div>
 
-        <div class="prose-split">
-          <div class="prose" data-reveal>
-            <p>
-              Die Seite ist bewusst roh-technisch, aber aufgeräumt: ein eigener Space für Systeme,
-              Netzwerke, Domains, Mail, GitHub Pages, Homelab-Ideen und Dinge, die ich nicht in
-              irgendein Standard-Portfolio pressen will.
-            </p>
-            <p>
-              Fokus: <strong>verstehen, bauen, dokumentieren</strong>. Nicht alles muss sofort fertig
-              sein, aber alles soll sauber genug sein, um später darauf aufzubauen.
-            </p>
-          </div>
+        <div class="block" data-reveal>
+          <h3 class="block-title">Cons</h3>
+          <p>Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+        </div>
 
-          <dl class="notes" data-reveal>
-            <div class="note">
-              <dt>Prinzip</dt>
-              <dd>Static first</dd>
-              <p>Kein Build-Step, keine Framework-Abhängigkeit, keine externen Fonts.</p>
-            </div>
-            <div class="note">
-              <dt>Richtung</dt>
-              <dd>Systemintegration</dd>
-              <p>DNS, Mail, Netzwerk, Clients, Server, Troubleshooting und Doku.</p>
-            </div>
-            <div class="note">
-              <dt>Modus</dt>
-              <dd>Homelab-ready</dd>
-              <p>Platz für Setup-Notizen, Automationen und spätere Projektseiten.</p>
-            </div>
-          </dl>
+        <div class="block" data-reveal>
+          <h3 class="block-title">Was als Nächstes kommt</h3>
+          <ul class="lines">
+            <li>Monitoring</li>
+            <li>mehr Automatisierung</li>
+            <li>Security tiefer verstehen</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- ===================== 02 STACK ===================== -->
-    <section class="section section--tight" id="stack" aria-labelledby="stackTitle">
-      <div class="shell">
-        <div class="sec-head" data-reveal>
-          <p class="sec-index">02</p>
-          <div>
-            <p class="sec-kicker">Stack / Module</p>
-            <h2 class="sec-title" id="stackTitle">Module, die diesen Space antreiben.</h2>
-          </div>
-        </div>
-
-        <ol class="spec-rows">
-          <li class="spec-row" data-reveal>
-            <span class="spec-id">M01</span>
-            <div class="spec-body">
-              <h3>Domain + Mail</h3>
-              <p>Eigene Domain, Proton Mail, Catch-All-Setup und klare Trennung für Accounts, Tests und Projekte.</p>
-            </div>
-            <span class="spec-status status status--live">live</span>
-          </li>
-
-          <li class="spec-row" data-reveal>
-            <span class="spec-id">M02</span>
-            <div class="spec-body">
-              <h3>Static Web</h3>
-              <p>GitHub Pages, handgeschriebenes HTML/CSS/JS, schnelle Auslieferung und kein Framework-Zwang.</p>
-            </div>
-            <span class="spec-status status status--live">live</span>
-          </li>
-
-          <li class="spec-row" data-reveal>
-            <span class="spec-id">M03</span>
-            <div class="spec-body">
-              <h3>Automation</h3>
-              <p>Skripte, Workflows, kleine interne Tools und alles, was Wiederholung aus dem Alltag nimmt.</p>
-            </div>
-            <span class="spec-status status status--wip">in Arbeit</span>
-          </li>
-
-          <li class="spec-row" data-reveal>
-            <span class="spec-id">M04</span>
-            <div class="spec-body">
-              <h3>Homelab</h3>
-              <p>Docker, Netzwerk, Home Assistant, NAS-Ideen, Monitoring und später Setup-Dokumentation.</p>
-            </div>
-            <span class="spec-status status status--plan">geplant</span>
-          </li>
-        </ol>
-      </div>
+    <!-- ===================== BASTELEIEN ===================== -->
+    <section class="section shell" id="basteleien" aria-labelledby="bastelnTitle">
+      <h2 class="sec-kicker" id="bastelnTitle">Basteleien</h2>
+      <ul class="lines" data-reveal>
+        <li>Skripte, die mir wiederkehrende Handgriffe abnehmen.</li>
+        <li>Container aufsetzen, zerlegen, neu bauen.</li>
+        <li>Dem Zuhause ein paar Automatiken beibringen.</li>
+        <li>Netzwerkkram so lange drehen, bis er sitzt.</li>
+      </ul>
     </section>
 
-    <!-- ===================== 03 VORHABEN (full bleed) ===================== -->
-    <section class="section section--bleed section--wide" id="missions" aria-labelledby="missionsTitle">
-      <div class="shell">
-        <div class="sec-head" data-reveal>
-          <p class="sec-index">03</p>
-          <div>
-            <p class="sec-kicker">Vorhaben</p>
-            <h2 class="sec-title" id="missionsTitle">Was läuft, was gebaut wird, was ansteht.</h2>
-          </div>
-        </div>
+    <!-- ===================== KONTAKT ===================== -->
+    <section class="section shell contact" id="kontakt" aria-labelledby="kontaktTitle">
+      <span class="passmark passmark--bl" aria-hidden="true"></span>
+      <h2 class="sec-kicker" id="kontaktTitle">Kontakt</h2>
 
-        <div class="register">
-          <article class="entry" data-reveal>
-            <p class="entry-no">01</p>
-            <div class="entry-main">
-              <h3>Domain + Proton Mail</h3>
-              <p>tr1stan.de ist als eigene digitale Identität aktiv. Kontakt läuft über chef@tr1stan.de.</p>
-            </div>
-            <div class="entry-side">
-              <dl class="entry-field"><dt>Status</dt><dd><span class="status status--live">live</span></dd></dl>
-              <dl class="entry-field"><dt>Bereich</dt><dd class="mono">Domain / Mail</dd></dl>
-            </div>
-          </article>
+      <a class="mail" href="mailto:chef@tr1stan.de" data-reveal>chef@tr1stan.de</a>
 
-          <article class="entry" data-reveal>
-            <p class="entry-no">02</p>
-            <div class="entry-main">
-              <h3>GitHub Pages Website</h3>
-              <p>Statische Root-Dateien, Custom Domain, schnelle Auslieferung und kein Build-Prozess.</p>
-            </div>
-            <div class="entry-side">
-              <dl class="entry-field"><dt>Status</dt><dd><span class="status status--live">live</span></dd></dl>
-              <dl class="entry-field"><dt>Bereich</dt><dd class="mono">Web</dd></dl>
-            </div>
-          </article>
-
-          <article class="entry" data-reveal>
-            <p class="entry-no">03</p>
-            <div class="entry-main">
-              <h3>Projekt-Hub</h3>
-              <p>Später ein Einstiegspunkt für Tools, Dokus, Experimente und saubere Unterseiten.</p>
-            </div>
-            <div class="entry-side">
-              <dl class="entry-field"><dt>Status</dt><dd><span class="status status--plan">geplant</span></dd></dl>
-              <dl class="entry-field"><dt>Bereich</dt><dd class="mono">Web</dd></dl>
-            </div>
-          </article>
-
-          <article class="entry" data-reveal>
-            <p class="entry-no">04</p>
-            <div class="entry-main">
-              <h3>Homelab / Setup-Doku</h3>
-              <p>Geplante Struktur für Netzwerk, Hardware, Services, Automationen und Lernnotizen.</p>
-            </div>
-            <div class="entry-side">
-              <dl class="entry-field"><dt>Status</dt><dd><span class="status status--plan">geplant</span></dd></dl>
-              <dl class="entry-field"><dt>Bereich</dt><dd class="mono">Infrastruktur</dd></dl>
-            </div>
-          </article>
-
-          <article class="entry" data-reveal>
-            <p class="entry-no">05</p>
-            <div class="entry-main">
-              <h3>Sidehustle-Space</h3>
-              <p>Ein Bereich für spätere Ideen, Experimente und kleine digitale Angebote, ohne die private Seite zu überladen.</p>
-            </div>
-            <div class="entry-side">
-              <dl class="entry-field"><dt>Status</dt><dd><span class="status status--plan">geplant</span></dd></dl>
-              <dl class="entry-field"><dt>Bereich</dt><dd class="mono">Offen</dd></dl>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 04 LAB ===================== -->
-    <section class="section section--mid" id="lab" aria-labelledby="labTitle">
-      <div class="shell">
-        <div class="sec-head" data-reveal>
-          <p class="sec-index">04</p>
-          <div>
-            <p class="sec-kicker">Homelab / Lab</p>
-            <h2 class="sec-title" id="labTitle">Ein Platz für Systeme, die wachsen dürfen.</h2>
-          </div>
-        </div>
-
-        <div class="lab-split">
-          <div class="plate" data-reveal>
-            <p class="plate-head"><span>Abb. 02 — Einheiten</span><b>04</b></p>
-            <ul class="unit-list">
-              <li class="unit">
-                <span class="unit-key">gateway</span>
-                <span class="unit-name">DNS / Mail / Domain</span>
-                <span class="status status--live">live</span>
-              </li>
-              <li class="unit">
-                <span class="unit-key">pages</span>
-                <span class="unit-name">Static Deploy</span>
-                <span class="status status--live">live</span>
-              </li>
-              <li class="unit">
-                <span class="unit-key">automation</span>
-                <span class="unit-name">Scripts / Flows</span>
-                <span class="status status--wip">in Arbeit</span>
-              </li>
-              <li class="unit">
-                <span class="unit-key">docs</span>
-                <span class="unit-name">Setup Notes</span>
-                <span class="status status--plan">geplant</span>
-              </li>
-              <li class="unit">
-                <span class="unit-key">future</span>
-                <span class="unit-name">Project Hub</span>
-                <span class="status status--plan">geplant</span>
-              </li>
-            </ul>
-            <p class="plate-foot"><span>Zustand manuell gepflegt</span></p>
-          </div>
-
-          <div data-reveal>
-            <div class="prose">
-              <p>
-                Der Lab-Bereich ist als späteres Kontrollpanel gedacht: nicht nur schöne Screenshots,
-                sondern nachvollziehbare Setups, kleine Fehleranalysen, Automationsideen und eine
-                technische Historie der eigenen Infrastruktur.
-              </p>
-            </div>
-            <ul class="stack-list">
-              <li>Netzwerk- und DNS-Notizen</li>
-              <li>Service-Checks und Statusideen</li>
-              <li>Setup-Dokus für Tools und Hardware</li>
-              <li>Automationen, die wirklich genutzt werden</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 05 KONTAKT ===================== -->
-    <section class="section section--wide" id="contact" aria-labelledby="contactTitle">
-      <div class="shell">
-        <div class="contact-sheet" data-reveal>
-          <p class="sec-kicker">05 — Kontakt</p>
-          <h2 class="sec-title" id="contactTitle">Direkter Kanal zur Domain.</h2>
-
-          <p class="hero-lead" style="margin-inline:auto">
-            Kontakt läuft bewusst simpel: keine Formulare, kein Tracking, keine Cookies.
-            Schreib direkt an die Mail-Adresse der Domain.
-          </p>
-
-          <a class="mail-line" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
-
-          <div class="contact-actions">
-            <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
-              <span class="btn-k">Copy</span>
-              <span data-copy-text>Adresse kopieren</span>
-            </button>
-          </div>
-
-          <dl class="contact-meta">
-            <div><dt>Adresse</dt><dd>chef@tr1stan.de</dd></div>
-            <div><dt>Mail-Provider</dt><dd>Proton</dd></div>
-            <div><dt>Formular</dt><dd>keins</dd></div>
-            <div><dt>Tracking</dt><dd>keins</dd></div>
-          </dl>
-        </div>
+      <div class="contact-row" data-reveal>
+        <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+          <span data-copy-text>Adresse kopieren</span>
+        </button>
+        <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
       </div>
     </section>
 
@@ -433,42 +117,16 @@
 
   <footer class="ftr">
     <div class="ftr-inner shell">
-      <span>© <span id="year">2026</span> tr1stan.de · private tech node</span>
-      <nav class="ftr-nav" aria-label="Footer-Navigation">
+      <span>© <span id="year">2026</span> tr1stan.de</span>
+      <nav class="ftr-nav" aria-label="Rechtliches">
         <a href="/impressum.html">Impressum</a>
         <a href="/datenschutz.html">Datenschutz</a>
-        <a href="#top">Nach oben</a>
       </nav>
     </div>
   </footer>
 
-  <dialog class="cmd" id="commandPalette" aria-labelledby="cmdTitle">
-    <div class="cmd-head">
-      <strong id="cmdTitle">Befehle</strong>
-      <button class="cmd-close" id="closePalette" type="button">Esc</button>
-    </div>
-    <input class="cmd-input" id="cmdInput" type="text" placeholder="Sektion oder Befehl suchen…"
-           autocomplete="off" spellcheck="false" aria-label="Befehl suchen" />
-    <div class="cmd-list" id="cmdList">
-      <a class="cmd-item" href="#identity" data-k="identity über about"><i>01</i><span>Identity öffnen</span><u>go</u></a>
-      <a class="cmd-item" href="#stack" data-k="stack module technik"><i>02</i><span>Stack anzeigen</span><u>go</u></a>
-      <a class="cmd-item" href="#missions" data-k="vorhaben missions projekte roadmap"><i>03</i><span>Vorhaben prüfen</span><u>go</u></a>
-      <a class="cmd-item" href="#lab" data-k="lab homelab rack"><i>04</i><span>Lab anzeigen</span><u>go</u></a>
-      <a class="cmd-item" href="#contact" data-k="kontakt contact mail"><i>05</i><span>Kontakt öffnen</span><u>go</u></a>
-      <a class="cmd-item" href="mailto:chef@tr1stan.de" data-k="mail mailto schreiben chef"><i>@</i><span>Mail an chef@tr1stan.de</span><u>mail</u></a>
-      <a class="cmd-item" href="/impressum.html" data-k="impressum legal ddg anbieter"><i>§</i><span>Impressum</span><u>seite</u></a>
-      <a class="cmd-item" href="/datenschutz.html" data-k="datenschutz privacy dsgvo"><i>§</i><span>Datenschutz</span><u>seite</u></a>
-      <p class="cmd-empty" id="cmdEmpty" hidden>Kein Treffer.</p>
-    </div>
-    <div class="cmd-foot">
-      <span><b>↑ ↓</b> wählen</span>
-      <span><b>Enter</b> öffnen</span>
-      <span><b>Esc</b> schließen</span>
-    </div>
-  </dialog>
-
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=9" defer></script>
+  <script src="/script.js?v=10" defer></script>
 </body>
 </html>

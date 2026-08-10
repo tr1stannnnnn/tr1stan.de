@@ -2,16 +2,15 @@
 
 /* ============================================================================
    tr1stan.de — stylesheet
-   Design direction: technical instrument / datasheet.
-   Neutral near-black ground, paper-white text, exactly one accent (signal amber).
-   No glow, no neon, no idle animation.
+   A short personal card. Strictly monochrome: no accent hue anywhere.
+   Hierarchy is carried by size, weight and rule thickness alone.
 
-   Order of this file:
-     1. TOKENS      design decisions as custom properties
+     1. TOKENS      every colour and measure as a custom property
      2. BASE        resets, element defaults, typography
-     3. LAYOUT      shell, grid, sections, full-bleed
-     4. COMPONENTS  header, nav, hero plate, spec rows, register, contact, palette
-     5. UTILITIES   helpers, state, motion, print
+     3. LAYOUT      shell, sections, rhythm
+     4. COMPONENTS  header, hero, about, list, contact, legal pages, 404
+     5. AMBIENT     background motion, grain, custom cursor
+     6. UTILITIES   helpers, motion preferences, print
    ========================================================================== */
 
 
@@ -20,96 +19,80 @@
    ========================================================================== */
 
 :root {
-  /* --- ground and surfaces: neutral greys, no blue or green cast --------- */
-  --c-bg:            #0B0B0C;
-  --c-surface-1:     #101012;
-  --c-surface-2:     #16161A;
-  --c-surface-3:     #1D1D21;
+  /* --- the whole palette. Monochrome by construction: every value below is
+         a neutral grey between ground and ink, so nothing can drift into a hue.
 
-  /* --- hairlines: the primary structural device of this design ---------- */
-  --c-rule:          #26262A;
-  --c-rule-soft:     #1B1B1E;
-  --c-rule-strong:   #3A3A41;
+         To invert the site into a light scheme, swap these eight values for
+         the light set kept in the comment underneath. Nothing else changes. */
+  --c-bg:      #0A0A0A;   /* page ground                                      */
+  --c-bg-1:    #101010;   /* raised surface                                   */
+  --c-bg-2:    #171717;   /* pressed / hovered surface                        */
+  --c-line:    #232323;   /* hairline                                         */
+  --c-line-2:  #363636;   /* emphasised hairline                              */
+  --c-ink:     #ECEAE6;   /* primary text            ~16.9:1 on --c-bg        */
+  --c-ink-2:   #B5B2AD;   /*  secondary text          ~9.2:1                  */
+  --c-ink-3:   #8B8883;   /*  quiet labels            ~5.2:1 (AA normal)      */
 
-  /* --- ink: paper white stepping down to decoration --------------------- */
-  --c-ink:           #F2F0EC;  /* body and headings   ~17.0:1 on --c-bg */
-  --c-ink-2:         #C6C3BD;  /* secondary prose     ~10.6:1 */
-  --c-ink-3:         #94918B;  /* labels, meta        ~ 5.6:1 (AA normal) */
-  --c-ink-4:         #7E7B76;  /* dimmest text tone       ~ 4.7:1 (AA normal) */
+  /* Light scheme — paste over the eight values above to flip the site:
+       --c-bg: #F4F2EE;  --c-bg-1: #EDEBE6;  --c-bg-2: #E4E1DB;
+       --c-line: #D6D3CC; --c-line-2: #BAB6AE;
+       --c-ink: #101010; --c-ink-2: #4A4844; --c-ink-3: #6E6B66;             */
 
-  /* --- the single accent ------------------------------------------------ */
-  --c-accent:        #FF6A2A;  /* signal amber        ~ 6.9:1 on --c-bg */
-  --c-accent-ink:    #0B0B0C;  /* text placed on top of the accent */
-  --c-accent-wash:   rgba(255, 106, 42, 0.10);
-  --c-accent-rule:   rgba(255, 106, 42, 0.38);
+  /* Derived, so the two overlays follow the ink automatically. */
+  --c-veil:    rgba(236, 234, 230, 0.032);  /* ambient light wash             */
+  --c-ring:    rgba(236, 234, 230, 0.55);   /* custom cursor ring             */
 
   /* --- type ------------------------------------------------------------- */
   --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* A deliberately wide gap between display and body: the datasheet look
-     depends on headline and running text never sitting on adjacent steps. */
-  --fs-display: clamp(2.6rem, 1.15rem + 6.2vw, 6rem);
-  --fs-h2:      clamp(1.7rem, 1.15rem + 2.3vw, 3rem);
-  --fs-h3:      clamp(1.02rem, 0.97rem + 0.28vw, 1.22rem);
-  --fs-lead:    clamp(1.06rem, 1.0rem + 0.45vw, 1.28rem);
-  --fs-body:    clamp(0.98rem, 0.95rem + 0.16vw, 1.06rem);
-  --fs-small:   0.82rem;
-  --fs-label:   0.6875rem;
-  --fs-micro:   0.625rem;
+  --fs-display: clamp(2.9rem, 1.1rem + 7.4vw, 7rem);
+  --fs-h2:      clamp(1.15rem, 1.05rem + 0.45vw, 1.5rem);
+  --fs-h3:      0.78rem;
+  --fs-lead:    clamp(1.1rem, 1.0rem + 0.5vw, 1.4rem);
+  --fs-body:    clamp(1rem, 0.97rem + 0.16vw, 1.08rem);
+  --fs-small:   0.86rem;
+  --fs-label:   0.7rem;
+  --fs-micro:   0.64rem;
 
-  --lh-display: 0.94;
-  --lh-tight:   1.16;
-  --lh-body:    1.62;
+  --lh-display: 0.92;
+  --lh-tight:   1.2;
+  --lh-body:    1.68;
 
-  --tr-label: 0.14em;   /* tracking for mono labels */
-  --tr-micro: 0.2em;
+  --tr-label: 0.16em;
 
-  /* --- space ------------------------------------------------------------ */
+  /* --- space ------------------------------------------------------------- */
   --sp-3xs: 0.25rem;
   --sp-2xs: 0.5rem;
   --sp-xs:  0.75rem;
   --sp-sm:  1rem;
   --sp-md:  1.5rem;
   --sp-lg:  2.25rem;
-  --sp-xl:  3.25rem;
-  --sp-2xl: 4.5rem;
-  --sp-3xl: 6.5rem;
-  --sp-4xl: 9rem;
+  --sp-xl:  3.5rem;
+  --sp-2xl: 5.5rem;
+  --sp-3xl: 8rem;
 
-  /* Vertical rhythm is intentionally uneven between sections; each section
-     picks one of these rather than sharing a single global padding. */
-  --pad-tight: clamp(3rem, 6vw, 4.5rem);
-  --pad-mid:   clamp(4rem, 9vw, 7rem);
-  --pad-wide:  clamp(5rem, 12vw, 9.5rem);
+  --pad-section: clamp(3.5rem, 9vw, 7rem);
 
-  /* --- measures --------------------------------------------------------- */
-  --shell-max:  1280px;
-  --shell-pad:  clamp(1.15rem, 4vw, 3.5rem);
-  --measure:    64ch;
-  --measure-sm: 46ch;
+  /* --- measures ---------------------------------------------------------- */
+  --shell-max: 940px;      /* narrow on purpose: this is a card, not a report */
+  --shell-pad: clamp(1.35rem, 6vw, 3rem);
+  --measure:   58ch;
+  --measure-sm: 42ch;
 
-  /* --- motion ----------------------------------------------------------- */
+  /* --- motion ------------------------------------------------------------ */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --dur-fast: 120ms;
-  --dur-mid:  260ms;
-  --dur-slow: 620ms;
+  --dur-fast: 140ms;
+  --dur-mid:  300ms;
+  --dur-slow: 700ms;
 
-  /* --- misc ------------------------------------------------------------- */
-  --focus-w: 2px;
-  --radius: 2px;          /* instruments are square; 2px only softens edges */
-  --header-h: 60px;
+  --header-h: 58px;
 }
 
 
 /* ============================================================================
    2. BASE
    ========================================================================== */
-
-/* --- self-hosted variable fonts -------------------------------------------
-   latin subset, weight axis. unicode-range covers Latin-1 (German umlauts,
-   sharp s), general punctuation, currency, and the arrows U+2191 / U+2193.
-   It does NOT cover U+2192 -> so that glyph is avoided in content. */
 
 @font-face {
   font-family: "Inter Variable";
@@ -150,70 +133,50 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
-  font-weight: 400;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;   /* guard: nothing should overflow, but never scroll sideways */
+  overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3 {
   margin: 0;
-  font-weight: 620;
   line-height: var(--lh-tight);
-  letter-spacing: -0.018em;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 
 p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
 
 a {
   color: inherit;
-  text-decoration-color: var(--c-rule-strong);
-  text-underline-offset: 0.22em;
+  text-decoration-color: var(--c-line-2);
+  text-underline-offset: 0.25em;
   transition: color var(--dur-fast) var(--ease),
               text-decoration-color var(--dur-fast) var(--ease);
 }
+a:hover { text-decoration-color: var(--c-ink); }
 
-a:hover { color: var(--c-accent); text-decoration-color: var(--c-accent-rule); }
-
-ul, ol { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; margin: 0; }
 
 code {
   font-family: var(--font-mono);
-  font-size: 0.92em;
-  color: var(--c-ink);
-  background: var(--c-surface-2);
-  border: 1px solid var(--c-rule);
+  font-size: 0.9em;
+  background: var(--c-bg-1);
+  border: 1px solid var(--c-line);
   padding: 0.08em 0.36em;
 }
 
-img, svg { display: block; max-width: 100%; }
+::selection { background: var(--c-ink); color: var(--c-bg); }
 
-button, input {
-  font: inherit;
-  color: inherit;
-  margin: 0;
-}
-
-button { cursor: pointer; background: none; border: 0; }
-
-hr {
-  border: 0;
-  border-top: 1px solid var(--c-rule);
-  margin: 0;
-}
-
-::selection {
-  background: var(--c-accent);
-  color: var(--c-accent-ink);
-}
-
-/* --- focus: one visible ring for every interactive element --------------- */
+/* One visible focus treatment everywhere. Without an accent hue it is drawn
+   in ink, which stands out against every surface in this palette. */
 :focus-visible {
-  outline: var(--focus-w) solid var(--c-accent);
+  outline: 2px solid var(--c-ink);
   outline-offset: 3px;
-  border-radius: var(--radius);
 }
 :focus:not(:focus-visible) { outline: none; }
 
@@ -222,7 +185,6 @@ hr {
    3. LAYOUT
    ========================================================================== */
 
-/* --- shell: the standard measure ---------------------------------------- */
 .shell {
   width: 100%;
   max-width: var(--shell-max);
@@ -230,74 +192,21 @@ hr {
   padding-inline: var(--shell-pad);
 }
 
-/* --- section frame ------------------------------------------------------- */
 .section {
   position: relative;
-  border-top: 1px solid var(--c-rule);
+  padding-block: var(--pad-section);
+  border-top: 1px solid var(--c-line);
 }
 
-.section--tight { padding-block: var(--pad-tight); }
-.section--mid   { padding-block: var(--pad-mid); }
-.section--wide  { padding-block: var(--pad-wide); }
-
-/* Full-bleed band: breaks the shell, carries its own ground. */
-.section--bleed {
-  background: var(--c-surface-1);
-  border-block: 1px solid var(--c-rule);
-}
-
-/* --- section masthead: the datasheet caption block ----------------------- */
-.sec-head {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: var(--sp-md);
-  margin-bottom: var(--sp-xl);
-}
-
-.sec-index {
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: 600;
-  letter-spacing: var(--tr-label);
-  color: var(--c-accent);
-  padding-top: 0.55em;
-  font-variant-numeric: tabular-nums;
-}
-
-.sec-title { font-size: var(--fs-h2); max-width: 22ch; }
-
+/* section caption: quiet mono label, no colour, no numbering */
 .sec-kicker {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  text-transform: uppercase;
+  font-weight: 500;
   letter-spacing: var(--tr-label);
+  text-transform: uppercase;
   color: var(--c-ink-3);
-  margin-bottom: var(--sp-2xs);
-}
-
-/* --- the visible base grid ----------------------------------------------
-   Faint vertical hairlines, drawn only where a section opts in. This is the
-   "graph paper" the layout is measured against. */
-.ruled {
-  position: relative;
-  isolation: isolate;
-}
-
-.ruled::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--c-rule-soft) 0 1px,
-    transparent 1px calc(100% / 6)
-  );
-  background-size: 100% 100%;
-  opacity: 0.9;
-  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  margin-bottom: var(--sp-md);
 }
 
 
@@ -305,34 +214,69 @@ hr {
    4. COMPONENTS
    ========================================================================== */
 
-/* --- 4.1 skip link -------------------------------------------------------- */
+/* --- 4.1 registration mark -----------------------------------------------
+   Two hairlines crossing. Used as the logo and, very sparingly, as a
+   passmark at a few grid points. Drawn in CSS so it stays exactly 1px. */
+.mark {
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: var(--c-ink);
+}
+.mark::before,
+.mark::after {
+  content: "";
+  position: absolute;
+  background: currentColor;
+}
+.mark::before { left: 50%; top: 0; width: 1px; height: 100%; }
+.mark::after  { top: 50%; left: 0; height: 1px; width: 100%; }
+
+/* passmark: same shape, dimmed and pushed to the margin */
+.passmark {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: var(--c-line-2);
+  pointer-events: none;
+}
+/* Anchored on the text column edge, never outside the box: a passmark that
+   overhangs its container widens the page on narrow viewports. */
+.passmark--tr { top: 10px; right: var(--shell-pad); }
+.passmark--bl { bottom: 10px; left: var(--shell-pad); }
+
+
+/* --- 4.2 skip link -------------------------------------------------------- */
 .skip {
   position: absolute;
   left: var(--sp-sm);
   top: -4rem;
   z-index: 90;
-  background: var(--c-accent);
-  color: var(--c-accent-ink);
+  background: var(--c-ink);
+  color: var(--c-bg);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
-  font-weight: 600;
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   text-decoration: none;
   padding: 0.7em 1.1em;
   transition: top var(--dur-fast) var(--ease);
 }
-.skip:focus { top: var(--sp-sm); color: var(--c-accent-ink); }
+.skip:focus { top: var(--sp-sm); }
 
 
-/* --- 4.2 header ----------------------------------------------------------- */
+/* --- 4.3 header ----------------------------------------------------------- */
 .hdr {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--c-bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--c-rule);
+  /* Opaque on purpose. A translucent bar would need backdrop-filter, which on
+     this near-black ground buys nothing visible, costs a composited layer on
+     mobile, and is a known source of paint artefacts on very tall viewports. */
+  background: var(--c-bg);
+  border-bottom: 1px solid var(--c-line);
 }
 
 .hdr-inner {
@@ -345,37 +289,18 @@ hr {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
   text-decoration: none;
   margin-right: auto;
 }
-
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--c-accent);
-  color: var(--c-accent);
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .brand-name {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.02em;
-  color: var(--c-ink);
+  line-height: 1.1;
 }
-
-.brand:hover .brand-name { color: var(--c-accent); }
-
-/* sub-labelled brand, used on the legal pages and on 404 */
-.brand-copy { display: grid; gap: 0.1rem; }
-.brand-copy .brand-name { line-height: 1.1; }
+.brand-copy { display: grid; gap: 0.12rem; }
 .brand-sub {
   font-family: var(--font-mono);
   font-size: var(--fs-micro);
@@ -384,14 +309,9 @@ hr {
   color: var(--c-ink-3);
   line-height: 1.1;
 }
+.brand:hover .mark { color: var(--c-ink-2); }
 
-/* primary nav */
-.nav {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.5rem, 1.6vw, 1.5rem);
-}
-
+.nav { display: flex; align-items: center; gap: clamp(0.75rem, 2vw, 1.75rem); }
 .nav a {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -402,43 +322,16 @@ hr {
   padding: 0.5rem 0;
   border-bottom: 1px solid transparent;
 }
-
 .nav a:hover { color: var(--c-ink); }
-.nav a[aria-current="true"] {
-  color: var(--c-ink);
-  border-bottom-color: var(--c-accent);
-}
+.nav a[aria-current="page"] { color: var(--c-ink); border-bottom-color: var(--c-line-2); }
 
-/* header tools */
 .hdr-tools { display: flex; align-items: center; gap: var(--sp-2xs); }
 
-.kbd-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  border: 1px solid var(--c-rule);
-  padding: 0.42rem 0.7rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
-}
-.kbd-btn:hover { border-color: var(--c-rule-strong); color: var(--c-ink); }
-.kbd-btn b {
-  font-weight: 600;
-  color: var(--c-ink-2);
-  border-left: 1px solid var(--c-rule);
-  padding-left: 0.55rem;
-}
-
-/* mobile toggle */
 .nav-toggle {
   display: none;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--c-rule);
+  border: 1px solid var(--c-line);
   position: relative;
 }
 .nav-toggle i {
@@ -456,133 +349,100 @@ hr {
 .nav-toggle[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded="true"] i:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
-/* scroll progress hairline — scroll-driven, not an idle animation */
-.hdr-progress {
-  height: 1px;
-  background: var(--c-rule);
-}
-.hdr-progress i {
-  display: block;
-  height: 100%;
-  width: 100%;
-  background: var(--c-accent);
-  transform: scaleX(0);
-  transform-origin: left;
-}
 
-
-/* --- 4.3 margin index (large screens) ------------------------------------ */
-.rail {
-  display: none;
-  position: fixed;
-  left: max(0.9rem, calc((100vw - var(--shell-max)) / 2 - 3.2rem));
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 40;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.rail a {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  color: var(--c-ink-4);
-  text-decoration: none;
-}
-.rail a::before {
-  content: "";
-  width: 14px;
-  height: 1px;
-  background: currentColor;
-  transition: width var(--dur-mid) var(--ease);
-}
-.rail a:hover,
-.rail a[aria-current="true"] { color: var(--c-accent); }
-.rail a[aria-current="true"]::before { width: 26px; }
-.rail span { opacity: 0; transition: opacity var(--dur-fast) var(--ease); }
-.rail a:hover span,
-.rail a[aria-current="true"] span { opacity: 1; }
-
-
-/* --- 4.4 masthead / hero -------------------------------------------------- */
-.masthead {
+/* --- 4.4 hero -------------------------------------------------------------
+   Name and a single sentence. Nothing else lives here. */
+.hero {
   position: relative;
-  padding-block: clamp(3.5rem, 10vw, 7.5rem) var(--pad-mid);
+  padding-block: clamp(4.5rem, 15vw, 10rem) clamp(3.5rem, 10vw, 6.5rem);
+}
+.hero-name {
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: -0.042em;
+  font-weight: 620;
+  margin-bottom: var(--sp-md);
+}
+.hero-line {
+  font-size: var(--fs-lead);
+  color: var(--c-ink-2);
+  max-width: var(--measure-sm);
+  text-wrap: pretty;
 }
 
-.masthead-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--sp-sm) var(--sp-md);
-  padding-bottom: var(--sp-sm);
-  border-bottom: 1px solid var(--c-rule);
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
-}
 
-.masthead-id {
+/* --- 4.5 about: three quiet blocks ---------------------------------------- */
+.about { display: grid; gap: var(--sp-lg); }
+
+.block { border-top: 1px solid var(--c-line); padding-top: var(--sp-sm); }
+.block:first-child { border-top: 0; padding-top: 0; }
+
+.block-title {
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
+  font-size: var(--fs-h3);
+  font-weight: 600;
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--c-ink-3);
-}
-.masthead-id b { color: var(--c-accent); font-weight: 600; }
-.masthead-doc {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
-  color: var(--c-ink-4);
+  margin-bottom: var(--sp-xs);
 }
 
-.masthead-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(2.5rem, 6vw, 4.5rem);
-}
+.block p { max-width: var(--measure); color: var(--c-ink-2); }
 
-.hero-title {
-  font-size: var(--fs-display);
-  line-height: var(--lh-display);
-  letter-spacing: -0.035em;
-  font-weight: 680;
-  margin-bottom: var(--sp-md);
-  text-wrap: pretty;
-}
-.hero-title > span { display: block; }
-.hero-title .muted { color: var(--c-ink-3); font-weight: 400; }
-.hero-title .dot { color: var(--c-accent); }
-
-.hero-lead {
-  font-size: var(--fs-lead);
-  color: var(--c-ink-2);
+/* a plain hairline-led list, no bullets, no markers other than the rule */
+.lines { display: grid; }
+.lines li {
+  display: flex;
+  gap: var(--sp-sm);
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--c-line);
   max-width: var(--measure);
-  margin-bottom: var(--sp-lg);
-  text-wrap: pretty;
+  color: var(--c-ink-2);
+}
+.lines li:last-child { border-bottom: 0; }
+.lines li::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 1px;
+  background: var(--c-line-2);
+  transform: translateY(0.85em);
 }
 
-.hero-actions {
+
+/* --- 4.6 contact ---------------------------------------------------------- */
+.contact { position: relative; display: grid; gap: var(--sp-md); }
+
+.mail {
+  display: inline-block;
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 0.72rem + 2.1vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--c-line-2);
+  padding-bottom: 0.14em;
+  word-break: break-word;
+}
+.mail:hover { border-bottom-color: var(--c-ink); }
+
+.contact-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2xs);
-  margin-bottom: var(--sp-xl);
+  align-items: center;
+  gap: var(--sp-2xs) var(--sp-md);
 }
 
-/* --- 4.5 buttons ---------------------------------------------------------- */
+
+/* --- 4.7 buttons ---------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
-  min-height: 48px;
-  padding: 0 1.1rem;
-  border: 1px solid var(--c-rule-strong);
-  background: transparent;
+  min-height: 46px;
+  padding: 0 1.05rem;
+  border: 1px solid var(--c-line-2);
   color: var(--c-ink);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -590,382 +450,36 @@ hr {
   text-transform: uppercase;
   text-decoration: none;
   transition: border-color var(--dur-fast) var(--ease),
-              background-color var(--dur-fast) var(--ease),
-              color var(--dur-fast) var(--ease);
+              background-color var(--dur-fast) var(--ease);
 }
-.btn:hover {
-  border-color: var(--c-accent);
-  color: var(--c-accent);
-  background: var(--c-accent-wash);
-}
+.btn:hover { border-color: var(--c-ink); background: var(--c-bg-1); }
+
 .btn-k {
   color: var(--c-ink-3);
-  border-right: 1px solid var(--c-rule);
+  border-right: 1px solid var(--c-line);
   padding-right: 0.7rem;
-  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
-.btn:hover .btn-k { color: var(--c-accent); border-color: var(--c-accent-rule); }
 
+/* the one inverted button: ink ground, page colour text */
 .btn--solid {
-  background: var(--c-accent);
-  border-color: var(--c-accent);
-  color: var(--c-accent-ink);
-  font-weight: 600;
-}
-.btn--solid .btn-k { color: rgba(11, 11, 12, 0.62); border-color: rgba(11, 11, 12, 0.24); }
-.btn--solid:hover {
   background: var(--c-ink);
   border-color: var(--c-ink);
   color: var(--c-bg);
+  font-weight: 600;
 }
-.btn--solid:hover .btn-k { color: rgba(11, 11, 12, 0.62); border-color: rgba(11, 11, 12, 0.24); }
+.btn--solid .btn-k { color: var(--c-bg); opacity: 0.62; border-color: rgba(10, 10, 10, 0.25); }
+.btn--solid:hover { background: var(--c-ink-2); border-color: var(--c-ink-2); }
 
-/* --- 4.6 spec bar (hero footer data) -------------------------------------- */
-.specbar {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--c-rule);
-}
-.specbar > div {
-  padding: var(--sp-sm) 0;
-  border-bottom: 1px solid var(--c-rule-soft);
-  padding-right: var(--sp-sm);
-}
-.specbar dt {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-  margin-bottom: 0.3rem;
-}
-.specbar dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  color: var(--c-ink);
-}
 
-/* --- 4.7 hero plate: static technical drawing ----------------------------- */
-.plate {
-  border: 1px solid var(--c-rule);
-  background: var(--c-surface-1);
-  align-self: start;
-}
-
-.plate-head,
-.plate-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-sm);
-  padding: 0.65rem 0.9rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-}
-.plate-head { border-bottom: 1px solid var(--c-rule); }
-.plate-foot { border-top: 1px solid var(--c-rule); color: var(--c-ink-4); }
-.plate-head b { color: var(--c-accent); font-weight: 600; }
-
-.plate-body { padding: clamp(0.75rem, 2.4vw, 1.4rem); }
-
-/* drawing primitives */
-.dwg { width: 100%; height: auto; }
-.dwg-rule    { stroke: var(--c-rule); stroke-width: 1; fill: none; }
-.dwg-tick    { stroke: var(--c-rule-strong); stroke-width: 1; }
-.dwg-link    { stroke: var(--c-rule-strong); stroke-width: 1; fill: none; }
-.dwg-box     { stroke: var(--c-rule-strong); fill: var(--c-surface-2); stroke-width: 1; }
-.dwg-box-key { stroke: var(--c-accent); fill: var(--c-accent-wash); stroke-width: 1; }
-.dwg-label {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  fill: var(--c-ink-2);
-}
-.dwg-label-key { fill: var(--c-accent); font-weight: 600; }
-.dwg-dim {
-  font-family: var(--font-mono);
-  font-size: 7.5px;
-  letter-spacing: 0.12em;
-  fill: var(--c-ink-4);
-}
-
-/* --- 4.8 status labels — honest states, no invented numbers --------------- */
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--c-ink-3);
-}
-.status::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  flex: none;
-  border: 1px solid currentColor;
-}
-.status--live   { color: var(--c-accent); }
-.status--live::before { background: var(--c-accent); }
-.status--wip    { color: var(--c-ink-2); }
-.status--wip::before  { background: linear-gradient(135deg, currentColor 50%, transparent 50%); }
-.status--plan   { color: var(--c-ink-3); }
-
-/* --- 4.9 identity: prose with margin notes -------------------------------- */
-.prose-split {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-xl);
-}
-
-.prose {
-  max-width: var(--measure);
-  display: grid;
-  gap: var(--sp-sm);
-  color: var(--c-ink-2);
-}
-.prose strong { color: var(--c-ink); font-weight: 600; }
-
-.notes { display: grid; gap: 0; align-content: start; }
-.note {
-  padding: var(--sp-sm) 0;
-  border-top: 1px solid var(--c-rule);
-}
-.note:last-child { border-bottom: 1px solid var(--c-rule); }
-.note dt {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-  margin-bottom: 0.35rem;
-}
-.note dd {
-  margin: 0;
-  font-size: var(--fs-small);
-  color: var(--c-ink);
-  font-weight: 560;
-}
-.note p {
-  margin-top: 0.3rem;
-  font-size: var(--fs-small);
-  color: var(--c-ink-3);
-  line-height: 1.5;
-}
-
-/* --- 4.10 stack: dense spec rows ------------------------------------------ */
-.spec-rows { border-top: 1px solid var(--c-rule); }
-
-.spec-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    "id    status"
-    "body  body";
-  gap: 0.5rem var(--sp-sm);
-  padding: var(--sp-md) 0;
-  border-bottom: 1px solid var(--c-rule);
-  transition: background-color var(--dur-fast) var(--ease);
-}
-.spec-row:hover { background: var(--c-surface-1); }
-
-.spec-id {
-  grid-area: id;
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--tr-label);
-  color: var(--c-accent);
-  font-variant-numeric: tabular-nums;
-}
-.spec-body { grid-area: body; }
-.spec-body h3 { font-size: var(--fs-h3); margin-bottom: 0.3rem; }
-.spec-body p { color: var(--c-ink-3); font-size: var(--fs-small); max-width: 62ch; }
-.spec-status { grid-area: status; justify-self: end; }
-
-/* --- 4.11 missions: airy full-bleed register ------------------------------ */
-.register { display: grid; }
-
-.entry {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-xs);
-  padding-block: var(--sp-lg);
-  border-top: 1px solid var(--c-rule);
-}
-.entry:last-child { border-bottom: 1px solid var(--c-rule); }
-
-.entry-no {
-  font-family: var(--font-mono);
-  font-size: clamp(1.6rem, 4vw, 2.6rem);
-  font-weight: 200;
-  line-height: 1;
-  color: var(--c-ink-4);
-  font-variant-numeric: tabular-nums;
-  transition: color var(--dur-mid) var(--ease);
-}
-.entry:hover .entry-no { color: var(--c-accent); }
-
-.entry-main h3 {
-  font-size: clamp(1.2rem, 0.98rem + 0.9vw, 1.7rem);
-  margin-bottom: var(--sp-3xs);
-}
-.entry-main p {
-  color: var(--c-ink-2);
-  max-width: 58ch;
-}
-.entry-side {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-sm);
-}
-.entry-field {
-  display: grid;
-  gap: 0.25rem;
-}
-.entry-field dt {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
-  color: var(--c-ink-4);
-}
-.entry-field dd { margin: 0; }
-
-/* --- 4.12 lab: schematic + list ------------------------------------------- */
-.lab-split {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-xl);
-  align-items: start;
-}
-
-/* rack-style unit panel: keys left, name centre, honest state right */
-.unit-list { border-top: 1px solid var(--c-rule); }
-.unit {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "key    state"
-    "name   name";
-  gap: 0.3rem 0.75rem;
-  align-items: center;
-  padding: 0.8rem 0.9rem;
-  border-bottom: 1px solid var(--c-rule-soft);
-  transition: background-color var(--dur-fast) var(--ease);
-}
-.unit:last-child { border-bottom: 0; }
-.unit:hover { background: var(--c-surface-2); }
-.unit-key {
-  grid-area: key;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-}
-.unit-name {
-  grid-area: name;
-  font-size: var(--fs-small);
-  color: var(--c-ink);
-}
-.unit .status { grid-area: state; justify-self: end; }
-
-@media (min-width: 520px) {
-  .unit {
-    grid-template-columns: 7rem 1fr auto;
-    grid-template-areas: "key name state";
-  }
-}
-
-.stack-list { border-top: 1px solid var(--c-rule); margin-top: var(--sp-md); }
-.stack-list li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-sm);
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--c-rule-soft);
-  color: var(--c-ink-2);
-  font-size: var(--fs-small);
-}
-.stack-list li::before {
-  content: "";
-  flex: none;
-  width: 10px;
-  height: 1px;
-  background: var(--c-accent);
-  transform: translateY(-0.32em);
-}
-
-/* --- 4.13 contact --------------------------------------------------------- */
-.contact-sheet {
-  max-width: 62ch;
-  margin-inline: auto;
-  text-align: center;
-}
-.contact-sheet .sec-title { max-width: none; margin-inline: auto; }
-
-.mail-line {
-  display: inline-block;
-  margin-block: var(--sp-lg) var(--sp-sm);
-  font-family: var(--font-mono);
-  font-size: clamp(1.05rem, 0.7rem + 2.2vw, 2.1rem);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--c-ink);
-  text-decoration: none;
-  border-bottom: 1px solid var(--c-accent-rule);
-  padding-bottom: 0.15em;
-  word-break: break-word;
-}
-.mail-line:hover { color: var(--c-accent); border-bottom-color: var(--c-accent); }
-
-.contact-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--sp-2xs);
-  margin-top: var(--sp-sm);
-}
-
-.contact-meta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-  margin-top: var(--sp-xl);
-  text-align: left;
-  border-top: 1px solid var(--c-rule);
-}
-.contact-meta > div {
-  padding: var(--sp-sm) var(--sp-sm) var(--sp-sm) 0;
-  border-bottom: 1px solid var(--c-rule-soft);
-}
-.contact-meta dt {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-  margin-bottom: 0.3rem;
-}
-.contact-meta dd { margin: 0; font-size: var(--fs-small); color: var(--c-ink); }
-
-/* --- 4.14 footer ---------------------------------------------------------- */
+/* --- 4.8 footer ----------------------------------------------------------- */
 .ftr {
-  border-top: 1px solid var(--c-rule);
+  border-top: 1px solid var(--c-line);
   padding-block: var(--sp-lg);
 }
 .ftr-inner {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-sm) var(--sp-md);
+  gap: var(--sp-2xs) var(--sp-md);
   align-items: center;
   justify-content: space-between;
   font-family: var(--font-mono);
@@ -976,107 +490,15 @@ hr {
 }
 .ftr-nav { display: flex; flex-wrap: wrap; gap: var(--sp-md); }
 .ftr-nav a { text-decoration: none; }
-.ftr-nav a:hover { color: var(--c-accent); }
+.ftr-nav a:hover { color: var(--c-ink); }
 
-/* --- 4.15 command palette -------------------------------------------------- */
-.cmd {
-  width: min(560px, calc(100vw - 2rem));
-  padding: 0;
-  border: 1px solid var(--c-rule-strong);
-  background: var(--c-surface-1);
-  color: var(--c-ink);
-  margin-top: 14vh;
-  margin-inline: auto;
-}
-.cmd::backdrop { background: rgba(5, 5, 6, 0.72); }
 
-.cmd-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--c-rule);
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-}
-.cmd-close {
-  border: 1px solid var(--c-rule);
-  padding: 0.3rem 0.6rem;
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  color: var(--c-ink-3);
-}
-.cmd-close:hover { border-color: var(--c-accent); color: var(--c-accent); }
-
-.cmd-input {
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--c-rule);
-  background: transparent;
-  padding: 0.95rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.86rem;
-  color: var(--c-ink);
-}
-.cmd-input::placeholder { color: var(--c-ink-4); }
-.cmd-input:focus { outline: none; border-bottom-color: var(--c-accent); }
-
-.cmd-list { max-height: min(46vh, 380px); overflow-y: auto; padding: 0.35rem; }
-
-.cmd-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.7rem;
-  text-decoration: none;
-  color: var(--c-ink-2);
-  font-size: var(--fs-small);
-  border: 1px solid transparent;
-}
-.cmd-item i {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  font-style: normal;
-  color: var(--c-ink-4);
-  width: 1.6em;
-  flex: none;
-}
-.cmd-item u { margin-left: auto; text-decoration: none; }
-.cmd-item u,
-.cmd-foot b {
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-4);
-}
-.cmd-item:is(:hover, [data-active="true"]) {
-  background: var(--c-surface-3);
-  border-color: var(--c-rule);
-  color: var(--c-ink);
-}
-.cmd-item:is(:hover, [data-active="true"]) i { color: var(--c-accent); }
-
-.cmd-empty { padding: 1.1rem 0.7rem; color: var(--c-ink-3); font-size: var(--fs-small); }
-
-.cmd-foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-sm);
-  padding: 0.7rem 1rem;
-  border-top: 1px solid var(--c-rule);
-  font-size: var(--fs-micro);
-  color: var(--c-ink-4);
-}
-
-/* --- 4.16 legal + 404 pages ----------------------------------------------- */
+/* --- 4.9 legal pages ------------------------------------------------------ */
 .page-head {
-  padding-block: clamp(2.5rem, 7vw, 4.5rem) var(--sp-lg);
-  border-bottom: 1px solid var(--c-rule);
+  padding-block: clamp(2.5rem, 7vw, 4rem) var(--sp-lg);
+  border-bottom: 1px solid var(--c-line);
 }
-.page-title { font-size: var(--fs-h2); margin-top: var(--sp-2xs); }
+.page-title { font-size: clamp(1.9rem, 1.3rem + 2.4vw, 3rem); letter-spacing: -0.03em; }
 .page-lead {
   margin-top: var(--sp-sm);
   max-width: var(--measure);
@@ -1085,38 +507,11 @@ hr {
 }
 .page-lead strong { color: var(--c-ink); font-weight: 600; }
 
-.legal-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2xs);
-  margin-top: var(--sp-sm);
-}
-
-.legal-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem var(--sp-md);
-  margin-top: var(--sp-lg);
-  padding-top: var(--sp-sm);
-  border-top: 1px solid var(--c-rule);
-  font-family: var(--font-mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-}
-
-.legal-back {
-  padding-bottom: var(--pad-tight);
-  border-top: 1px solid var(--c-rule);
-  padding-top: var(--sp-lg);
-}
-
 .legal {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--sp-xl);
-  padding-block: var(--pad-tight) var(--pad-mid);
+  padding-block: var(--sp-xl);
   align-items: start;
 }
 
@@ -1124,11 +519,11 @@ hr {
 .toc-title {
   font-family: var(--font-mono);
   font-size: var(--fs-micro);
-  letter-spacing: var(--tr-micro);
+  letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--c-ink-3);
   padding-bottom: var(--sp-2xs);
-  border-bottom: 1px solid var(--c-rule);
+  border-bottom: 1px solid var(--c-line);
   margin-bottom: var(--sp-2xs);
 }
 .toc ol { counter-reset: toc; }
@@ -1145,18 +540,18 @@ hr {
   content: counter(toc, decimal-leading-zero);
   font-family: var(--font-mono);
   font-size: var(--fs-micro);
-  color: var(--c-ink-4);
+  color: var(--c-ink-3);
 }
-.toc a:hover { color: var(--c-accent); }
+.toc a:hover { color: var(--c-ink); }
 
 .legal-body { max-width: var(--measure); color: var(--c-ink-2); }
-.legal-body section { padding-block: var(--sp-md); border-top: 1px solid var(--c-rule); }
+.legal-body section { padding-block: var(--sp-md); border-top: 1px solid var(--c-line); }
 .legal-body section:first-of-type { border-top: 0; padding-top: 0; }
 .legal-body h2 {
   display: flex;
   align-items: baseline;
   gap: 0.7rem;
-  font-size: var(--fs-h3);
+  font-size: 1.02rem;
   color: var(--c-ink);
   margin-bottom: var(--sp-2xs);
 }
@@ -1165,31 +560,21 @@ hr {
   font-size: var(--fs-micro);
   font-weight: 600;
   letter-spacing: var(--tr-label);
-  color: var(--c-accent);
-}
-.legal-body h3 {
-  font-size: var(--fs-small);
-  color: var(--c-ink);
-  margin-top: var(--sp-sm);
-  margin-bottom: 0.3rem;
+  color: var(--c-ink-3);
 }
 .legal-body p { margin-bottom: var(--sp-2xs); }
 .legal-body p:last-child { margin-bottom: 0; }
 .legal-body strong { color: var(--c-ink); font-weight: 600; }
-.legal-body a { color: var(--c-accent); }
+.legal-body a { color: var(--c-ink); }
 .legal-body ul { display: grid; gap: 0.35rem; margin-block: var(--sp-2xs); }
-.legal-body ul li {
-  display: flex;
-  gap: 0.6rem;
-  font-size: var(--fs-small);
-}
+.legal-body ul li { display: flex; gap: 0.6rem; font-size: var(--fs-small); }
 .legal-body ul li::before {
   content: "";
   flex: none;
-  width: 8px;
+  width: 9px;
   height: 1px;
-  background: var(--c-accent);
-  transform: translateY(0.75em);
+  background: var(--c-line-2);
+  transform: translateY(0.8em);
 }
 .legal-body address {
   font-style: normal;
@@ -1200,36 +585,179 @@ hr {
 }
 
 .legal-note {
-  border-left: 1px solid var(--c-accent);
-  background: var(--c-surface-1);
-  padding: var(--sp-sm) var(--sp-sm);
+  border-left: 1px solid var(--c-line-2);
+  background: var(--c-bg-1);
+  padding: var(--sp-sm);
   margin-top: var(--sp-sm);
   font-size: var(--fs-small);
 }
 
-/* 404 */
+.legal-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin-top: var(--sp-sm); }
+
+.legal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem var(--sp-md);
+  margin-top: var(--sp-lg);
+  padding-top: var(--sp-sm);
+  border-top: 1px solid var(--c-line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--c-ink-3);
+}
+
+.legal-back {
+  padding-block: var(--sp-lg) var(--sp-2xl);
+  border-top: 1px solid var(--c-line);
+}
+
+
+/* --- 4.10 404 ------------------------------------------------------------- */
 .nf {
-  min-height: 62vh;
+  min-height: 60vh;
   display: grid;
   align-content: center;
   gap: var(--sp-md);
-  padding-block: var(--pad-mid);
-  text-align: left;
+  padding-block: var(--sp-2xl);
 }
 .nf-code {
   font-family: var(--font-mono);
-  font-size: clamp(3.5rem, 14vw, 8rem);
+  font-size: clamp(3.2rem, 13vw, 7rem);
   font-weight: 200;
   line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--c-accent);
+  letter-spacing: -0.05em;
+  color: var(--c-ink);
 }
 .nf-text { color: var(--c-ink-2); max-width: var(--measure); }
 .nf-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); }
 
 
 /* ============================================================================
-   5. UTILITIES
+   5. AMBIENT — background motion, grain, custom cursor
+   Everything in this block sits behind the content and never takes pointer
+   events. All of it degrades to nothing without JavaScript or with reduced
+   motion requested.
+   ========================================================================== */
+
+/* --- 5.1 slow monochrome drift -------------------------------------------
+   Two very large, very faint light washes moving past each other. Pure CSS,
+   composited transforms only, no repaint per frame. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient::before,
+.ambient::after {
+  content: "";
+  position: absolute;
+  width: 78vmax;
+  height: 78vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--c-veil), transparent 64%);
+  will-change: transform;
+}
+.ambient::before {
+  top: -26vmax;
+  left: -18vmax;
+  animation: drift-a 104s var(--ease) infinite alternate;
+}
+.ambient::after {
+  bottom: -30vmax;
+  right: -22vmax;
+  animation: drift-b 137s var(--ease) infinite alternate;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(16vw, 11vh, 0) scale(1.22); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.1); }
+  to   { transform: translate3d(-13vw, -9vh, 0) scale(1); }
+}
+
+/* paused while the tab is in the background */
+html.is-hidden .ambient::before,
+html.is-hidden .ambient::after { animation-play-state: paused; }
+
+/* --- 5.2 grain -----------------------------------------------------------
+   Generated by an inline SVG turbulence filter in the markup. No image file
+   is loaded and no request leaves the page. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+/* --- 5.3 custom cursor ---------------------------------------------------
+   Only ever enabled by script, and only on a device that really has a fine
+   hovering pointer. If the script does not run, .has-cursor is never set and
+   the native cursor stays exactly as it was. */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+html.has-cursor .cursor-dot,
+html.has-cursor .cursor-ring { opacity: 1; }
+
+/* the dot is itself a small crosshair, echoing the registration mark */
+.cursor-dot {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  color: var(--c-ink);
+}
+.cursor-dot::before,
+.cursor-dot::after { content: ""; position: absolute; background: currentColor; }
+.cursor-dot::before { left: 50%; top: 0; width: 1px; height: 100%; }
+.cursor-dot::after  { top: 50%; left: 0; height: 1px; width: 100%; }
+
+.cursor-ring {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 1px solid var(--c-ring);
+  border-radius: 50%;
+  transition: opacity var(--dur-mid) var(--ease),
+              width var(--dur-mid) var(--ease),
+              height var(--dur-mid) var(--ease),
+              margin var(--dur-mid) var(--ease),
+              border-color var(--dur-mid) var(--ease);
+}
+/* state change over anything interactive */
+html.cursor-hot .cursor-ring {
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border-color: var(--c-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor body { cursor: none; }
+  html.has-cursor a,
+  html.has-cursor button,
+  html.has-cursor .mark { cursor: none; }
+}
+
+
+/* ============================================================================
+   6. UTILITIES
    ========================================================================== */
 
 .sr-only {
@@ -1251,38 +779,30 @@ hr {
   color: var(--c-ink-3);
 }
 
-.accent { color: var(--c-accent); }
-.center { text-align: center; }
-
-/* JS-dependent controls stay hidden until the document is known to be scripted */
 html:not(.has-js) .js-only { display: none !important; }
 
-/* --- scroll reveal — the only entrance motion in the design --------------- */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(10px);
   transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
 }
 [data-reveal].is-in { opacity: 1; transform: none; }
-
-/* Without JS nothing may stay invisible. */
 html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
 
 
 /* ============================================================================
-   RESPONSIVE
-   Breakpoints are content-driven; verified at 360 / 768 / 1280 / 1920.
+   RESPONSIVE — verified at 360 / 768 / 1280 / 1920
    ========================================================================== */
 
-@media (max-width: 860px) {
+@media (max-width: 760px) {
   .nav {
     position: fixed;
     inset: var(--header-h) 0 auto 0;
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    background: var(--c-surface-1);
-    border-bottom: 1px solid var(--c-rule);
+    background: var(--c-bg-1);
+    border-bottom: 1px solid var(--c-line);
     padding: var(--sp-2xs) var(--shell-pad) var(--sp-sm);
     transform: translateY(-8px);
     opacity: 0;
@@ -1292,71 +812,26 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
                 visibility var(--dur-mid);
   }
   .nav[data-open="true"] { opacity: 1; visibility: visible; transform: none; }
-  .nav a {
-    padding: 0.9rem 0;
-    border-bottom: 1px solid var(--c-rule-soft);
-    font-size: var(--fs-small);
-    letter-spacing: 0.06em;
-  }
-  .nav a[aria-current="true"] { border-bottom-color: var(--c-accent); }
+  .nav a { padding: 0.9rem 0; border-bottom: 1px solid var(--c-line); font-size: var(--fs-small); }
   .nav-toggle { display: block; }
-  .kbd-btn { display: none; }
+
+  /* the drift is the first thing to go on small screens */
+  .ambient::before,
+  .ambient::after { animation: none; }
 }
 
-@media (min-width: 720px) {
-  .specbar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .specbar > div { padding-right: var(--sp-md); }
-
-  .spec-row {
-    grid-template-columns: 4.5rem 1fr 7.5rem;
-    grid-template-areas: "id body status";
-    align-items: baseline;
-    gap: var(--sp-md);
-  }
-  .spec-status { align-self: center; }
-
-  .entry {
-    grid-template-columns: 5rem 1fr;
-    grid-template-areas:
-      "no  main"
-      "no  side";
-    gap: var(--sp-2xs) var(--sp-lg);
-    padding-block: var(--sp-xl);
-  }
-  .entry-no   { grid-area: no; }
-  .entry-main { grid-area: main; }
-  .entry-side { grid-area: side; margin-top: var(--sp-xs); }
-
-  .contact-meta { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .nf { text-align: left; }
+@media (min-width: 640px) {
+  .about { gap: var(--sp-xl); }
 }
 
-@media (min-width: 980px) {
-  .masthead-grid {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    align-items: start;
-  }
-  /* deliberately different column measures per section */
-  .prose-split  { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: var(--sp-2xl); }
-  .lab-split    { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--sp-2xl); }
-  .legal        { grid-template-columns: 15rem minmax(0, 1fr); gap: var(--sp-2xl); }
-  .toc          { position: sticky; top: calc(var(--header-h) + 1.5rem); }
-
-  .sec-head { grid-template-columns: 5rem 1fr; gap: var(--sp-lg); }
-}
-
-@media (min-width: 1400px) {
-  .rail { display: flex; }
-}
-
-/* Very wide viewports: hold the measure, let the ground breathe. */
-@media (min-width: 1700px) {
-  :root { --shell-max: 1360px; }
+@media (min-width: 900px) {
+  .legal { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--sp-2xl); }
+  .toc { position: sticky; top: calc(var(--header-h) + 1.5rem); }
 }
 
 
 /* ============================================================================
-   MOTION PREFERENCES
+   MOTION PREFERENCES — reduced motion means completely still
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1371,18 +846,29 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
     scroll-behavior: auto !important;
   }
 
+  .ambient::before,
+  .ambient::after { animation: none !important; }
+
   [data-reveal] { opacity: 1 !important; transform: none !important; }
+
+  /* native pointer, no custom cursor at all */
+  .cursor-dot,
+  .cursor-ring { display: none !important; }
+  html.has-cursor,
+  html.has-cursor body,
+  html.has-cursor a,
+  html.has-cursor button { cursor: auto !important; }
 }
 
 
 /* ============================================================================
-   PRINT — the datasheet, on paper
+   PRINT
    ========================================================================== */
 
 @media print {
-  :root { --c-bg: #fff; --c-ink: #000; --c-ink-2: #222; --c-ink-3: #555; --c-rule: #bbb; }
+  :root { --c-bg: #fff; --c-ink: #000; --c-ink-2: #222; --c-ink-3: #555; --c-line: #bbb; }
   body { background: #fff; color: #000; }
-  .hdr, .rail, .cmd, .skip, .hero-actions, .contact-actions, .nav-toggle { display: none !important; }
-  .section, .masthead { padding-block: 1.2cm; }
+  .hdr, .ambient, .grain, .cursor-dot, .cursor-ring, .skip, .nav-toggle { display: none !important; }
+  .section, .hero { padding-block: 1.2cm; }
   a { text-decoration: underline; }
 }
