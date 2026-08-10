@@ -165,7 +165,7 @@ eines zu strengen Schwellwerts.
 |---|---|
 | Merge | `redesign/v6` mit `--no-ff` nach `main` |
 | Push | `0f3ce00..e0934e7` |
-| Pages-Lauf | siehe Abschnitt „Deploy-Status" unten |
+| Pages-Lauf | `pages build and deployment` für `e0934e7` — **completed / success** |
 | Rückfall nötig? | Nein |
 
 ---
