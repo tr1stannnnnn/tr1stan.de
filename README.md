@@ -1,99 +1,80 @@
 # tr1stan.de
 
-Statische private Website für `tr1stan.de`.
-
-Die Seite ist ein persönlicher Tech-, Homelab- und Automation-Space: kein Framework, kein
-Build-Step, kein npm, keine externen Requests, keine Tracking-Libraries. Ausgeliefert wird
-direkt aus dem Repository-Root über GitHub Pages.
-
-**Kein Portfolio, sondern ein privater Systemraum** — Systemintegration, DNS, Mail, Netzwerk,
-Homelab und Automation als zusammenhängende Story statt als Standard-Visitenkarte.
+Statische private Website für `tr1stan.de` — eine kurze persönliche Visitenkarte.
+Kein Framework, kein Build-Step, kein npm, keine externen Requests.
 
 ---
 
-## Designrichtung: technisches Instrument / Datenblatt
+## Gestaltung
 
-Die Gestaltung folgt der Anmutung eines Messgeräts und eines gedruckten Datenblatts, nicht dem
-Cyber-Neon-Klischee. Konkret heißt das:
+Streng monochrom. Es gibt **keine** Akzentfarbe: Hierarchie entsteht nur über
+Schriftgröße, Gewicht und Strichstärke.
 
-- **Grund:** neutrales Fast-Schwarz `#0B0B0C`, abgestufte Graustufen für Flächen und Linien.
-- **Text:** papierweiß `#F2F0EC`, darunter drei abgestufte Grautöne — alle mindestens 4,5:1.
-- **Akzent:** genau eine Farbe, Signal-Amber `#FF6A2A`. Kein Cyan, kein Grün, kein Magenta,
-  keine Glow-Effekte.
-- **Struktur:** sichtbares Basisraster, feine Trennlinien, Beschriftungen wie in einer
-  technischen Zeichnung. Jede Sektion hat ein eigenes Layout statt eines wiederholten
-  Karten-Grids.
-- **Bewegung:** ausschließlich scroll-getriggerte Einblendungen und Hover-Feedback. Nichts
-  animiert dauerhaft von selbst. `prefers-reduced-motion` schaltet alles ab.
+- Grund `#0A0A0A`, Text `#ECEAE6`, dazwischen abgestufte Graustufen.
+- Alle Farben liegen als acht CSS Custom Properties am Anfang von `style.css`.
+  Direkt darunter steht ein heller Satz derselben acht Werte — einmal
+  hineinkopiert und das Schema ist umgedreht, ohne eine weitere Zeile zu ändern.
+- Feines Korn als Textur, erzeugt von einem Inline-SVG-Turbulenzfilter. Keine
+  Bilddatei, kein Request.
+- Registermarke: ein Plus aus zwei Haarlinien, wie eine Passmarke in einer
+  technischen Zeichnung. Es dient als Logo und sitzt an zwei Rasterpunkten.
+  Bewusst leise gehalten. Das Favicon zeigt dieselbe Marke.
 
-### Ehrliche Zustände statt erfundener Zahlen
+### Bewegung
 
-Die Seite zeigt bewusst **keine** Prozentbalken, Auslastungswerte, FPS-Zähler oder Timer.
-Solche Werte hatten keine Quelle. Zustände stehen jetzt als überprüfbare Labels: `live`,
-`in Arbeit`, `geplant`.
+- **Hintergrund:** zwei sehr große, sehr blasse Lichtflächen driften langsam
+  aneinander vorbei (104 s und 137 s). Reines CSS, nur composited Transforms.
+  Pausiert bei `document.hidden`, auf schmalen Viewports abgeschaltet, bei
+  `prefers-reduced-motion` vollständig statisch.
+- **Cursor:** ein Fadenkreuz folgt exakt, ein Ring läuft mit leichter
+  Verzögerung nach und wächst über Links und Buttons. Nur bei `hover: hover`
+  und `pointer: fine`; auf Touch und bei reduzierter Bewegung bleibt der native
+  Zeiger. Läuft das Skript nicht, wird der native Zeiger nie versteckt.
 
 ---
 
 ## Dateistruktur
 
-Alle Dateien liegen bewusst flach im Root. Es gibt **kein** `/pages/`-Verzeichnis.
+Alle Dateien liegen flach im Root.
 
 ```text
 tr1stan.de/
-├── index.html          # Startseite (Masthead, Identity, Stack, Vorhaben, Lab, Kontakt)
+├── index.html          # Visitenkarte: Name, Über mich, Basteleien, Kontakt
 ├── impressum.html      # Impressum nach § 5 DDG
 ├── datenschutz.html    # Datenschutzhinweise nach Art. 13 DSGVO
-├── 404.html            # GitHub-Pages-Fehlerseite inkl. Legacy-Redirects
-├── style.css           # Designsystem: Tokens, Base, Layout, Komponenten, Utilities
-├── script.js           # Progressive Enhancement (Nav, Befehle, Copy, Reveal)
+├── 404.html            # Fehlerseite inkl. Legacy-Redirects
+├── style.css           # Tokens, Base, Layout, Komponenten, Ambient, Utilities
+├── script.js           # Jahr, Copy, mobiles Menü, Reveal, Cursor
 ├── fonts/              # selbst gehostete Variable Fonts inkl. Lizenzen
-├── favicon.svg         # SVG-Favicon
-├── robots.txt          # Crawler-Hinweise
-├── sitemap.xml         # Sitemap für tr1stan.de
-├── CNAME               # Custom Domain für GitHub Pages (Inhalt: tr1stan.de)
-└── README.md           # Diese Datei
+├── favicon.svg         # Registermarke
+├── robots.txt
+├── sitemap.xml
+├── CNAME
+└── README.md
 ```
-
-### Das visuelle Hauptobjekt
-
-Der Blickfang ist eine **statische technische Zeichnung** im Masthead: ein Inline-SVG, das
-zeigt, wie die Domain auf ihre drei Zweige verteilt ist — DNS (`A + AAAA`), Web (GitHub Pages)
-und Mail (Proton). Mit Maßlinien, Ticks und Revisionsnummer wie auf einem Datenblatt. Die
-Zeichnung ist bewusst unbewegt.
-
----
 
 ## Schriften
 
-Beide Schriften liegen selbst gehostet in `fonts/`, es wird nichts von einem CDN geladen.
+| Schrift | Verwendung | Lizenz |
+|---|---|---|
+| Inter Variable | Fließtext und Überschriften | SIL OFL 1.1 |
+| JetBrains Mono Variable | Labels und Kleinteile | SIL OFL 1.1 |
 
-| Schrift | Verwendung | Datei | Lizenz |
-|---|---|---|---|
-| Inter Variable | Fließtext, Überschriften | `inter-var-latin.woff2` (48 KB) | SIL OFL 1.1 |
-| JetBrains Mono Variable | Labels, Werte, technische Kleinteile | `jetbrains-mono-var-latin.woff2` (40 KB) | SIL OFL 1.1 |
+Beide selbst gehostet in `fonts/`, `latin`-Subset mit Gewichtsachse, eingebunden
+per `@font-face` mit `font-display: swap` und `preload`. Lizenztexte liegen daneben.
 
-Beide sind auf das `latin`-Subset reduziert und tragen eine Gewichtsachse
-(`font-weight: 100 900` bzw. `100 800`), eingebunden per `@font-face` mit `font-display: swap`
-und `<link rel="preload">`. Die Lizenztexte liegen als `fonts/LICENSE-*.txt` daneben.
-
-> Hinweis zum Zeichenvorrat: Die `unicode-range` des `latin`-Subsets deckt Umlaute, `ß`,
-> typografische Anführungszeichen sowie `↑` und `↓` ab — **nicht** aber `→` (U+2192). Dieses
-> Zeichen wird im Inhalt deshalb vermieden, damit kein Fallback-Glyph einspringt.
-
----
+> Der Zeichenvorrat deckt Umlaute, `ß` und typografische Anführungszeichen ab,
+> aber **nicht** `→` (U+2192). Dieses Zeichen im Inhalt vermeiden.
 
 ## Barrierefreiheit
 
-- sichtbarer Fokusring auf allen bedienbaren Elementen
-- genau eine `h1` pro Seite, keine übersprungenen Überschriftenebenen
-- `aria-label` an Icon-Buttons, `aria-expanded` am mobilen Menü
-- vollständige Tastaturbedienung inklusive Skip-Link als erstes Tab-Ziel
-- alle Textfarben erreichen mindestens WCAG AA (4,5:1)
+Sichtbarer Fokusring, genau eine `h1` pro Seite, keine übersprungenen
+Überschriftenebenen, vollständige Tastaturbedienung mit Skip-Link als erstes
+Tab-Ziel, alle Textfarben mindestens WCAG AA.
 
 ## Lokal ansehen
 
-Weil die Pfade root-relativ sind (`/style.css`, `/fonts/…`), braucht es einen Server —
-ein Doppelklick auf die Datei reicht nicht:
+Die Pfade sind root-relativ, ein Doppelklick auf die Datei reicht deshalb nicht:
 
 ```bash
 python3 -m http.server 8000
@@ -102,5 +83,5 @@ python3 -m http.server 8000
 
 ## Deploy
 
-GitHub Pages liefert den Branch `main` aus dem Repository-Root aus. Es gibt keinen
-Actions-Workflow und keinen Build-Schritt: Push auf `main` genügt.
+GitHub Pages liefert `main` aus dem Repository-Root aus. Kein Actions-Workflow,
+kein Build-Schritt: Push auf `main` genügt.
