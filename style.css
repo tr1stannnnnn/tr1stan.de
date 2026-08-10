@@ -3,12 +3,13 @@
 /* ============================================================================
    tr1stan.de — stylesheet
    A short personal card. Strictly monochrome: no accent hue anywhere.
-   Hierarchy is carried by size, weight and rule thickness alone.
+   Hierarchy is carried by brightness, size, weight and rule thickness.
 
      1. TOKENS      every colour and measure as a custom property
      2. BASE        resets, element defaults, typography
-     3. LAYOUT      shell, sections, rhythm
-     4. COMPONENTS  header, hero, about, list, contact, legal pages, 404
+     3. LAYOUT      shell, sections, rhythm, the drawing frame
+     4. COMPONENTS  header, hero, cross drawing, the three block patterns,
+                    contact, legal pages, 404
      5. AMBIENT     background motion, grain, custom cursor
      6. UTILITIES   helpers, motion preferences, print
    ========================================================================== */
@@ -19,47 +20,62 @@
    ========================================================================== */
 
 :root {
-  /* --- the whole palette. Monochrome by construction: every value below is
-         a neutral grey between ground and ink, so nothing can drift into a hue.
+  /* --- the whole palette -------------------------------------------------
+     Five steps of one warm neutral. Measured against --c-bg:
 
-         To invert the site into a light scheme, swap these eight values for
-         the light set kept in the comment underneath. Nothing else changes. */
-  --c-bg:      #0A0A0A;   /* page ground                                      */
-  --c-bg-1:    #101010;   /* raised surface                                   */
-  --c-bg-2:    #171717;   /* pressed / hovered surface                        */
-  --c-line:    #232323;   /* hairline                                         */
-  --c-line-2:  #363636;   /* emphasised hairline                              */
-  --c-ink:     #ECEAE6;   /* primary text            ~16.9:1 on --c-bg        */
-  --c-ink-2:   #B5B2AD;   /*  secondary text          ~9.2:1                  */
-  --c-ink-3:   #8B8883;   /*  quiet labels            ~5.2:1 (AA normal)      */
+       --c-ink     18.2:1   headlines, the brightest thing on the page
+       --c-ink-2   11.6:1   body copy and list items
+       --c-ink-3    6.1:1   mono labels and drawing annotation
+       --c-line-2   1.7:1   visible rules, passmarks, construction lines
+       --c-line     1.2:1   the finest hairlines
 
-  /* Light scheme — paste over the eight values above to flip the site:
-       --c-bg: #F4F2EE;  --c-bg-1: #EDEBE6;  --c-bg-2: #E4E1DB;
-       --c-line: #D6D3CC; --c-line-2: #BAB6AE;
-       --c-ink: #101010; --c-ink-2: #4A4844; --c-ink-3: #6E6B66;             */
+     Each text step is at least 1.5x apart from the next, so the levels stay
+     distinguishable without any hue to lean on.
 
-  /* Derived, so the two overlays follow the ink automatically. */
-  --c-veil:    rgba(236, 234, 230, 0.032);  /* ambient light wash             */
-  --c-ring:    rgba(236, 234, 230, 0.55);   /* custom cursor ring             */
+     To invert into a light scheme, swap the nine values below for the light
+     set in the comment underneath. Nothing else in the file changes. */
+  --c-bg:      #0A0A0A;
+  --c-bg-1:    #121212;
+  --c-bg-2:    #1A1A1A;
+  --c-line:    #212121;
+  --c-line-2:  #3A3A3A;
+  --c-grid:    #1A1A1A;   /* the drifting background grid */
+  --c-ink:     #F7F5F1;
+  --c-ink-2:   #C9C6C0;
+  --c-ink-3:   #918E88;
+
+  /* Light scheme — paste over the nine values above:
+       --c-bg: #F5F3EF;  --c-bg-1: #EDEBE6;  --c-bg-2: #E3E0DA;
+       --c-line: #DAD7D0; --c-line-2: #B4B0A8; --c-grid: #E6E3DD;
+       --c-ink: #0C0C0C; --c-ink-2: #33322F; --c-ink-3: #6B6862;         */
+
+  /* Derived overlays, so they follow the ink automatically. */
+  --c-wash-1:  rgba(255, 255, 255, 0.060);
+  --c-wash-2:  rgba(255, 255, 255, 0.040);
+  --c-ring:    rgba(247, 245, 241, 0.55);
 
   /* --- type ------------------------------------------------------------- */
   --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --fs-display: clamp(2.9rem, 1.1rem + 7.4vw, 7rem);
-  --fs-h2:      clamp(1.15rem, 1.05rem + 0.45vw, 1.5rem);
-  --fs-h3:      0.78rem;
-  --fs-lead:    clamp(1.1rem, 1.0rem + 0.5vw, 1.4rem);
+  /* A wide gap between display and body: the size jump is a hierarchy tool
+     in its own right, not decoration. */
+  --fs-display: clamp(3rem, 1.1rem + 7.6vw, 7.5rem);
+  --fs-statement: clamp(1.35rem, 1rem + 1.8vw, 2.15rem);
+  --fs-h2:      0.72rem;
+  --fs-h3:      0.72rem;
+  --fs-lead:    clamp(1.1rem, 1.02rem + 0.42vw, 1.35rem);
+  --fs-item:    clamp(1.02rem, 0.98rem + 0.28vw, 1.14rem);
   --fs-body:    clamp(1rem, 0.97rem + 0.16vw, 1.08rem);
-  --fs-small:   0.86rem;
+  --fs-small:   0.88rem;
   --fs-label:   0.7rem;
   --fs-micro:   0.64rem;
 
-  --lh-display: 0.92;
-  --lh-tight:   1.2;
-  --lh-body:    1.68;
+  --lh-display: 0.9;
+  --lh-tight:   1.18;
+  --lh-body:    1.66;
 
-  --tr-label: 0.16em;
+  --tr-label: 0.17em;
 
   /* --- space ------------------------------------------------------------- */
   --sp-3xs: 0.25rem;
@@ -72,13 +88,20 @@
   --sp-2xl: 5.5rem;
   --sp-3xl: 8rem;
 
-  --pad-section: clamp(3.5rem, 9vw, 7rem);
+  /* Three different section rhythms, alternated deliberately so scrolling
+     has a beat instead of a metronome. */
+  --pad-a: clamp(3rem, 7vw, 5rem);
+  --pad-b: clamp(4.5rem, 11vw, 8.5rem);
+  --pad-c: clamp(3.5rem, 8vw, 6rem);
 
   /* --- measures ---------------------------------------------------------- */
-  --shell-max: 940px;      /* narrow on purpose: this is a card, not a report */
-  --shell-pad: clamp(1.35rem, 6vw, 3rem);
-  --measure:   58ch;
-  --measure-sm: 42ch;
+  --shell-max:  1180px;
+  --shell-pad:  clamp(1.35rem, 5vw, 3rem);
+  --measure:    58ch;
+  --measure-sm: 40ch;
+  --label-col:  7rem;
+
+  --grid-step: 88px;   /* module of the drifting background grid */
 
   /* --- motion ------------------------------------------------------------ */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -129,7 +152,7 @@ html {
 body {
   margin: 0;
   background: var(--c-bg);
-  color: var(--c-ink);
+  color: var(--c-ink-2);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -144,6 +167,7 @@ h1, h2, h3 {
   line-height: var(--lh-tight);
   font-weight: 600;
   letter-spacing: -0.015em;
+  color: var(--c-ink);
   text-wrap: balance;
 }
 
@@ -158,7 +182,7 @@ a {
   transition: color var(--dur-fast) var(--ease),
               text-decoration-color var(--dur-fast) var(--ease);
 }
-a:hover { text-decoration-color: var(--c-ink); }
+a:hover { color: var(--c-ink); text-decoration-color: var(--c-ink); }
 
 button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; margin: 0; }
 
@@ -172,8 +196,6 @@ code {
 
 ::selection { background: var(--c-ink); color: var(--c-bg); }
 
-/* One visible focus treatment everywhere. Without an accent hue it is drawn
-   in ink, which stands out against every surface in this palette. */
 :focus-visible {
   outline: 2px solid var(--c-ink);
   outline-offset: 3px;
@@ -186,28 +208,73 @@ code {
    ========================================================================== */
 
 .shell {
+  position: relative;   /* passmarks anchor to the text column, not the viewport */
   width: 100%;
   max-width: var(--shell-max);
   margin-inline: auto;
   padding-inline: var(--shell-pad);
 }
 
+/* Sections are full width so they can carry rules edge to edge; the measure
+   is held by the .shell inside them. */
 .section {
   position: relative;
-  padding-block: var(--pad-section);
   border-top: 1px solid var(--c-line);
 }
+.section--a { padding-block: var(--pad-a); }
+.section--b { padding-block: var(--pad-b); }
+.section--c { padding-block: var(--pad-c); }
 
-/* section caption: quiet mono label, no colour, no numbering */
+/* mono caption for a whole section */
 .sec-kicker {
   font-family: var(--font-mono);
-  font-size: var(--fs-label);
+  font-size: var(--fs-h2);
   font-weight: 500;
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--c-ink-3);
-  margin-bottom: var(--sp-md);
+  margin-bottom: var(--sp-lg);
 }
+
+/* --- 3.1 the drawing frame ------------------------------------------------
+   Two measuring rails just outside the text column, with ticks, plus one
+   vertical mono label. It gives the wide margins on large screens something
+   to be, instead of leaving them as unstructured black. Large screens only —
+   below that the margins are too narrow to hold it. */
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  display: none;
+}
+
+.frame-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  background-image:
+    linear-gradient(to right, transparent 0 4px, var(--c-line-2) 4px 5px, transparent 5px),
+    repeating-linear-gradient(to bottom, var(--c-line-2) 0 1px, transparent 1px 72px);
+  opacity: 0.75;
+}
+.frame-rail--l { left: calc(50% - var(--shell-max) / 2 - 2.75rem); }
+.frame-rail--r { right: calc(50% - var(--shell-max) / 2 - 2.75rem); }
+
+.frame-label {
+  position: absolute;
+  bottom: 3.5rem;
+  right: calc(50% - var(--shell-max) / 2 - 4.6rem);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--c-ink-3);
+}
+
+@media (min-width: 1340px) { .frame { display: block; } }
 
 
 /* ============================================================================
@@ -215,15 +282,15 @@ code {
    ========================================================================== */
 
 /* --- 4.1 registration mark -----------------------------------------------
-   Two hairlines crossing. Used as the logo and, very sparingly, as a
-   passmark at a few grid points. Drawn in CSS so it stays exactly 1px. */
+   Two bare hairlines crossing. No enclosing shape of any kind, so it cannot
+   be mistaken for a control. */
 .mark {
   position: relative;
   display: inline-block;
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   flex: none;
-  color: var(--c-ink);
+  color: var(--c-ink-3);
 }
 .mark::before,
 .mark::after {
@@ -234,7 +301,7 @@ code {
 .mark::before { left: 50%; top: 0; width: 1px; height: 100%; }
 .mark::after  { top: 50%; left: 0; height: 1px; width: 100%; }
 
-/* passmark: same shape, dimmed and pushed to the margin */
+/* passmark: the same shape, dimmer, sitting on a grid point */
 .passmark {
   position: absolute;
   width: 9px;
@@ -242,10 +309,13 @@ code {
   color: var(--c-line-2);
   pointer-events: none;
 }
-/* Anchored on the text column edge, never outside the box: a passmark that
-   overhangs its container widens the page on narrow viewports. */
-.passmark--tr { top: 10px; right: var(--shell-pad); }
-.passmark--bl { bottom: 10px; left: var(--shell-pad); }
+.passmark::before,
+.passmark::after { content: ""; position: absolute; background: currentColor; }
+.passmark::before { left: 50%; top: 0; width: 1px; height: 100%; }
+.passmark::after  { top: 50%; left: 0; height: 1px; width: 100%; }
+.passmark--tr { top: 12px; right: var(--shell-pad); }
+.passmark--tl { top: 12px; left: var(--shell-pad); }
+.passmark--bl { bottom: 12px; left: var(--shell-pad); }
 
 
 /* --- 4.2 skip link -------------------------------------------------------- */
@@ -272,9 +342,8 @@ code {
   position: sticky;
   top: 0;
   z-index: 60;
-  /* Opaque on purpose. A translucent bar would need backdrop-filter, which on
-     this near-black ground buys nothing visible, costs a composited layer on
-     mobile, and is a known source of paint artefacts on very tall viewports. */
+  /* Opaque on purpose: a translucent bar would need backdrop-filter, which on
+     this ground buys nothing and costs a composited layer. */
   background: var(--c-bg);
   border-bottom: 1px solid var(--c-line);
 }
@@ -289,16 +358,17 @@ code {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   text-decoration: none;
   margin-right: auto;
 }
 .brand-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   line-height: 1.1;
+  color: var(--c-ink-2);
 }
 .brand-copy { display: grid; gap: 0.12rem; }
 .brand-sub {
@@ -309,7 +379,7 @@ code {
   color: var(--c-ink-3);
   line-height: 1.1;
 }
-.brand:hover .mark { color: var(--c-ink-2); }
+.brand:hover .brand-name { color: var(--c-ink); }
 
 .nav { display: flex; align-items: center; gap: clamp(0.75rem, 2vw, 1.75rem); }
 .nav a {
@@ -331,7 +401,7 @@ code {
   display: none;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--c-line);
+  border: 1px solid var(--c-line-2);
   position: relative;
 }
 .nav-toggle i {
@@ -350,76 +420,152 @@ code {
 .nav-toggle[aria-expanded="true"] i:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
 
-/* --- 4.4 hero -------------------------------------------------------------
-   Name and a single sentence. Nothing else lives here. */
+/* --- 4.4 hero: two balanced columns --------------------------------------- */
 .hero {
   position: relative;
-  padding-block: clamp(4.5rem, 15vw, 10rem) clamp(3.5rem, 10vw, 6.5rem);
+  padding-block: clamp(3rem, 8vw, 5.5rem) clamp(3rem, 8vw, 5.5rem);
 }
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  align-items: center;
+}
+
 .hero-name {
   font-size: var(--fs-display);
   line-height: var(--lh-display);
-  letter-spacing: -0.042em;
-  font-weight: 620;
+  letter-spacing: -0.045em;
+  font-weight: 650;
   margin-bottom: var(--sp-md);
 }
+
 .hero-line {
   font-size: var(--fs-lead);
+  font-weight: 380;
   color: var(--c-ink-2);
   max-width: var(--measure-sm);
   text-wrap: pretty;
 }
 
 
-/* --- 4.5 about: three quiet blocks ---------------------------------------- */
-.about { display: grid; gap: var(--sp-lg); }
+/* --- 4.5 the cross drawing ------------------------------------------------
+   A construction drawing, not a logo: outline, centre axes as dash-dot,
+   two dimensions with arrowheads, construction circle and diagonals,
+   passmarks at the bounding corners. Purely decorative, aria-hidden. */
+.cross-wrap { justify-self: center; width: 100%; max-width: 460px; }
+.cross { width: 100%; height: auto; }
 
-.block { border-top: 1px solid var(--c-line); padding-top: var(--sp-sm); }
-.block:first-child { border-top: 0; padding-top: 0; }
+.cx-contour { fill: none; stroke: var(--c-ink-2); stroke-width: 1.6; stroke-linejoin: miter; }
+.cx-axis    { fill: none; stroke: var(--c-ink-3); stroke-width: 0.7; stroke-dasharray: 22 4 2 4; }
+.cx-dim     { fill: none; stroke: var(--c-ink-3); stroke-width: 0.7; }
+.cx-ext     { fill: none; stroke: var(--c-line-2); stroke-width: 0.5; }
+.cx-mark    { fill: none; stroke: var(--c-line-2); stroke-width: 0.9; }
+.cx-arrow   { fill: var(--c-ink-3); stroke: none; }
+.cx-aux     { fill: none; stroke: var(--c-line-2); stroke-width: 0.5; stroke-dasharray: 3 3; }
+.cx-t {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  fill: var(--c-ink-3);
+}
+.cx-t--sm { font-size: 7.5px; }
 
-.block-title {
+/* The auxiliary construction breathes, very slowly and very slightly. It is
+   the only thing on the drawing that moves. */
+.cx-breathe { animation: cx-breathe 19s ease-in-out infinite alternate; }
+@keyframes cx-breathe {
+  from { opacity: 0.4; }
+  to   { opacity: 0.9; }
+}
+html.is-hidden .cx-breathe { animation-play-state: paused; }
+
+
+/* --- 4.6 block pattern one: label beside a stack --------------------------
+   Used once, for Pros. One continuous rule holds the group together; there
+   are deliberately no rules between the items. */
+.split { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); }
+
+.split-label,
+.statement-label,
+.parts-label {
   font-family: var(--font-mono);
   font-size: var(--fs-h3);
   font-weight: 600;
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   color: var(--c-ink-3);
-  margin-bottom: var(--sp-xs);
 }
 
-.block p { max-width: var(--measure); color: var(--c-ink-2); }
-
-/* a plain hairline-led list, no bullets, no markers other than the rule */
-.lines { display: grid; }
-.lines li {
-  display: flex;
+.stack {
+  display: grid;
   gap: var(--sp-sm);
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--c-line);
+  border-left: 1px solid var(--c-line-2);
+  padding-left: var(--sp-md);
   max-width: var(--measure);
+}
+.stack li {
+  font-size: var(--fs-item);
+  font-weight: 420;
   color: var(--c-ink-2);
-}
-.lines li:last-child { border-bottom: 0; }
-.lines li::before {
-  content: "";
-  flex: none;
-  width: 12px;
-  height: 1px;
-  background: var(--c-line-2);
-  transform: translateY(0.85em);
+  line-height: 1.45;
 }
 
 
-/* --- 4.6 contact ---------------------------------------------------------- */
+/* --- 4.7 block pattern two: a statement in the grid -----------------------
+   Used for Cons and for what comes next. Large, quiet, offset from the
+   label column so it reads as a held sentence rather than a list. */
+.statement { display: grid; gap: var(--sp-xs); }
+
+.statement-text {
+  font-size: var(--fs-statement);
+  font-weight: 300;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--c-ink);
+  max-width: 26ch;
+  text-wrap: pretty;
+}
+
+
+/* --- 4.8 block pattern three: numbered positions --------------------------
+   Used for Basteleien. Position numbers in mono, no rules at all. */
+.parts { display: grid; gap: var(--sp-lg); }
+.parts li {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  align-items: start;
+  gap: var(--sp-2xs);
+}
+.parts-no {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--tr-label);
+  color: var(--c-ink-3);
+  padding-top: 0.34em;
+  font-variant-numeric: tabular-nums;
+}
+.parts-txt {
+  font-size: var(--fs-item);
+  font-weight: 420;
+  color: var(--c-ink-2);
+  line-height: 1.45;
+}
+
+
+/* --- 4.9 contact ---------------------------------------------------------- */
 .contact { position: relative; display: grid; gap: var(--sp-md); }
 
 .mail {
   display: inline-block;
   justify-self: start;
   font-family: var(--font-mono);
-  font-size: clamp(1.1rem, 0.72rem + 2.1vw, 2rem);
+  font-size: clamp(1.15rem, 0.72rem + 2.3vw, 2.15rem);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  color: var(--c-ink);
   text-decoration: none;
   border-bottom: 1px solid var(--c-line-2);
   padding-bottom: 0.14em;
@@ -435,7 +581,7 @@ code {
 }
 
 
-/* --- 4.7 buttons ---------------------------------------------------------- */
+/* --- 4.10 buttons --------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -443,24 +589,20 @@ code {
   min-height: 46px;
   padding: 0 1.05rem;
   border: 1px solid var(--c-line-2);
-  color: var(--c-ink);
+  color: var(--c-ink-2);
   font-family: var(--font-mono);
   font-size: var(--fs-label);
   letter-spacing: var(--tr-label);
   text-transform: uppercase;
   text-decoration: none;
   transition: border-color var(--dur-fast) var(--ease),
-              background-color var(--dur-fast) var(--ease);
+              background-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
 }
-.btn:hover { border-color: var(--c-ink); background: var(--c-bg-1); }
+.btn:hover { border-color: var(--c-ink); color: var(--c-ink); background: var(--c-bg-1); }
 
-.btn-k {
-  color: var(--c-ink-3);
-  border-right: 1px solid var(--c-line);
-  padding-right: 0.7rem;
-}
+.btn-k { color: var(--c-ink-3); border-right: 1px solid var(--c-line-2); padding-right: 0.7rem; }
 
-/* the one inverted button: ink ground, page colour text */
 .btn--solid {
   background: var(--c-ink);
   border-color: var(--c-ink);
@@ -468,10 +610,10 @@ code {
   font-weight: 600;
 }
 .btn--solid .btn-k { color: var(--c-bg); opacity: 0.62; border-color: rgba(10, 10, 10, 0.25); }
-.btn--solid:hover { background: var(--c-ink-2); border-color: var(--c-ink-2); }
+.btn--solid:hover { background: var(--c-ink-2); border-color: var(--c-ink-2); color: var(--c-bg); }
 
 
-/* --- 4.8 footer ----------------------------------------------------------- */
+/* --- 4.11 footer ---------------------------------------------------------- */
 .ftr {
   border-top: 1px solid var(--c-line);
   padding-block: var(--sp-lg);
@@ -493,17 +635,18 @@ code {
 .ftr-nav a:hover { color: var(--c-ink); }
 
 
-/* --- 4.9 legal pages ------------------------------------------------------ */
+/* --- 4.12 legal pages ----------------------------------------------------- */
 .page-head {
   padding-block: clamp(2.5rem, 7vw, 4rem) var(--sp-lg);
   border-bottom: 1px solid var(--c-line);
 }
-.page-title { font-size: clamp(1.9rem, 1.3rem + 2.4vw, 3rem); letter-spacing: -0.03em; }
+.page-title { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.2rem); letter-spacing: -0.032em; }
 .page-lead {
   margin-top: var(--sp-sm);
   max-width: var(--measure);
   color: var(--c-ink-2);
   font-size: var(--fs-lead);
+  font-weight: 380;
 }
 .page-lead strong { color: var(--c-ink); font-weight: 600; }
 
@@ -523,7 +666,7 @@ code {
   text-transform: uppercase;
   color: var(--c-ink-3);
   padding-bottom: var(--sp-2xs);
-  border-bottom: 1px solid var(--c-line);
+  border-bottom: 1px solid var(--c-line-2);
   margin-bottom: var(--sp-2xs);
 }
 .toc ol { counter-reset: toc; }
@@ -551,8 +694,7 @@ code {
   display: flex;
   align-items: baseline;
   gap: 0.7rem;
-  font-size: 1.02rem;
-  color: var(--c-ink);
+  font-size: 1.05rem;
   margin-bottom: var(--sp-2xs);
 }
 .legal-body h2 > span {
@@ -614,7 +756,7 @@ code {
 }
 
 
-/* --- 4.10 404 ------------------------------------------------------------- */
+/* --- 4.13 404 ------------------------------------------------------------- */
 .nf {
   min-height: 60vh;
   display: grid;
@@ -636,14 +778,10 @@ code {
 
 /* ============================================================================
    5. AMBIENT — background motion, grain, custom cursor
-   Everything in this block sits behind the content and never takes pointer
-   events. All of it degrades to nothing without JavaScript or with reduced
-   motion requested.
+   Behind everything, never interactive, and gone entirely under reduced
+   motion.
    ========================================================================== */
 
-/* --- 5.1 slow monochrome drift -------------------------------------------
-   Two very large, very faint light washes moving past each other. Pure CSS,
-   composited transforms only, no repaint per frame. */
 .ambient {
   position: fixed;
   inset: 0;
@@ -651,57 +789,73 @@ code {
   overflow: hidden;
   pointer-events: none;
 }
-.ambient::before,
-.ambient::after {
+
+/* 5.1 the drifting grid: a whole module per cycle, so the loop is seamless.
+   About two pixels a second — noticeable within a few seconds against the
+   static frame rails, but far too slow to pull at the eye while reading. */
+.ambient::before {
   content: "";
   position: absolute;
-  width: 78vmax;
-  height: 78vmax;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, var(--c-veil), transparent 64%);
+  inset: calc(var(--grid-step) * -2);
+  background-image:
+    repeating-linear-gradient(to right, var(--c-grid) 0 1px, transparent 1px var(--grid-step)),
+    repeating-linear-gradient(to bottom, var(--c-grid) 0 1px, transparent 1px var(--grid-step));
+  animation: grid-drift 46s linear infinite;
   will-change: transform;
 }
-.ambient::before {
-  top: -26vmax;
-  left: -18vmax;
-  animation: drift-a 104s var(--ease) infinite alternate;
+
+@keyframes grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(var(--grid-step), var(--grid-step), 0); }
 }
-.ambient::after {
-  bottom: -30vmax;
-  right: -22vmax;
-  animation: drift-b 137s var(--ease) infinite alternate;
+
+/* 5.2 two slow light washes */
+.ambient i {
+  position: absolute;
+  display: block;
+  width: 84vmax;
+  height: 84vmax;
+  border-radius: 50%;
+  will-change: transform;
+}
+.ambient i:nth-child(1) {
+  top: -30vmax;
+  left: -22vmax;
+  background: radial-gradient(circle at center, var(--c-wash-1), transparent 64%);
+  animation: drift-a 88s var(--ease) infinite alternate;
+}
+.ambient i:nth-child(2) {
+  bottom: -34vmax;
+  right: -26vmax;
+  background: radial-gradient(circle at center, var(--c-wash-2), transparent 62%);
+  animation: drift-b 119s var(--ease) infinite alternate;
 }
 
 @keyframes drift-a {
   from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(16vw, 11vh, 0) scale(1.22); }
+  to   { transform: translate3d(18vw, 12vh, 0) scale(1.2); }
 }
 @keyframes drift-b {
-  from { transform: translate3d(0, 0, 0) scale(1.1); }
-  to   { transform: translate3d(-13vw, -9vh, 0) scale(1); }
+  from { transform: translate3d(0, 0, 0) scale(1.12); }
+  to   { transform: translate3d(-15vw, -10vh, 0) scale(1); }
 }
 
-/* paused while the tab is in the background */
 html.is-hidden .ambient::before,
-html.is-hidden .ambient::after { animation-play-state: paused; }
+html.is-hidden .ambient i { animation-play-state: paused; }
 
-/* --- 5.2 grain -----------------------------------------------------------
-   Generated by an inline SVG turbulence filter in the markup. No image file
-   is loaded and no request leaves the page. */
+/* 5.3 grain, from an inline SVG turbulence filter in the markup */
 .grain {
   position: fixed;
   inset: 0;
   z-index: -2;
   width: 100%;
   height: 100%;
-  opacity: 0.045;
+  opacity: 0.05;
   pointer-events: none;
 }
 
-/* --- 5.3 custom cursor ---------------------------------------------------
-   Only ever enabled by script, and only on a device that really has a fine
-   hovering pointer. If the script does not run, .has-cursor is never set and
-   the native cursor stays exactly as it was. */
+/* 5.4 custom cursor — only ever switched on by script, and only on a device
+   with a real hovering pointer. Without the class the native cursor stays. */
 .cursor-dot,
 .cursor-ring {
   position: fixed;
@@ -715,7 +869,6 @@ html.is-hidden .ambient::after { animation-play-state: paused; }
 html.has-cursor .cursor-dot,
 html.has-cursor .cursor-ring { opacity: 1; }
 
-/* the dot is itself a small crosshair, echoing the registration mark */
 .cursor-dot {
   width: 11px;
   height: 11px;
@@ -739,7 +892,6 @@ html.has-cursor .cursor-ring { opacity: 1; }
               margin var(--dur-mid) var(--ease),
               border-color var(--dur-mid) var(--ease);
 }
-/* state change over anything interactive */
 html.cursor-hot .cursor-ring {
   width: 46px;
   height: 46px;
@@ -749,10 +901,9 @@ html.cursor-hot .cursor-ring {
 
 @media (hover: hover) and (pointer: fine) {
   html.has-cursor,
-  html.has-cursor body { cursor: none; }
+  html.has-cursor body,
   html.has-cursor a,
-  html.has-cursor button,
-  html.has-cursor .mark { cursor: none; }
+  html.has-cursor button { cursor: none; }
 }
 
 
@@ -771,14 +922,6 @@ html.cursor-hot .cursor-ring {
   border: 0;
 }
 
-.mono {
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-}
-
 html:not(.has-js) .js-only { display: none !important; }
 
 [data-reveal] {
@@ -791,7 +934,7 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
 
 
 /* ============================================================================
-   RESPONSIVE — verified at 360 / 768 / 1280 / 1920
+   RESPONSIVE — verified at 360 / 768 / 1280 / 1440 / 1920
    ========================================================================== */
 
 @media (max-width: 760px) {
@@ -815,18 +958,41 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
   .nav a { padding: 0.9rem 0; border-bottom: 1px solid var(--c-line); font-size: var(--fs-small); }
   .nav-toggle { display: block; }
 
-  /* the drift is the first thing to go on small screens */
-  .ambient::before,
-  .ambient::after { animation: none; }
+  /* Reduced, not removed: the grid keeps drifting, the washes stop.
+     Selector matches the specificity of the :nth-child rules that set them. */
+  .ambient i:nth-child(1),
+  .ambient i:nth-child(2) { animation: none; }
+}
+
+/* Below the two-column threshold the drawing moves under the text and shrinks.
+   The threshold sits at 720px rather than 900: between the two the single
+   column leaves a lopsided gap beside the drawing, which reads as unfinished
+   rather than as composed space. */
+@media (max-width: 719px) {
+  .cross-wrap { max-width: 300px; justify-self: start; }
+}
+
+@media (min-width: 720px) {
+  .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
+  .hero { padding-block: clamp(3.5rem, 7vw, 6rem); }
 }
 
 @media (min-width: 640px) {
-  .about { gap: var(--sp-xl); }
+  .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-xl); }
 }
 
 @media (min-width: 900px) {
+  .split { grid-template-columns: var(--label-col) minmax(0, 1fr); gap: var(--sp-xl); }
+  /* the statements start where the stack starts, one column in */
+  .statement { margin-left: calc(var(--label-col) + var(--sp-xl)); }
+  .parts { column-gap: var(--sp-2xl); }
+
   .legal { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--sp-2xl); }
   .toc { position: sticky; top: calc(var(--header-h) + 1.5rem); }
+}
+
+@media (min-width: 1280px) {
+  .parts li { grid-template-columns: 3rem 1fr; }
 }
 
 
@@ -847,11 +1013,12 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
   }
 
   .ambient::before,
-  .ambient::after { animation: none !important; }
+  .ambient i,
+  .cx-breathe { animation: none !important; }
+  .cx-breathe { opacity: 0.7; }
 
   [data-reveal] { opacity: 1 !important; transform: none !important; }
 
-  /* native pointer, no custom cursor at all */
   .cursor-dot,
   .cursor-ring { display: none !important; }
   html.has-cursor,
@@ -866,9 +1033,9 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
    ========================================================================== */
 
 @media print {
-  :root { --c-bg: #fff; --c-ink: #000; --c-ink-2: #222; --c-ink-3: #555; --c-line: #bbb; }
+  :root { --c-bg: #fff; --c-ink: #000; --c-ink-2: #222; --c-ink-3: #555; --c-line: #bbb; --c-line-2: #999; }
   body { background: #fff; color: #000; }
-  .hdr, .ambient, .grain, .cursor-dot, .cursor-ring, .skip, .nav-toggle { display: none !important; }
+  .hdr, .ambient, .grain, .frame, .cursor-dot, .cursor-ring, .skip, .nav-toggle { display: none !important; }
   .section, .hero { padding-block: 1.2cm; }
   a { text-decoration: underline; }
 }
