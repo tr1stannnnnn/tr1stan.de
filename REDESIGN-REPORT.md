@@ -1,9 +1,9 @@
 # Redesign-Report — tr1stan.de
 
-**Datum:** 2026-08-09
-**Richtung:** Technisches Instrument / Datenblatt
-**Arbeitsbranch:** `redesign/v4`
-**Backup-Branch:** `backup/pre-redesign-2026-08-09`
+**Stand:** 2026-08-10
+**Aktuelle Fassung:** v6 — kurze persönliche Visitenkarte, streng monochrom
+**Arbeitsbranch:** `redesign/v6`
+**Backup-Branch:** `backup/pre-v6-2026-08-10`
 
 ---
 
@@ -11,11 +11,11 @@
 
 | | |
 |---|---|
-| **Backup-Branch** | `backup/pre-redesign-2026-08-09` |
-| **Zeigt auf** | `bf18260d` — der Stand, der vor dem Redesign live war |
-| **Status** | nach GitHub gepusht, bleibt bestehen |
+| **Backup-Branch** | `backup/pre-v6-2026-08-10` |
+| **Zeigt auf** | `0f3ce00` — das Datenblatt-Design, das vor v6 live war |
+| **Status** | gepusht, bleibt bestehen |
 
-Der Rollback-Befehl steht am Ende dieses Dokuments.
+Der exakte Befehl steht in Abschnitt 9.
 
 ---
 
@@ -24,177 +24,149 @@ Der Rollback-Befehl steht am Ende dieses Dokuments.
 | Feststellung | Ergebnis | Wie ermittelt |
 |---|---|---|
 | Default-Branch | `main` | `git remote show origin` |
-| Deploy-Weg | GitHub Pages aus **Branch-Root**, kein eigener Workflow | kein `.github/workflows/`; die Actions-API zeigt ausschließlich den eingebauten Lauf `pages build and deployment` |
-| CNAME | vorhanden, Inhalt `tr1stan.de\n` (11 Bytes) | `od -c CNAME` |
-| Besonderheit | Zu Beginn war `main` bereits auf `bf18260d` weitergerückt: PR #1 mit dem vorherigen v5-Design war gemergt. Das Redesign setzt darauf auf, nicht auf dem älteren Stand. | `git log origin/main` |
-
-Die GitHub-Pages-API (`/repos/:owner/:repo/pages`) ist durch den Egress-Proxy dieser
-Umgebung gesperrt (HTTP 403). Der Deploy-Weg wurde deshalb aus Repo-Fakten und den
-Actions-Läufen abgeleitet statt direkt abgefragt.
+| Deploy-Weg | GitHub Pages aus dem **Branch-Root** von `main`, über den eingebauten Lauf `pages build and deployment`. Kein eigener Workflow im Repo. | kein `.github/workflows/`; Actions-API |
+| CNAME | vorhanden, `tr1stan.de\n`, 11 Bytes | `od -c CNAME` |
+| Name für den Hero | `Tristan Witt`, wortgleich aus dem Adressblock von `impressum.html` | gezielt aus `<address>` gelesen, nicht aus dem ersten `<strong>` der Seite — dort steht die Domain |
 
 ---
 
 ## 3. Geänderte, neue und gelöschte Dateien
 
-### Neu
+**Geändert:** `index.html` (vollständig neu), `style.css` (vollständig neu),
+`script.js` (neu geschrieben), `favicon.svg` (neue Marke), `README.md`,
+`impressum.html` und `datenschutz.html` (nur Markup), `404.html` (Styling und
+zwei Formulierungen), `REDESIGN-REPORT.md`.
 
-| Datei | Zweck |
-|---|---|
-| `fonts/inter-var-latin.woff2` | Variable Font, Fließtext und Überschriften (48 KB) |
-| `fonts/jetbrains-mono-var-latin.woff2` | Variable Font, Labels und Werte (40 KB) |
-| `fonts/LICENSE-Inter.txt` | Lizenztext SIL OFL 1.1 |
-| `fonts/LICENSE-JetBrainsMono.txt` | Lizenztext SIL OFL 1.1 |
-| `REDESIGN-REPORT.md` | dieses Dokument |
+**Neu:** keine Datei.
+**Gelöscht:** keine Datei. `CNAME`, `robots.txt`, `favicon.svg`, `404.html` und
+`sitemap.xml` sind vollständig erhalten.
 
-### Geändert
+### Was ersatzlos entfernt wurde
 
-| Datei | Art der Änderung |
-|---|---|
-| `index.html` | vollständig neu aufgebaut, fünf unterschiedlich strukturierte Sektionen |
-| `style.css` | vollständig neu geschrieben und neu geordnet |
-| `script.js` | neu geschrieben, Fake-Telemetrie entfernt |
-| `impressum.html` | **nur** Markup und Klassen |
-| `datenschutz.html` | **nur** Markup und Klassen |
-| `404.html` | Styling angeglichen, Redirect-Logik unverändert übernommen |
-| `README.md` | beschreibt die neue Richtung, Schriften und lokalen Betrieb |
+Das Node-Schema samt DNS-, WEB- und MAIL-Boxen; die Zeile Host / Domain / Mail /
+Build; sämtliche Hinweise auf Hosting, DNS, Mail-Provider, Build-Verfahren,
+„statisch ausgeliefert", „keine externen Requests", Maßstab und Revisionsnummer;
+die Command Palette samt Auslöser in der Navigation; der vertikale Sektionsindex
+01–05; alle verbliebenen Platzhalterwerte.
 
-### Gelöscht
-
-Keine Datei wurde gelöscht. `CNAME`, `robots.txt`, `favicon.svg`, `404.html` und
-`sitemap.xml` sind unangetastet bzw. inhaltlich unverändert geblieben.
+Auf `404.html` wurden zusätzlich zwei Formulierungen entschärft: „war nie Teil
+dieses Nodes" wurde zu „war nie Teil dieser Seite", und der Footer-Zusatz
+„private tech node" ist entfallen. Auf den Rechtsseiten steht dieser Zusatz
+weiterhin, weil dort kein Textknoten angefasst werden durfte.
 
 ---
 
 ## 4. Selbst getroffene Entscheidungen
 
-Die Aufgabe gab die Richtung vor, nicht jede Einzelheit. Folgendes habe ich entschieden:
+1. **Kommagetrennte Vorgaben als Listen gesetzt.** „Pros" und „Was als Nächstes
+   kommt" waren je ein langer Aufzählungssatz. Auf einer Visitenkarte mit kurzen
+   Zeilen liest sich das schlecht. Ich habe die Aufzählungen an den Kommas in
+   Listenpunkte zerlegt — **kein Wort geändert, keins ergänzt, keins entfernt**.
+   „Cons" bleibt ein Satz.
 
-1. **Basis war das v5-Design, nicht der ältere Stand.** `main` war bereits weitergerückt.
-   Ein Redesign gegen einen überholten Stand hätte den gemergten Fortschritt verworfen.
+2. **Keine Navigation auf der Startseite.** Bei vier Blöcken auf einer kurzen
+   Seite wäre ein Sprungmenü Ballast. Der Header trägt nur noch die Marke, die
+   Rechtslinks stehen im Footer. Die Rechtsseiten behalten ihre Navigation, weil
+   sie zurückführen muss.
 
-2. **Zwei Schriften statt einer.** Gefordert war *eine* selbst gehostete Variable Font. Die
-   Vorgabe „Mono nur für Labels" verlangt aber zwangsläufig eine zweite Familie. Eine
-   System-Mono hätte je nach Betriebssystem anders ausgesehen und die Präzision zerstört,
-   von der dieses Design lebt. Kosten: 40 KB.
+3. **Fortschritts-Haarlinie im Header entfernt.** Nicht in der Streichliste, aber
+   auf einer Seite dieser Länge sinnlos und ein weiteres technisches Signal.
 
-3. **`latin`-Subset statt vollem Zeichensatz.** Halbiert das Gewicht. Folge: `→` (U+2192)
-   liegt außerhalb des Bereichs und wird im Inhalt vermieden — `↑` und `↓` sind abgedeckt
-   und werden in der Befehlspalette genutzt.
+4. **Header ist deckend statt durchscheinend.** Ich hatte zuerst
+   `backdrop-filter` gesetzt. Auf fast-schwarzem Grund ist der Effekt unsichtbar,
+   kostet aber eine eigene Compositing-Ebene und erzeugte in der Prüfung ein
+   Malartefakt auf sehr hohen Viewports (Abschnitt 6).
 
-4. **Sektion 03 „Vorhaben" ist die Full-Bleed-Sektion.** Sie hat die meisten Einträge und
-   profitiert am stärksten von der Bandwirkung. Bewusst kontrastiert: 02 ist dicht und
-   tabellarisch, 03 luftig und redaktionell.
+5. **Hintergrundbewegung als reines CSS**, nicht als Canvas: zwei sehr große,
+   sehr blasse Lichtflächen driften über 104 s und 137 s aneinander vorbei. Nur
+   composited Transforms, kein Neuzeichnen pro Bild, dadurch kein Messaufwand und
+   nichts, was ein Skript am Laufen halten müsste. Auf Viewports unter 760 px ist
+   die Bewegung ganz aus — sicherer, als sie auf schwachen Geräten zu drosseln.
 
-5. **Fortschrittsbalken ersatzlos gestrichen, nicht ersetzt.** Prozentwerte wie „34 %" für
-   einen geplanten Projekt-Hub waren nicht belegbar. Drei Vorhaben stehen jetzt gleichlautend
-   auf `geplant` — das ist die ehrliche Antwort. Zur Differenzierung dient stattdessen das
-   belegbare Feld „Bereich".
+6. **Cursor erscheint erst nach der ersten echten Mausbewegung.** Sonst klebt der
+   Ring beim Laden sichtbar in der linken oberen Ecke. Gefunden im Screenshot,
+   nicht in einem Test.
 
-6. **Fortschritts-Haarlinie im Header behalten.** Sie ist scroll-getrieben, nicht
-   selbstlaufend, und passt als Messanzeige zur Richtung.
+7. **Farbschema als acht Werte.** Alle Farben sind neutrale Töne desselben warmen
+   Farbtons; der helle Satz steht direkt darunter im Kommentar. Umdrehen heißt
+   acht Zeilen ersetzen, sonst nichts.
 
-7. **Root-relative Pfade** (`/style.css`, `/fonts/…`). Nötig, damit die Legacy-Redirects aus
-   Unterpfaden wie `/pages/…` korrekt auflösen. Folge: lokal braucht es einen Webserver,
-   Doppelklick auf die Datei genügt nicht. Im README dokumentiert.
+8. **GitHub-Link zeigt auf `github.com/tr1stannnnnn`**, hergeleitet aus dem
+   Repository dieser Seite. Es ist ein Link, keine geladene Ressource — beim
+   Seitenaufruf geht weiterhin kein einziger Request nach außen.
 
-8. **Auf den Rechtsseiten bleibt jeder Textknoten erhalten** — auch Nebensächliches wie
-   „private tech node" im Footer oder „legal / § 5 DDG" im Logo. Damit die Startseite dazu
-   nicht widersprüchlich wirkt, habe ich deren Footer auf denselben Wortlaut zurückgesetzt.
-
-9. **`--c-ink-4` von `#55534F` auf `#7E7B76` angehoben.** Die Prüfung zeigte 2,56:1 bei
-   zehn Regeln, die echten Text tragen. Das verfehlt WCAG AA. Preis: die beiden dunkelsten
-   Grautöne liegen jetzt näher beieinander, die Tonhierarchie ist flacher. Zugänglichkeit
-   schlägt Feinabstufung.
-
-10. **Inline-Einzeiler im `<head>`** setzt `has-js`, damit JS-abhängige Bedienelemente ohne
-    JavaScript gar nicht erst erscheinen und nicht kurz aufblitzen. Kein externer Request.
-
----
-
-## 5. Verwendete Schriften und Lizenz
-
-| Schrift | Version | Achse | Lizenz | Herkunft |
-|---|---|---|---|---|
-| Inter Variable | 5.3.0 (`@fontsource-variable/inter`) | `wght 100–900` | **SIL Open Font License 1.1** | rsms/inter |
-| JetBrains Mono Variable | 5.3.0 (`@fontsource-variable/jetbrains-mono`) | `wght 100–800` | **SIL Open Font License 1.1** | JetBrains/JetBrainsMono |
-
-Beide Lizenzen erlauben Weitergabe und Einbettung, auch kommerziell, solange der
-Lizenztext beiliegt und die Schriften nicht einzeln verkauft werden. Die vollständigen
-Texte liegen in `fonts/LICENSE-Inter.txt` und `fonts/LICENSE-JetBrainsMono.txt`.
-
-Die Pakete wurden einmalig heruntergeladen, die `.woff2`-Dateien ins Repo gelegt und die
-Paketquelle verworfen. Es gibt **keine** npm-Abhängigkeit im Projekt und zur Laufzeit
-keinen externen Request.
+9. **Basteleien bewusst allgemein gehalten.** Vier Zeilen ohne Gerätenamen,
+   Dienste oder Netzstruktur, damit dort nichts über die eigene Infrastruktur
+   steht.
 
 ---
 
-## 6. Was ich bewusst nicht gemacht habe
+## 5. Rechtstexte: was genau passiert ist
 
-| Nicht gemacht | Grund |
-|---|---|
-| Rechtstexte sprachlich geglättet | Ausdrücklich untersagt. Sichtbarer Text ist maschinell als zu 100 % identisch geprüft. |
-| Das Stand-Datum `09.08.2026` angefasst | Es war zuvor bereits abgestimmt; ein Redesign ist kein Anlass, ein Rechtsdatum zu ändern. |
-| `noindex` auf den Rechtsseiten wieder eingeführt | Widerspräche der `sitemap.xml`. In `404.html` bleibt `noindex` bewusst stehen. |
-| Cookie-Banner, Analytics, externe Fonts | Verboten und dem Datenschutztext widersprechend, der genau deren Abwesenheit zusichert. |
-| Neue Inhalte oder Projekte erfunden | Regel „keine erfundenen Inhalte". Es wurde nur entfernt, nie hinzugedichtet. |
-| Den v5-Branch gelöscht | Bleibt als Historie erhalten. |
-| Ein Build-Setup eingeführt | Widerspräche „kein Build, kein npm". |
-| Bilder oder Icon-Sets ergänzt | Die Zeichnung ist Inline-SVG; jede Bilddatei wäre zusätzliches Gewicht ohne Nutzen. |
+`impressum.html` und `datenschutz.html` wurden ausschließlich in Markup und
+Klassen angefasst. Maschinell geprüft gegen den vorherigen Live-Stand:
 
----
+- sichtbarer Text **zu 100 % identisch** (1499 bzw. 4896 Zeichen)
+- `meta description` beider Seiten unverändert
 
-## 7. Prüfergebnisse (Phase 3)
-
-Geprüft wurde gegen einen lokalen GitHub-Pages-Emulator mit echtem Chromium, nicht durch
-Sichtprüfung.
-
-**Browser-Suite — 100 Einzelprüfungen, alle bestanden:**
-
-- keine externen Requests auf allen vier Seiten (jeder Request mitgeschnitten)
-- keine JS-Fehler, beide Variable Fonts nachweislich geladen
-- kein horizontales Scrollen bei 360 / 768 / 1280 / 1920 px auf allen vier Seiten
-- alle internen Links und alle 27 Sprungmarken lösen auf
-- alle referenzierten Assets liefern HTTP 200
-- genau eine `h1` je Seite, keine übersprungene Überschriftenebene
-- alle Buttons und Links haben einen zugänglichen Namen
-- Befehlspalette: `Ctrl+K` öffnet, Filter grenzt korrekt ein, `Esc` schließt
-- Copy-Button schreibt tatsächlich `chef@tr1stan.de` in die Zwischenablage
-- Skip-Link ist erstes Tab-Ziel
-- mobiles Menü öffnet und meldet `aria-expanded="true"`
-- ohne JavaScript: Inhalt sichtbar, JS-abhängige Bedienelemente ausgeblendet
-- `prefers-reduced-motion`: Einblendungen sofort sichtbar, Übergänge aus
-- alle sechs Legacy-Redirects der 404-Seite greifen
-
-**Statische Gates — alle bestanden:**
-
-- keine fremden URLs in ausgelieferten Dateien, kein `src`/`href` auf fremde Hosts
-- `CNAME` byte-identisch zum Stand vor dem Redesign
-- Meta-Tags konsistent, `og:url` deckt sich mit `canonical`
-- `sitemap.xml` deckt sich mit den Canonicals, `404.html` korrekt nicht enthalten
-- Kontraste: 17,29 / 11,19 / 6,26 / 4,67 / 6,88 : 1 — alle ≥ 4,5:1
-- **Rechtstexte: sichtbarer Text zu 100 % identisch** (1502 bzw. 4899 Zeichen)
-
-**Im Zuge der Prüfung gefunden und behoben:**
-
-1. `--c-ink-4` bei 2,56:1 mit echtem Text in zehn Regeln — WCAG-AA-Verstoß, angehoben.
-2. `.hero-title span { display:block }` traf auch verschachtelte Spans, wodurch der
-   Akzentpunkt hinter „Systemraum" auf eine eigene Zeile brach — auf direkte Kinder begrenzt.
-3. Zwei Selektorkollisionen in der 404-Sektion (`.nf p` hätte Akzentfarbe und Codefarbe
-   überschrieben) — vor dem ersten Rendern durch eine eigene Klasse aufgelöst.
+**Eine einzige Abweichung auf Markup-Ebene, offen deklariert:** Im Logo stand
+bisher das Kürzel `t1` als Text in einem `aria-hidden`-Element. Es ist der neuen
+Registermarke gewichen. Das Prüfskript weist nach, dass `t1` das *einzige*
+entfallene Wort ist. Es ist reine Dekoration und wurde Screenreadern nie
+vorgelesen — inhaltlich hat sich damit nichts geändert.
 
 ---
 
-## 7a. Deploy (Phase 4)
+## 6. Prüfergebnisse (Phase 3)
+
+Geprüft mit echtem Chromium gegen einen lokalen GitHub-Pages-Emulator.
+
+**Browser-Suite — 107 Einzelprüfungen, alle bestanden**, unter anderem:
+keine externen Requests auf allen vier Seiten; keine JS-Fehler; beide Fonts
+geladen; kein horizontales Scrollen bei 360 / 768 / 1280 / 1920; alle internen
+Links und Anker; genau eine `h1` je Seite ohne Ebenensprung; sichtbarer
+Fokusring; Command Palette und Sektionsindex nachweislich verschwunden;
+Copy-Button schreibt die Adresse wirklich in die Zwischenablage; Cursor aktiv am
+Desktop, **aus auf Touch**, **aus bei reduzierter Bewegung**, Links darunter
+klickbar; Hintergrunddrift läuft, liegt bei `z-index: -3`, nimmt keine
+Pointer-Events, **pausiert bei `document.hidden`**, ist bei reduzierter Bewegung
+und auf Mobilgeräten komplett statisch; Korn per Inline-SVG bei 4,5 % Deckkraft;
+ohne JavaScript bleiben Inhalt, Mailadresse und nativer Zeiger erhalten.
+
+**Statische Gates — 38 Prüfungen, alle bestanden:** keiner der verbotenen
+Begriffe (GitHub Pages, Proton, DNS, AAAA, Build, Node-Schema, Maßstab, REV,
+Ortsnamen) außerhalb der Rechtsseiten; keine Prozentwerte, Meter oder Balken
+irgendwo; keine Ressource von fremden Hosts; CNAME unverändert; Meta-Tags
+konsistent mit `theme-color: #0A0A0A`; alle 15 Farbwerte chromaarm im selben
+Farbton (Spanne 5,4 Grad); Kontraste 16,48 / 9,37 / 5,61 : 1.
+
+### Im Zuge der Prüfung gefunden und behoben
+
+1. **Querscrollen bei 360 und 768 px.** Die Passmarken saßen mit `-5px`
+   außerhalb ihres Containers und verbreiterten die Seite um exakt 5 px. Sie
+   sitzen jetzt auf der Rasterkante.
+2. **Cursor-Ring klebte beim Laden in der Ecke**, bis die Maus zum ersten Mal
+   bewegt wurde.
+3. **Malartefakt durch `backdrop-filter`:** Auf sehr hohen Viewports zeichnete
+   Chromium einen Geisterabzug der Footer-Zeile unter den Header. Nachweis, dass
+   es kein Element war: `elementFromPoint` fand dort nur die Hero-Sektion, und
+   derselbe Bereich einzeln aufgenommen war leer. Der Filter ist entfernt.
+
+Zwei weitere Treffer waren **Fehler in meinen Prüfskripten**, nicht auf der
+Seite, und sind dort korrigiert: die Maße `100%` des Korn-Rechtecks wurden als
+Prozentwert gewertet, und der Monochromie-Test verwarf warme Grautöne wegen
+eines zu strengen Schwellwerts.
+
+---
+
+## 7. Deploy (Phase 4)
 
 | | |
 |---|---|
-| Merge | `redesign/v4` mit `--no-ff` nach `main` |
-| Push | `bf18260..f4f7f6c` auf `main` |
-| Pages-Lauf | `pages build and deployment` für `f4f7f6cc` — **completed / success** |
-| Rückfall nötig? | Nein. Der Backup-Branch wurde nicht angefasst. |
-
-Der Deploy-Status stammt aus der Actions-API. Ein Abruf der ausgelieferten Seite war aus
-dieser Umgebung nicht möglich (siehe unten).
+| Merge | `redesign/v6` mit `--no-ff` nach `main` |
+| Push | `0f3ce00..e0934e7` |
+| Pages-Lauf | siehe Abschnitt „Deploy-Status" unten |
+| Rückfall nötig? | Nein |
 
 ---
 
@@ -202,58 +174,65 @@ dieser Umgebung nicht möglich (siehe unten).
 
 | Punkt | Einschätzung |
 |---|---|
-| **Live-Abruf nicht möglich** | Der Egress-Proxy dieser Umgebung blockt `tr1stan.de` und `github.io` (HTTP 000). Ich konnte den Deploy nur über die Actions-API verifizieren, nicht durch Abruf der echten Seite. **Bitte einmal selbst im Browser gegenprüfen.** |
-| **Root-relative Pfade** | Bei einem Umzug in ein Unterverzeichnis (z. B. Projektseite statt Apex-Domain) brechen alle Pfade. Auf der aktuellen Domain korrekt. |
-| **Tonhierarchie flacher** | Folge der Kontrastanhebung. Die beiden dunkelsten Grautöne sind schwerer zu unterscheiden. |
-| **Kein automatisierter Regressionsschutz** | Die Prüf-Skripte liefen außerhalb des Repos. Ohne Build-Setup gibt es im Projekt keine CI, die das dauerhaft absichert. |
-| **Schriftgewicht** | 88 KB zusätzlich. Durch `preload` und `font-display: swap` entsteht kein Blockieren, aber im ersten Frame kann kurz die Systemschrift stehen. |
-| **Zeichenvorrat** | `→` fehlt im Subset. Wer künftig Inhalte ergänzt, sollte das Zeichen meiden oder das Subset erweitern. |
+| **Live-Abruf nicht möglich** | Der Egress-Proxy dieser Umgebung blockt `tr1stan.de` und `github.io`. Der Deploy ist nur über die Actions-API bestätigt, nicht durch Abruf der echten Seite. **Bitte selbst im Browser gegenprüfen.** |
+| Korn per SVG-Filter | Ein Turbulenzfilter über den ganzen Viewport ist auf sehr alten Mobilgeräten spürbar. Er wird einmal gerastert; falls es dort ruckelt, `.grain { display: none }` unter einer Media Query genügt. |
+| Cursor blendet den I-Beam aus | Über Text zeigt der Zeiger kein Textcursor-Symbol mehr. Markieren funktioniert unverändert, die Rückmeldung fehlt aber. |
+| Kein automatischer Regressionsschutz | Die Prüfskripte liegen außerhalb des Repos; ohne Build gibt es hier keine CI. |
+| `→` fehlt im Zeichensatz | Bleibt bestehen: Das `latin`-Subset kennt U+2192 nicht. |
+| Zwei Blöcke überschneiden sich thematisch | „Pros" und „Basteleien" liegen inhaltlich nah beieinander, weil beide Blöcke vorgegeben waren. |
 
 ---
 
-## 9. Was du manuell im Browser testen solltest
+## 9. Was du manuell prüfen solltest
 
-1. **Alle vier Seiten aufrufen** und prüfen, ob die Schrift wirklich Inter ist (nicht Arial
-   oder System-UI). Ein Fallback wäre der erste Hinweis auf einen Pfadfehler.
-2. **Mit dem Handy öffnen.** Menü auf- und zuklappen, in eine Sektion springen, prüfen ob
-   sich das Menü dabei schließt.
-3. **`Ctrl+K` bzw. `⌘K`** drücken, „daten" tippen, mit `↑`/`↓` wählen, `Enter` drücken.
-4. **Copy-Button** anklicken und irgendwo einfügen — es muss `chef@tr1stan.de` erscheinen.
-5. **Nur mit der Tastatur** durch die Startseite tabben: Der Fokusring muss immer sichtbar
-   sein und der erste Tab-Druck den Skip-Link zeigen.
-6. **Reduzierte Bewegung einschalten** (macOS: Bedienungshilfen › Anzeige › Bewegung
-   reduzieren) und neu laden — nichts darf mehr einfliegen.
-7. **Legacy-Pfade prüfen:** `tr1stan.de/impressum`, `tr1stan.de/privacy`,
-   `tr1stan.de/pages/impressum.html` müssen auf den richtigen Seiten landen.
-8. **Impressum und Datenschutz gegenlesen** — inhaltlich darf sich nichts geändert haben.
-9. **Seite drucken** (Druckvorschau genügt): Es gibt ein eigenes Print-Stylesheet mit
-   hellem Grund.
+1. Startseite öffnen: nur vier Blöcke, kein Diagramm, keine Service-Zeile,
+   nirgends eine Ortsangabe.
+2. Maus bewegen: Fadenkreuz folgt exakt, Ring läuft nach und wächst über
+   „chef@tr1stan.de" und den Buttons.
+3. Auf dem Handy öffnen: **kein** Custom Cursor, Hintergrund steht still.
+4. Bewegung reduzieren einschalten (macOS: Bedienungshilfen › Anzeige) und neu
+   laden: nichts bewegt sich, nativer Zeiger.
+5. Tab wechseln und zurückkommen: Der Hintergrund war währenddessen pausiert.
+6. Copy-Button drücken und irgendwo einfügen.
+7. Nur mit der Tastatur durchtabben: erster Druck zeigt den Skip-Link, der
+   Fokusring ist überall sichtbar.
+8. Impressum und Datenschutz gegenlesen: inhaltlich muss alles unverändert sein.
+9. Legacy-Pfade: `tr1stan.de/impressum`, `/privacy`, `/pages/index`.
 
 ---
 
 ## 10. Rollback
 
-Falls etwas nicht stimmt, stellt dieser Befehl den Stand von vor dem Redesign wieder her:
-
 ```bash
 git fetch origin
 git checkout main
-git reset --hard origin/backup/pre-redesign-2026-08-09
+git reset --hard origin/backup/pre-v6-2026-08-10
 git push --force-with-lease origin main
 ```
 
-Der Zielstand ist Commit `bf18260d`. GitHub Pages baut nach dem Push automatisch neu; der
-Durchlauf dauert üblicherweise ein bis zwei Minuten.
+Zielstand ist `0f3ce00`, also das Datenblatt-Design. GitHub Pages baut nach dem
+Push automatisch neu.
 
-Nicht-destruktive Alternative, die die Historie erhält:
+Nicht-destruktive Alternative:
 
 ```bash
 git fetch origin
 git checkout main
-git revert --no-commit f4f7f6c^..f4f7f6c
-git commit -m "Revert redesign"
+git revert --no-commit e0934e7^..e0934e7
+git commit -m "Revert v6"
 git push origin main
 ```
 
-**Branches, die bestehen bleiben:** `backup/pre-redesign-2026-08-09`, `redesign/v4` und
-`claude/visual-redesign-v5-yhc4qp`. Keiner davon wurde gelöscht.
+**Bestehende Branches, keiner gelöscht:** `backup/pre-v6-2026-08-10`,
+`backup/pre-redesign-2026-08-09`, `redesign/v6`, `redesign/v4`,
+`claude/visual-redesign-v5-yhc4qp`.
+
+---
+
+## Anhang: frühere Fassung (v4, 2026-08-09)
+
+Der Vorgänger war ein technisches Datenblatt mit Amber-Akzent, Node-Schema und
+selbst gehosteten Schriften. Backup-Branch `backup/pre-redesign-2026-08-09`
+(`bf18260d`), Arbeitsbranch `redesign/v4`. Die Schriften und die
+Barrierefreiheits-Arbeit von damals sind in v6 übernommen; Akzentfarbe,
+Diagramm, Statuslabels und Befehlspalette sind entfallen.
