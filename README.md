@@ -7,35 +7,68 @@ Kein Framework, kein Build-Step, kein npm, keine externen Requests.
 
 ## Gestaltung
 
-Streng monochrom. Es gibt **keine** Akzentfarbe: Hierarchie entsteht nur über
-Schriftgröße, Gewicht und Strichstärke.
+Streng monochrom. Es gibt **keine** Akzentfarbe: Hierarchie entsteht ausschließlich
+über Helligkeit, Schriftgröße, Gewicht und Strichstärke.
 
-- Grund `#0A0A0A`, Text `#ECEAE6`, dazwischen abgestufte Graustufen.
-- Alle Farben liegen als acht CSS Custom Properties am Anfang von `style.css`.
-  Direkt darunter steht ein heller Satz derselben acht Werte — einmal
-  hineinkopiert und das Schema ist umgedreht, ohne eine weitere Zeile zu ändern.
-- Feines Korn als Textur, erzeugt von einem Inline-SVG-Turbulenzfilter. Keine
-  Bilddatei, kein Request.
-- Registermarke: ein Plus aus zwei Haarlinien, wie eine Passmarke in einer
-  technischen Zeichnung. Es dient als Logo und sitzt an zwei Rasterpunkten.
-  Bewusst leise gehalten. Das Favicon zeigt dieselbe Marke.
+### Die Tonleiter
+
+Fünf Stufen eines warmen Neutraltons, gemessen gegen den Grund `#0A0A0A`:
+
+| Stufe | Token | Kontrast | Verwendung |
+|---|---|---|---|
+| 1 | `--c-ink` | 18,2:1 | Headlines, Aussagen |
+| 2 | `--c-ink-2` | 11,6:1 | Fließtext und Listen |
+| 3 | `--c-ink-3` | 6,1:1 | Mono-Labels, Zeichnungsbeschriftung |
+| 4 | `--c-line-2` | 1,7:1 | sichtbare Regeln, Passmarken |
+| 5 | `--c-line` | 1,2:1 | feinste Haarlinien |
+
+Jede Textstufe liegt mindestens Faktor 1,5 von der nächsten entfernt, damit die
+Ebenen ohne Farbe unterscheidbar bleiben. Alle neun Farbwerte stehen am Anfang
+von `style.css`; direkt darunter liegt derselbe Satz in hell — einmal
+hineinkopiert und das Schema ist umgedreht.
+
+### Die Kreuz-Zeichnung
+
+Der Blickfang im Hero ist eine technische Konstruktionszeichnung als Inline-SVG:
+ein gleichschenkliges Kreuz, nur aus Konturen, dazu Strichpunkt-Mittelachsen,
+zwei bemaßte Kanten mit Pfeilenden, Konstruktionskreis und Diagonalen als
+Hilfslinien sowie Passmarken an den Eckpunkten der Bounding-Box. Die
+Strichstärken variieren von 1,6 (Kontur) bis 0,5 (Hilfslinien).
+
+Die Beschriftung ist rein geometrisch — `X`, `Y`, `6a`, `2a` — und beschreibt nur
+die Proportionen der Zeichnung selbst. Die Zeichnung ist `aria-hidden`, trägt
+also keine Information. Die Hilfslinien atmen über 19 Sekunden kaum merklich;
+bei `prefers-reduced-motion` steht alles still.
+
+### Drei Blockmuster
+
+Die Inhaltsblöcke verwenden bewusst unterschiedliche Layouts:
+
+1. **Pros** — Label am äußeren Rand, Inhalt rechts daneben, eine durchgehende
+   Regel hält die Gruppe. Keine Linie unter den einzelnen Punkten.
+2. **Cons / Was als Nächstes kommt** — als gehaltene Aussage gesetzt, groß und
+   ruhig, ins Raster eingerückt.
+3. **Basteleien** — nummerierte Positionen im Stil einer Stückliste, ohne Regeln.
+
+Auch die vertikalen Abstände wechseln zwischen den Blöcken (`--pad-a/b/c`).
 
 ### Bewegung
 
-- **Hintergrund:** zwei sehr große, sehr blasse Lichtflächen driften langsam
-  aneinander vorbei (104 s und 137 s). Reines CSS, nur composited Transforms.
-  Pausiert bei `document.hidden`, auf schmalen Viewports abgeschaltet, bei
-  `prefers-reduced-motion` vollständig statisch.
-- **Cursor:** ein Fadenkreuz folgt exakt, ein Ring läuft mit leichter
-  Verzögerung nach und wächst über Links und Buttons. Nur bei `hover: hover`
-  und `pointer: fine`; auf Touch und bei reduzierter Bewegung bleibt der native
-  Zeiger. Läuft das Skript nicht, wird der native Zeiger nie versteckt.
+- **Hintergrund:** ein feines Raster driftet mit gut 2,7 px/s diagonal, dazu
+  zwei sehr blasse Lichtflächen über 88 s und 119 s. Reines CSS, nur composited
+  Transforms. Pausiert bei `document.hidden`, auf schmalen Viewports laufen nur
+  noch die Rasterlinien, bei `prefers-reduced-motion` steht alles.
+- **Korn:** Inline-SVG-Turbulenzfilter, keine Bilddatei.
+- **Cursor:** Fadenkreuz folgt exakt, ein Ring läuft nach und wächst über Links.
+  Nur bei `hover: hover` und `pointer: fine`; auf Touch und bei reduzierter
+  Bewegung bleibt der native Zeiger. Läuft das Skript nicht, wird der native
+  Zeiger nie versteckt.
+- **Randstruktur:** ab 1340 px zwei Messschienen mit Teilstrichen in den äußeren
+  Rändern, damit große Bildschirme keine unstrukturierte Fläche zeigen.
 
 ---
 
 ## Dateistruktur
-
-Alle Dateien liegen flach im Root.
 
 ```text
 tr1stan.de/
@@ -60,21 +93,20 @@ tr1stan.de/
 | Inter Variable | Fließtext und Überschriften | SIL OFL 1.1 |
 | JetBrains Mono Variable | Labels und Kleinteile | SIL OFL 1.1 |
 
-Beide selbst gehostet in `fonts/`, `latin`-Subset mit Gewichtsachse, eingebunden
-per `@font-face` mit `font-display: swap` und `preload`. Lizenztexte liegen daneben.
+Selbst gehostet in `fonts/`, `latin`-Subset mit Gewichtsachse, `font-display: swap`
+und `preload`. Lizenztexte liegen daneben.
 
-> Der Zeichenvorrat deckt Umlaute, `ß` und typografische Anführungszeichen ab,
-> aber **nicht** `→` (U+2192). Dieses Zeichen im Inhalt vermeiden.
+> Der Zeichenvorrat kennt `→` (U+2192) nicht. Dieses Zeichen im Inhalt vermeiden.
 
 ## Barrierefreiheit
 
 Sichtbarer Fokusring, genau eine `h1` pro Seite, keine übersprungenen
 Überschriftenebenen, vollständige Tastaturbedienung mit Skip-Link als erstes
-Tab-Ziel, alle Textfarben mindestens WCAG AA.
+Tab-Ziel. Fließtext erreicht 11,6:1, alle Textstufen mindestens WCAG AA.
 
 ## Lokal ansehen
 
-Die Pfade sind root-relativ, ein Doppelklick auf die Datei reicht deshalb nicht:
+Die Pfade sind root-relativ, ein Doppelklick auf die Datei reicht nicht:
 
 ```bash
 python3 -m http.server 8000

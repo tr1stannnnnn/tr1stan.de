@@ -16,11 +16,11 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=10" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=11" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=10" />
+  <link rel="stylesheet" href="/style.css?v=11" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
@@ -28,7 +28,7 @@
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
   <!-- background layers: behind everything, never interactive -->
-  <div class="ambient" aria-hidden="true"></div>
+  <div class="ambient" aria-hidden="true"><i></i><i></i></div>
   <svg class="grain" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
     <filter id="grainFilter">
       <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="2" stitchTiles="stitch" />
@@ -36,6 +36,13 @@
     </filter>
     <rect width="100%" height="100%" filter="url(#grainFilter)" />
   </svg>
+
+  <!-- measuring rails in the outer margins, large screens only -->
+  <div class="frame" aria-hidden="true">
+    <i class="frame-rail frame-rail--l"></i>
+    <i class="frame-rail frame-rail--r"></i>
+    <span class="frame-label">tr1stan.de</span>
+  </div>
 
   <header class="hdr">
     <div class="hdr-inner shell">
@@ -49,20 +56,74 @@
   <main id="content">
 
     <!-- ===================== HERO ===================== -->
-    <section class="hero shell" id="top">
-      <span class="passmark passmark--tr" aria-hidden="true"></span>
-      <h1 class="hero-name" data-reveal>Tristan Witt</h1>
-      <p class="hero-line" data-reveal>Private Seite über Technik, Basteleien und Automatisierung.</p>
+    <section class="hero" id="top">
+      <div class="shell">
+        <span class="passmark passmark--tr" aria-hidden="true"></span>
+        <div class="hero-grid">
+          <div>
+            <h1 class="hero-name" data-reveal>Tristan Witt</h1>
+            <p class="hero-line" data-reveal>Private Seite über Technik, Basteleien und Automatisierung.</p>
+          </div>
+
+          <div class="cross-wrap" data-reveal>
+            <!-- decorative construction drawing; carries no information -->
+            <svg class="cross" viewBox="0 0 460 520" aria-hidden="true" focusable="false"
+                 xmlns="http://www.w3.org/2000/svg">
+              <!-- construction: circumscribing circle and diagonals of the bounding square -->
+              <g class="cx-aux cx-breathe">
+                <circle cx="210" cy="250" r="150" />
+                <path d="M60 100 L360 400 M360 100 L60 400" />
+              </g>
+
+              <!-- centre axes, dash-dot -->
+              <path class="cx-axis" d="M24 250 H400" />
+              <path class="cx-axis" d="M210 64 V436" />
+
+              <!-- the cross itself: equal arms, outline only -->
+              <path class="cx-contour"
+                    d="M160 100 H260 V200 H360 V300 H260 V400 H160 V300 H60 V200 H160 Z" />
+
+              <!-- passmarks at the corners of the bounding square -->
+              <g class="cx-mark">
+                <path d="M55 100 H65 M60 95 V105" />
+                <path d="M355 100 H365 M360 95 V105" />
+                <path d="M55 400 H65 M60 395 V405" />
+                <path d="M355 400 H365 M360 395 V405" />
+              </g>
+
+              <!-- overall width, dimensioned along the lower edge -->
+              <path class="cx-ext" d="M60 400 V468 M360 400 V468" />
+              <path class="cx-dim" d="M60 460 H360" />
+              <path class="cx-arrow" d="M60 460 L71 456.5 L71 463.5 Z" />
+              <path class="cx-arrow" d="M360 460 L349 456.5 L349 463.5 Z" />
+              <text class="cx-t" x="210" y="452" text-anchor="middle">6a</text>
+
+              <!-- arm width, dimensioned along the right edge -->
+              <path class="cx-ext" d="M360 200 H424 M360 300 H424" />
+              <path class="cx-dim" d="M416 200 V300" />
+              <path class="cx-arrow" d="M416 200 L412.5 211 L419.5 211 Z" />
+              <path class="cx-arrow" d="M416 300 L412.5 289 L419.5 289 Z" />
+              <text class="cx-t" x="430" y="254">2a</text>
+
+              <!-- axis designations -->
+              <text class="cx-t cx-t--sm" x="24" y="243">X</text>
+              <text class="cx-t cx-t--sm" x="214" y="58">Y</text>
+            </svg>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ===================== ÜBER MICH ===================== -->
-    <section class="section shell" id="ueber" aria-labelledby="ueberTitle">
-      <h2 class="sec-kicker" id="ueberTitle">Über mich</h2>
+    <section class="section section--b" id="ueber" aria-labelledby="ueberTitle">
+      <div class="shell">
+        <span class="passmark passmark--tl" aria-hidden="true"></span>
+        <h2 class="sec-kicker" id="ueberTitle">Über mich</h2>
 
-      <div class="about">
-        <div class="block" data-reveal>
-          <h3 class="block-title">Pros</h3>
-          <ul class="lines">
+        <!-- pattern one: label beside a stack, one continuous rule -->
+        <div class="split" data-reveal>
+          <h3 class="split-label">Pros</h3>
+          <ul class="stack">
             <li>Linux und Docker im Alltag</li>
             <li>Homelab-Bastler mit Raspberry Pi und Home Assistant</li>
             <li>Netzwerk und Fernzugriff</li>
@@ -71,45 +132,48 @@
           </ul>
         </div>
 
-        <div class="block" data-reveal>
-          <h3 class="block-title">Cons</h3>
-          <p>Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+        <!-- pattern two: a held statement, offset into the grid -->
+        <div class="statement" data-reveal style="margin-top: var(--sp-2xl)">
+          <h3 class="statement-label">Cons</h3>
+          <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
         </div>
 
-        <div class="block" data-reveal>
-          <h3 class="block-title">Was als Nächstes kommt</h3>
-          <ul class="lines">
-            <li>Monitoring</li>
-            <li>mehr Automatisierung</li>
-            <li>Security tiefer verstehen</li>
-          </ul>
+        <div class="statement" data-reveal style="margin-top: var(--sp-xl)">
+          <h3 class="statement-label">Was als Nächstes kommt</h3>
+          <p class="statement-text">Monitoring, mehr Automatisierung, Security tiefer verstehen.</p>
         </div>
       </div>
     </section>
 
     <!-- ===================== BASTELEIEN ===================== -->
-    <section class="section shell" id="basteleien" aria-labelledby="bastelnTitle">
-      <h2 class="sec-kicker" id="bastelnTitle">Basteleien</h2>
-      <ul class="lines" data-reveal>
-        <li>Skripte, die mir wiederkehrende Handgriffe abnehmen.</li>
-        <li>Container aufsetzen, zerlegen, neu bauen.</li>
-        <li>Dem Zuhause ein paar Automatiken beibringen.</li>
-        <li>Netzwerkkram so lange drehen, bis er sitzt.</li>
-      </ul>
+    <section class="section section--a" id="basteleien" aria-labelledby="bastelnTitle">
+      <div class="shell">
+        <h2 class="sec-kicker" id="bastelnTitle">Basteleien</h2>
+
+        <!-- pattern three: numbered positions, no rules -->
+        <ol class="parts" data-reveal>
+          <li><span class="parts-no">01</span><span class="parts-txt">Skripte, die mir wiederkehrende Handgriffe abnehmen.</span></li>
+          <li><span class="parts-no">02</span><span class="parts-txt">Container aufsetzen, zerlegen, neu bauen.</span></li>
+          <li><span class="parts-no">03</span><span class="parts-txt">Dem Zuhause ein paar Automatiken beibringen.</span></li>
+          <li><span class="parts-no">04</span><span class="parts-txt">Netzwerkkram so lange drehen, bis er sitzt.</span></li>
+        </ol>
+      </div>
     </section>
 
     <!-- ===================== KONTAKT ===================== -->
-    <section class="section shell contact" id="kontakt" aria-labelledby="kontaktTitle">
-      <span class="passmark passmark--bl" aria-hidden="true"></span>
-      <h2 class="sec-kicker" id="kontaktTitle">Kontakt</h2>
+    <section class="section section--c" id="kontakt" aria-labelledby="kontaktTitle">
+      <div class="shell contact">
+        <span class="passmark passmark--bl" aria-hidden="true"></span>
+        <h2 class="sec-kicker" id="kontaktTitle">Kontakt</h2>
 
-      <a class="mail" href="mailto:chef@tr1stan.de" data-reveal>chef@tr1stan.de</a>
+        <a class="mail" href="mailto:chef@tr1stan.de" data-reveal>chef@tr1stan.de</a>
 
-      <div class="contact-row" data-reveal>
-        <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
-          <span data-copy-text>Adresse kopieren</span>
-        </button>
-        <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
+        <div class="contact-row" data-reveal>
+          <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+            <span data-copy-text>Adresse kopieren</span>
+          </button>
+          <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
+        </div>
       </div>
     </section>
 
@@ -127,6 +191,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=10" defer></script>
+  <script src="/script.js?v=11" defer></script>
 </body>
 </html>
