@@ -1,70 +1,64 @@
 # tr1stan.de
 
-Statische private Website für `tr1stan.de` — eine kurze persönliche Visitenkarte.
-Kein Framework, kein Build-Step, kein npm, keine externen Requests.
+Statische private Website für `tr1stan.de` — eine kurze persönliche Seite im
+Synthwave-Stil. Kein Framework, kein Build-Step, kein npm, keine externen Requests.
 
 ---
 
 ## Gestaltung
 
-Streng monochrom. Es gibt **keine** Akzentfarbe: Hierarchie entsteht ausschließlich
-über Helligkeit, Schriftgröße, Gewicht und Strichstärke.
+Schwarz und Violett, Nachthimmel mit gestreifter Sonne. Die gesamte Szene ist aus
+Verläufen und einem Inline-SVG gebaut — **keine einzige Bilddatei**.
 
-### Die Tonleiter
+### Palette
 
-Fünf Stufen eines warmen Neutraltons, gemessen gegen den Grund `#0A0A0A`:
+Alle Farben liegen als CSS Custom Properties am Anfang von `style.css`. Andere
+Farbfamilien kommen nicht vor, kein Cyan, kein Grün, kein Orange.
 
-| Stufe | Token | Kontrast | Verwendung |
-|---|---|---|---|
-| 1 | `--c-ink` | 18,2:1 | Headlines, Aussagen |
-| 2 | `--c-ink-2` | 11,6:1 | Fließtext und Listen |
-| 3 | `--c-ink-3` | 6,1:1 | Mono-Labels, Zeichnungsbeschriftung |
-| 4 | `--c-line-2` | 1,7:1 | sichtbare Regeln, Passmarken |
-| 5 | `--c-line` | 1,2:1 | feinste Haarlinien |
+| Rolle | Token | Wert |
+|---|---|---|
+| Himmel oben / Seitengrund | `--sky-top` | `#06020C` |
+| Himmel Mitte | `--sky-mid` | `#160628` |
+| Himmel Horizont | `--sky-horizon` | `#2F0B46` |
+| Boden unter dem Horizont | `--ground` | `#0B0316` |
+| Neon Raster | `--neon-grid` | `#E879F9` |
+| Neon Bergkante | `--neon-ridge` | `#C084FC` |
+| Horizontlinie | `--horizon-line` | `#FBE4FF` |
+| Sonne oben / Mitte / unten | `--sun-top/-mid/-bottom` | `#FEF3C7` `#FDA4D3` `#C026D3` |
+| Text primär / sekundär | `--text-1` / `--text-2` | `#FFFFFF` `#F3ECFA` |
+| Mono-Labels | `--label` | `#F5D0FE` |
 
-Jede Textstufe liegt mindestens Faktor 1,5 von der nächsten entfernt, damit die
-Ebenen ohne Farbe unterscheidbar bleiben. Alle neun Farbwerte stehen am Anfang
-von `style.css`; direkt darunter liegt derselbe Satz in hell — einmal
-hineinkopiert und das Schema ist umgedreht.
+### Die Szene
 
-### Die Kreuz-Zeichnung
+Sie liegt **nur hinter dem Hero**, nicht hinter der ganzen Seite; alle weiteren
+Abschnitte stehen auf ruhigem dunklem Grund.
 
-Der Blickfang im Hero ist eine technische Konstruktionszeichnung als Inline-SVG:
-ein gleichschenkliges Kreuz, nur aus Konturen, dazu Strichpunkt-Mittelachsen,
-zwei bemaßte Kanten mit Pfeilenden, Konstruktionskreis und Diagonalen als
-Hilfslinien sowie Passmarken an den Eckpunkten der Bounding-Box. Die
-Strichstärken variieren von 1,6 (Kontur) bis 0,5 (Hilfslinien).
+- **Himmel** als vierstufiger Verlauf, harter Schnitt zum Boden am Horizont.
+- **Sterne**: dreizehn Punkte, jeder mit eigener Funkeldauer.
+- **Sonne** sitzt auf dem Horizont. Die Streifen in der unteren Hälfte sind mit
+  einer CSS-Maske ausgeschnitten, dadurch zeigen die Lücken den echten Himmel
+  dahinter statt einer nachgebauten Farbe. Der Schein kommt aus einem weichen
+  radialen Halo plus `drop-shadow` — kein harter Ring, kein Rechteckrand.
+- **Berge** als Inline-SVG mit `preserveAspectRatio="none"`, dunkle Silhouette in
+  Bodenfarbe, obere Kante als Neonlinie. Der Strich nutzt
+  `vector-effect="non-scaling-stroke"`, sonst würde ihn die Streckung verzerren.
+- **Horizontlinie** mit Schein nach oben und unten.
+- **Raster** über `perspective` und `rotateX`, Linien als
+  `repeating-linear-gradient`, Bewegung über `background-position`.
 
-Die Beschriftung ist rein geometrisch — `X`, `Y`, `6a`, `2a` — und beschreibt nur
-die Proportionen der Zeichnung selbst. Die Zeichnung ist `aria-hidden`, trägt
-also keine Information. Die Hilfslinien atmen über 19 Sekunden kaum merklich;
-bei `prefers-reduced-motion` steht alles still.
+### Lesbarkeit hat Vorrang
 
-### Drei Blockmuster
-
-Die Inhaltsblöcke verwenden bewusst unterschiedliche Layouts:
-
-1. **Pros** — Label am äußeren Rand, Inhalt rechts daneben, eine durchgehende
-   Regel hält die Gruppe. Keine Linie unter den einzelnen Punkten.
-2. **Cons / Was als Nächstes kommt** — als gehaltene Aussage gesetzt, groß und
-   ruhig, ins Raster eingerückt.
-3. **Basteleien** — nummerierte Positionen im Stil einer Stückliste, ohne Regeln.
-
-Auch die vertikalen Abstände wechseln zwischen den Blöcken (`--pad-a/b/c`).
+Der Hero-Text steht immer **unterhalb** der Sonne; der Horizont steigt auf kurzen
+Viewports selbst an, damit der Name nie in die Sonne wandert. Hinter dem Text
+liegt ein weich auslaufendes dunkles Band — kein Textschatten. Gemessen gegen die
+tatsächlich gerenderten Pixel erreicht der Fließtext dort 17:1.
 
 ### Bewegung
 
-- **Hintergrund:** ein feines Raster driftet mit gut 2,7 px/s diagonal, dazu
-  zwei sehr blasse Lichtflächen über 88 s und 119 s. Reines CSS, nur composited
-  Transforms. Pausiert bei `document.hidden`, auf schmalen Viewports laufen nur
-  noch die Rasterlinien, bei `prefers-reduced-motion` steht alles.
-- **Korn:** Inline-SVG-Turbulenzfilter, keine Bilddatei.
-- **Cursor:** Fadenkreuz folgt exakt, ein Ring läuft nach und wächst über Links.
-  Nur bei `hover: hover` und `pointer: fine`; auf Touch und bei reduzierter
-  Bewegung bleibt der native Zeiger. Läuft das Skript nicht, wird der native
-  Zeiger nie versteckt.
-- **Randstruktur:** ab 1340 px zwei Messschienen mit Teilstrichen in den äußeren
-  Rändern, damit große Bildschirme keine unstrukturierte Fläche zeigen.
+Sterne funkeln, der Halo atmet über 11 s, das Raster läuft eine Rasterzeile in
+2,5 s. Alles pausiert bei `document.hidden`. Auf schmalen Viewports läuft das
+Raster mit 7 s deutlich langsamer. Bei `prefers-reduced-motion` steht die Szene
+vollständig still, bleibt aber sichtbar. Ohne JavaScript ist sie ebenfalls da.
 
 ---
 
@@ -72,14 +66,14 @@ Auch die vertikalen Abstände wechseln zwischen den Blöcken (`--pad-a/b/c`).
 
 ```text
 tr1stan.de/
-├── index.html          # Visitenkarte: Name, Über mich, Basteleien, Kontakt
+├── index.html          # Hero mit Szene, fünf Textabschnitte, Kontakt
 ├── impressum.html      # Impressum nach § 5 DDG
 ├── datenschutz.html    # Datenschutzhinweise nach Art. 13 DSGVO
 ├── 404.html            # Fehlerseite inkl. Legacy-Redirects
-├── style.css           # Tokens, Base, Layout, Komponenten, Ambient, Utilities
-├── script.js           # Jahr, Copy, mobiles Menü, Reveal, Cursor
+├── style.css           # Tokens, Base, Layout, Szene, Komponenten, Utilities
+├── script.js           # Jahr, Copy, mobiles Menü, Reveal, Pause bei hidden
 ├── fonts/              # selbst gehostete Variable Fonts inkl. Lizenzen
-├── favicon.svg         # Registermarke
+├── favicon.svg         # Sonne über dem Horizont
 ├── robots.txt
 ├── sitemap.xml
 ├── CNAME
@@ -88,25 +82,18 @@ tr1stan.de/
 
 ## Schriften
 
-| Schrift | Verwendung | Lizenz |
-|---|---|---|
-| Inter Variable | Fließtext und Überschriften | SIL OFL 1.1 |
-| JetBrains Mono Variable | Labels und Kleinteile | SIL OFL 1.1 |
-
-Selbst gehostet in `fonts/`, `latin`-Subset mit Gewichtsachse, `font-display: swap`
-und `preload`. Lizenztexte liegen daneben.
-
-> Der Zeichenvorrat kennt `→` (U+2192) nicht. Dieses Zeichen im Inhalt vermeiden.
+Inter Variable und JetBrains Mono Variable, beide SIL OFL 1.1, selbst gehostet in
+`fonts/`, `latin`-Subset mit Gewichtsachse. Der Zeichenvorrat kennt `→` (U+2192)
+nicht — dieses Zeichen im Inhalt vermeiden.
 
 ## Barrierefreiheit
 
 Sichtbarer Fokusring, genau eine `h1` pro Seite, keine übersprungenen
-Überschriftenebenen, vollständige Tastaturbedienung mit Skip-Link als erstes
-Tab-Ziel. Fließtext erreicht 11,6:1, alle Textstufen mindestens WCAG AA.
+Überschriftenebenen, Skip-Link als erstes Tab-Ziel, Tap-Ziele mindestens
+44 × 44 px, nichts hängt an Hover. Die Szene ist `aria-hidden` und nimmt keine
+Pointer-Events.
 
 ## Lokal ansehen
-
-Die Pfade sind root-relativ, ein Doppelklick auf die Datei reicht nicht:
 
 ```bash
 python3 -m http.server 8000
