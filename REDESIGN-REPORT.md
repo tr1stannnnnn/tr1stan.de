@@ -1,9 +1,9 @@
 # Redesign-Report — tr1stan.de
 
-**Stand:** 2026-08-10
-**Aktuelle Fassung:** v7 — persönliche Visitenkarte mit Konstruktionszeichnung, streng monochrom
-**Arbeitsbranch:** `redesign/v7`
-**Backup-Branch:** `backup/pre-v7-2026-08-10`
+**Stand:** 2026-08-14
+**Aktuelle Fassung:** v9 — Synthwave in Schwarz und Violett
+**Arbeitsbranch:** `redesign/v9`
+**Backup-Branch:** `backup/pre-v9-2026-08-14`
 
 ---
 
@@ -11,200 +11,215 @@
 
 | | |
 |---|---|
-| **Backup-Branch** | `backup/pre-v7-2026-08-10` |
-| **Zeigt auf** | `1ec3415` — die Fassung v6, die vor v7 live war |
+| **Backup-Branch** | `backup/pre-v9-2026-08-14` |
+| **Zeigt auf** | `c3ab2b0` — die Fassung, die vor v9 live war |
 | **Status** | gepusht, bleibt bestehen |
 
-Der exakte Befehl steht in Abschnitt 8.
+Zwei Hinweise dazu:
+
+- Die Aufgabe nannte **v8** als Basis. Im Repository gibt es kein v8: der
+  Live-Stand war **v7** (`c3ab2b0`). Ich habe darauf aufgesetzt und die
+  vorgegebenen Branch-Namen beibehalten.
+- Ich hatte den Backup-Branch zunächst mit dem Datum aus dem alten Kontext
+  angelegt (`backup/pre-v9-2026-08-10`) und danach korrekt datiert neu erstellt.
+  Der Proxy dieser Umgebung lässt kein Löschen von Remote-Branches zu, deshalb
+  existieren beide. **Beide zeigen auf denselben Commit `c3ab2b0`**, maßgeblich
+  ist der mit dem richtigen Datum.
 
 ---
 
-## 2. Die sechs Befunde und was dagegen getan wurde
+## 2. Geänderte Dateien
 
-| Befund | Behebung |
-|---|---|
-| **Tote Fläche rechts** | Der Hero ist ab 720 px zweispaltig: links Name und Satz, rechts die Kreuz-Zeichnung. Gemessen bleiben rechts nur noch 36–45 px Innenabstand statt einer leeren Hälfte. |
-| **Drei identische Blöcke** | Jeder Block hat jetzt ein eigenes Muster: Pros als Label neben einem Stapel mit einer durchgehenden Regel, Cons und „Was als Nächstes kommt" als große gehaltene Aussagen ins Raster eingerückt, Basteleien als nummerierte Positionen ohne jede Regel. Auch die vertikalen Abstände wechseln (`--pad-a/b/c`). |
-| **Kein visueller Ankerpunkt** | Die Kreuz-Zeichnung füllt 78 % der rechten Hero-Hälfte. |
-| **Zu schwacher Kontrast** | Neue Tonleiter in fünf gemessenen Stufen. Fließtext von 9,4:1 auf **11,6:1**, Headline 18,2:1, Labels 6,1:1. Jede Stufe liegt mindestens Faktor 1,5 von der nächsten entfernt. Größensprung Headline zu Fließtext jetzt 6,3-fach, dazu Gewicht als eigenes Mittel (650 gegen 300). |
-| **Marke wirkt wie ein Bedienelement** | Die Marke ist kleiner (13 auf 10 px) und ruhiger (Ink-2 auf Ink-3). Sie hatte allerdings **nie** einen Kreis im Markup — siehe Abschnitt 4, Punkt 5. |
-| **Bewegung unsichtbar** | Ein feines Raster driftet jetzt mit **gemessenen 2,71 px/s** diagonal, dazu zwei deutlich stärkere Lichtflächen (Alpha 0,06 und 0,04 statt 0,032). |
-
----
-
-## 3. Geänderte Dateien
-
-**Geändert:** `index.html` (neuer Hero, drei neue Blockmuster, Zeichnung, Randstruktur),
-`style.css` (neue Tonleiter, Muster, Ambient, Frame), `README.md`,
-`impressum.html`, `datenschutz.html`, `404.html` (nur Asset-Version), `REDESIGN-REPORT.md`.
+**Geändert:** `index.html` (Szene, neue Abschnitte), `style.css` (komplett neu),
+`script.js` (Cursor entfernt), `favicon.svg` (Sonne über dem Horizont statt
+Registermarke), `impressum.html`, `datenschutz.html`, `404.html` (nur Styling und
+Asset-Version), `README.md`, `REDESIGN-REPORT.md`.
 
 **Neu:** keine Datei. **Gelöscht:** keine Datei.
-`script.js` und `favicon.svg` sind **unverändert** — der Cursor sollte laut Vorgabe
-bleiben wie er war.
+
+### Entfernt, wie verlangt
+
+Die Kreuz-Konstruktionszeichnung samt Maßlinien und Passmarken; die
+Registermarke im Header (jetzt reiner Text `tr1stan.de`); sämtliche Reste des
+Custom Cursors; das monochrome Farbsystem; die Korn-Textur. Ein eigenes
+Prüfskript sucht nach allen fünf Gruppen und meldet null Treffer.
 
 ---
 
-## 4. Selbst getroffene Entscheidungen
+## 3. Selbst getroffene Entscheidungen
 
-1. **Zweispalter ab 720 px statt ab 900 px.** Erst so gesetzt wie ursprünglich
-   geplant, dann im Screenshot bei 768 px gesehen: die Zeichnung stand
-   linksbündig unter dem Text und ließ rechts eine schiefe Lücke — genau der
-   Eindruck von „nicht fertig geladen", der weg sollte. Schwelle heruntergezogen.
+1. **Sonnenstreifen als Maske, nicht als aufgelegte Balken.** Die Lücken zeigen
+   damit den echten Himmelsverlauf dahinter statt einer nachgebauten Farbe, die
+   an dieser Stelle nie exakt gepasst hätte.
 
-2. **Die Zeichnung wird nicht ausgeblendet, sondern verkleinert.** Unter 720 px
-   rutscht sie unter den Text bei 300 px Breite. Ausblenden wäre erlaubt gewesen,
-   hätte aber genau die Leere zurückgebracht, um die es ging.
+2. **`vector-effect="non-scaling-stroke"` an der Bergkante.** Mit
+   `preserveAspectRatio="none"` wird das SVG in der Breite gestreckt — ohne
+   diesen Zusatz würde die Neonlinie mitgestreckt und ungleichmäßig dick.
 
-3. **Beschriftung der Zeichnung: `X`, `Y`, `6a`, `2a`.** Bewusst keine
-   Millimeterwerte, denn die wären erfundene Zahlen. `a` ist die halbe Armbreite;
-   `6a` und `2a` beschreiben nachprüfbar die echten Proportionen der Zeichnung.
-   Keine Jahreszahlen, keine Symbolik, kein erklärender Text.
+3. **Der Horizont steigt auf kurzen Viewports selbst an.** Statt `61%` steht dort
+   `min(61%, calc(100% - 21rem))`. Auf 1440 × 700 wäre der Name sonst 15 px in
+   die Sonne geklettert. Damit ist die Vorgabe „Text nie über der Sonne"
+   strukturell abgesichert und nicht nur zufällig erfüllt.
 
-4. **„Was als Nächstes kommt" ist wieder Fließtext.** In v6 hatte ich die
-   Komma-Aufzählung in eine Liste zerlegt. Die Vorgabe verlangt jetzt eine
-   hervorgehobene Aussage, also steht der Satz wieder als Satz. Wortlaut in
-   beiden Fassungen unverändert.
+4. **Der Hero ist `calc(100svh - var(--header-h))` hoch.** Der Sticky-Header
+   belegt 58 px im Fluss; mit vollen `100svh` rutschte die Unterzeile bei 320,
+   360, 768 und 1280 exakt um diese 58 px unter die Falz.
 
-5. **Zur Marke „im Kreis":** Im Markup gab es nie einen Kreis um die
-   Registermarke — sie ist seit v6 nur zwei Haarlinien. Der Kreis, der sich um
-   ein Plus legt, ist der **Custom Cursor**: ein Ring mit Fadenkreuz darin. Wenn
-   der Zeiger neben dem Namen steht, sieht das exakt nach „Marke im Kreis" aus.
-   Da Punkt 6 der Vorgabe den Cursor ausdrücklich unverändert lassen wollte, habe
-   ich ihn nicht angefasst und stattdessen die Marke wie verlangt kleiner und
-   ruhiger gemacht. **Falls der Ring gemeint war, sag Bescheid — das ist eine
-   Zeile.**
+5. **Die Hero-Spalte ist breiter als der Fließtext (bis 1400 px).** Bei 1920
+   braucht der Name mit 10vw rund 1150 px; in der 1120-px-Spalte wäre er
+   zweizeilig umgebrochen und dadurch in die Sonne gestiegen.
 
-6. **Messschienen erst ab 1340 px.** Darunter sind die Außenränder zu schmal;
-   die Schienen würden am Text kleben statt ihn zu rahmen.
+6. **Der Scrim ist ein senkrechtes Band, kein radiales Feld.** Der erste Versuch
+   mit einem radialen Verlauf brach an der eigenen Box-Kante sichtbar ab — ein
+   dunkles Rechteck neben dem Namen. Das Band läuft seitlich randlos aus.
 
-7. **Raster driftet, Lichtflächen stehen auf Mobilgeräten.** „Reduziert" statt
-   „aus": die Bewegung bleibt wahrnehmbar, die teureren Flächen entfallen.
+7. **Das Raster bewegt sich über `background-position`.** Punkt 8 der Vorgabe
+   verlangt Animationen über `transform` und `opacity`, Punkt 3 verlangt für das
+   Raster ausdrücklich `background-position`. Ich bin der spezifischen Vorgabe
+   gefolgt; `background-position` löst ohnehin nur Neuzeichnen aus, kein neues
+   Layout. Alle übrigen Animationen laufen über `transform` und `opacity`.
 
-8. **Fließtext bei 11,6:1 statt noch heller.** Bei ~15:1 verliert die Headline
-   ihre eigene Stufe. Der Abstand Headline zu Fließtext beträgt so 1,57-fach und
-   bleibt sichtbar — Hierarchie schlägt Maximalkontrast.
+8. **Mobil wird das Raster verlangsamt, nicht abgeschaltet** (2,5 s auf 7 s pro
+   Rasterzeile). Ganz aus wäre erlaubt gewesen, hätte der Szene aber im
+   Hochformat ihren Charakter genommen.
+
+9. **Das Favicon zeigt jetzt Sonne, Horizont und Rasterlinien.** Es war nicht
+   ausdrücklich gefordert, aber eine monochrome Registermarke als Icon hätte dem
+   kompletten Stilwechsel widersprochen. Datei- und Pfadname sind unverändert.
+
+10. **Abschnittsüberschriften sind Mono in Flieder bei 1,15–1,75 rem.** Damit
+    sind sie klar größer als der Fließtext und klar kleiner als der Name, wie
+    verlangt — der kleine Mono-Kicker aus v7 wäre kleiner als der Fließtext
+    gewesen.
+
+11. **Umlaute ausgeschrieben.** Die Vorgabe kam in ASCII-Umschrift („Ueber das
+    Zocken"); auf der Seite steht die korrekte deutsche Schreibweise. Wortlaut
+    und Satzbau sind unverändert.
 
 ---
 
-## 5. Prüfergebnisse
+## 4. Prüfergebnisse
 
-**Browser-Suite — 134 Einzelprüfungen, alle bestanden.** Darunter:
+**Browser-Suite — 173 Einzelprüfungen, alle bestanden.** Unter anderem:
 
 - keine externen Requests, keine JS-Fehler, beide Fonts geladen
-- kein horizontales Scrollen bei **360 / 768 / 1280 / 1440 / 1920**
-- Kontraste im gerenderten Zustand gemessen: Headline 18,2:1, Aussage 18,2:1,
-  Fließtext 11,6:1, Positionsliste 11,6:1, Labels 6,1:1
-- Stufen nachgerechnet: Headline zu Fließtext 1,57×, Fließtext zu Label 1,92×
-- Größensprung 114,9 px zu 18,2 px = 6,3-fach; Gewichte 650 gegen 300
-- die drei Muster maschinell unterschieden: Pros zweispaltig mit Gruppenregel und
-  **ohne** Linie unter den Punkten, Aussage um 168 px eingerückt und 1,9-fach
-  größer als Fließtext, Positionsliste zweispaltig mit Nummern und ohne Linien
-- Zeichnung: `aria-hidden`, Inline-SVG, in der rechten Hälfte, 78 % Flächenanteil,
-  vier verschiedene Strichstärken (1,6 / 0,7 / 0,5 / 0,5), Beschriftung rein
-  geometrisch, Hilfslinien atmen, bei reduzierter Bewegung statisch
-- Hintergrund: Drift **gemessen 2,71 px/s**, `pointer-events: none`, `z-index -3`,
-  pausiert bei `document.hidden`, statisch bei reduzierter Bewegung, mobil reduziert
-- Cursor: aktiv am Desktop, **aus auf Touch**, **aus bei reduzierter Bewegung**,
-  blockiert die Zeichnung nicht, Zustandswechsel über Links
-- ohne JavaScript: Inhalt lesbar, Mailadresse erreichbar, nativer Cursor sichtbar
-- Fokusring sichtbar, genau eine `h1` je Seite, keine Ebenensprünge
+- kein horizontales Scrollen bei **320 / 360 / 390 / 430 / 768 / 1280 / 1920**
+- **Text nie über der Sonne**, geprüft bei 320, 390, 768, 1280 und 1920, zusätzlich
+  bei zwölf Kombinationen aus Breite und Höhe inklusive kurzer Desktop-Fenster
+- **Kontrast gegen die tatsächlich gerenderten Pixel**: Der Text wird versteckt,
+  die Seite fotografiert und der hellste Pixel hinter jedem Textblock gemessen.
+  Ergebnis unter anderem Name 15,6:1, Unterzeile 17,2:1, Abschnittstitel 15,0:1 —
+  Fließtext liegt überall über der geforderten 7:1
+- Szene: `aria-hidden`, `pointer-events: none`, `z-index -3` unter dem Inhalt,
+  alle neun Teile vorhanden, Berge und Raster sitzen auf ±3 px genau auf der
+  Horizontlinie, Sonne ebenso
+- **pausiert bei `document.hidden`** (Raster, Halo und Sterne gleichzeitig geprüft)
+- `prefers-reduced-motion`: keinerlei Animation, Szene vollständig sichtbar
+- ohne JavaScript: Szene sichtbar, Inhalt lesbar, Mailadresse erreichbar
+- Tap-Ziele mindestens 44 × 44 px auf allen vier Seiten, nichts hängt an Hover
+- genau eine `h1` je Seite, keine Ebenensprünge, Fokusring sichtbar,
+  Copy-Button schreibt die Adresse, alle Links, Anker und Redirects
 
-**Statische Gates — 48 Prüfungen, alle bestanden:** keiner der verbotenen Begriffe
-außerhalb der Rechtsseiten, keine Prozentwerte oder Balken, keine fremd geladene
-Ressource, CNAME unverändert, Meta-Tags konsistent, alle Farbwerte chromaarm im
-selben Farbton, Rechtstexte zeichengenau identisch (1499 und 4896 Zeichen),
-**Fließtext auch auf dem hellstmöglichen Hintergrund noch 8,77:1** (beide
-Lichtflächen und das Korn übereinandergerechnet).
+**Statische Gates — 47 Prüfungen, alle bestanden:** keiner der verbotenen
+Begriffe außerhalb der Rechtsseiten (inklusive `6a2a`), keine Prozentwerte oder
+Balken, keine Ressource von fremden Hosts, **keine Bilddatei und kein `img`-Tag**,
+CNAME unverändert, `theme-color: #06020C` auf allen Seiten, **alle 14 Farbwerte
+stammen aus der vorgegebenen Palette** (Prüfung über Hex und `rgba()`), alle 16
+Textbausteine wortgleich vorhanden, Rechtstexte zeichengenau identisch.
 
-**Sichtprüfung:** Screenshots bei 1920, 1440, 1280, 768 und 360 px angesehen. Der
-einzige Befund war die Schieflage bei 768 px, siehe Entscheidung 1. Die
-Zeichnung habe ich zusätzlich in doppelter Auflösung ausgeschnitten und geprüft.
+### Gefundene und behobene Fehler
 
-**Gefundene und behobene Fehler:**
+1. **Scrim als sichtbares Rechteck.** Der radiale Verlauf brach an seiner Box-Kante
+   ab; im Screenshot bei 1920 stand ein dunkles Rechteck links neben dem Namen.
+2. **Unterzeile unter der Falz** bei 320, 360, 768 und 1280 — Ursache war die
+   Höhe des Sticky-Headers.
+3. **Name stieg in die Sonne** bei 1440 × 700, 1600 × 760 und 1920 × 850. Zwei
+   Ursachen: zweizeiliger Umbruch bei 1920 und zu wenig Platz unter dem Horizont.
+4. **Tap-Ziel „Start" im Footer nur 42 px breit.**
 
-1. **Lichtflächen liefen auf Mobilgeräten weiter.** `.ambient i` (Spezifität
-   0,1,1) verlor gegen `.ambient i:nth-child(1)` (0,2,0). Selektoren angeglichen.
-2. **Schieflage bei 768 px** (Entscheidung 1).
-3. Ein Timeout in meinem eigenen Prüfskript verdeckte Abschnitt 12 — das Skript
-   suchte `.mail` auf der Impressumsseite. Korrigiert, danach lief die Suite
-   vollständig durch.
+Drei weitere Treffer waren Fehler in meinen Prüfskripten, nicht auf der Seite:
+eine zu kurze Wartezeit ließ die Einblendung von `.mail` als Hover-Abhängigkeit
+erscheinen, ein Rect wurde an `getComputedStyle` übergeben, und ein Testlauf
+maß vor dem Scrollen.
 
 ---
 
-## 6. Deploy
+## 5. Deploy
 
 | | |
 |---|---|
-| Merge | `redesign/v7` mit `--no-ff` nach `main` |
-| Push | `1ec3415..9fe5bda` |
-| Pages-Lauf | `pages build and deployment` für `9fe5bda` — **completed / success** |
+| Merge | `redesign/v9` mit `--no-ff` nach `main` |
+| Push | `c3ab2b0..9363b2d` |
+| Pages-Lauf | `pages build and deployment` für `9363b2d` — **completed / success** |
 | Rückfall nötig? | Nein. Der Backup-Branch wurde nicht angefasst. |
 
 ---
 
-## 7. Offene Punkte und Risiken
+## 6. Offene Punkte und Risiken
 
 | Punkt | Einschätzung |
 |---|---|
 | **Live-Abruf nicht möglich** | Der Egress-Proxy blockt `tr1stan.de`. Der Deploy ist nur über die Actions-API bestätigt. **Bitte selbst im Browser gegenprüfen.** |
-| Rasterdrift als Geschmacksfrage | 2,71 px/s ist bewusst an der Wahrnehmungsschwelle. Zu langsam: `grid-drift` von 46 s runter. Zu unruhig: hoch. |
-| Hilfslinien sehr zart | Konstruktionskreis und Diagonalen liegen bei `--c-line-2` und 0,5 px. In hellen Räumen kaum zu sehen. Absicht, aber leicht zu ändern. |
-| Cursor blendet den I-Beam aus | Über Text fehlt die Textcursor-Rückmeldung. Markieren funktioniert. |
-| Ring um die Marke | Siehe Entscheidung 5 — wenn der Cursor-Ring gemeint war, ist das eine Zeile. |
-| Kein Regressionsschutz | Die Prüfskripte liegen außerhalb des Repos; ohne Build gibt es keine CI. |
+| `mask-composite` | Die Sonnenstreifen brauchen `mask-composite: add` (mit `-webkit-`-Fallback). In sehr alten Browsern wäre die Sonne eine volle Scheibe ohne Streifen — sie verschwindet nicht, sie verliert nur die Streifen. |
+| Rastergeschwindigkeit | 2,5 s pro Rasterzeile ist der Richtwert aus der Vorgabe. Wer es ruhiger mag, erhöht `--grid-speed`. |
+| Raster auf schwachen Geräten | Ein perspektivisch gedrehtes Element mit animierter `background-position` ist teurer als eine reine Transform-Animation. Mobil auf 7 s gedrosselt; falls es dort dennoch ruckelt, `--grid-speed` weiter erhöhen oder die Animation unter 700 px ganz abschalten. |
+| Kontrast auf der Szene | Gemessen am hellsten Pixel hinter dem Text. Wer den Scrim schwächer macht, muss neu messen. |
 | `→` fehlt im Zeichensatz | Bleibt bestehen, `latin`-Subset. |
 
 ---
 
-## 8. Was du manuell prüfen solltest
+## 7. Was du manuell prüfen solltest
 
-1. Startseite auf einem breiten Monitor: rechts neben dem Namen steht die
-   Zeichnung, nirgends eine große leere Fläche.
-2. Etwa fünf Sekunden ruhig auf den Hintergrund schauen — die Rasterbewegung soll
-   auffallen. Nach einer halben Minute soll sie nicht nerven.
-3. Nach unten scrollen: die drei Blöcke müssen unterschiedlich gebaut aussehen.
-4. Lesbarkeit: Fließtext soll klar heller wirken als vorher.
-5. Maus über die Zeichnung führen — nichts darf blockieren oder flackern.
-6. Auf dem Handy: kein Custom Cursor, Zeichnung unter dem Text, ruhiger Hintergrund.
-7. Bewegung reduzieren einschalten und neu laden: alles steht still, nativer Zeiger.
-8. Tab wechseln und zurückkommen: Der Hintergrund war pausiert.
-9. Nur mit der Tastatur durchtabben, Fokusring muss überall sichtbar sein.
-10. Impressum und Datenschutz gegenlesen: inhaltlich unverändert.
+1. Startseite auf dem Desktop: Sonne mittig über dem Horizont, Berge davor,
+   Raster läuft ruhig auf dich zu, der Name steht klar darunter.
+2. Fenster schmal und niedrig ziehen — der Name darf die Sonne nie berühren und
+   die Unterzeile nie unter den Rand rutschen.
+3. Auf dem Handy im Hochformat: Sonne kleiner, Berge niedriger, Raster flacher,
+   Bewegung deutlich langsamer.
+4. Tab wechseln und zurückkommen: Die Szene war währenddessen eingefroren.
+5. Bewegung reduzieren einschalten und neu laden: alles steht still, die Szene
+   ist trotzdem vollständig da.
+6. JavaScript abschalten: Szene und Text bleiben, nur der Copy-Button verschwindet.
+7. Nur mit der Tastatur durchtabben, Fokusring muss überall sichtbar sein.
+8. Impressum und Datenschutz gegenlesen — inhaltlich unverändert, nur neu gestylt.
+9. Legacy-Pfade: `tr1stan.de/impressum`, `/privacy`, `/pages/index`.
 
 ---
 
-## 9. Rollback
+## 8. Rollback
 
 ```bash
 git fetch origin
 git checkout main
-git reset --hard origin/backup/pre-v7-2026-08-10
+git reset --hard origin/backup/pre-v9-2026-08-14
 git push --force-with-lease origin main
 ```
 
-Zielstand ist `1ec3415`, also v6. GitHub Pages baut nach dem Push automatisch neu.
+Zielstand ist `c3ab2b0`, also die monochrome Fassung v7. GitHub Pages baut nach
+dem Push automatisch neu.
 
 Nicht-destruktive Alternative:
 
 ```bash
 git fetch origin
 git checkout main
-git revert --no-commit 9fe5bda^..9fe5bda
-git commit -m "Revert v7"
+git revert --no-commit 9363b2d^..9363b2d
+git commit -m "Revert v9"
 git push origin main
 ```
 
-**Bestehende Branches, keiner gelöscht:** `backup/pre-v7-2026-08-10`,
-`backup/pre-v6-2026-08-10`, `backup/pre-redesign-2026-08-09`, `redesign/v7`,
-`redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
+**Bestehende Branches, keiner gelöscht:** `backup/pre-v9-2026-08-14`,
+`backup/pre-v9-2026-08-10` (identischer Commit), `backup/pre-v7-2026-08-10`,
+`backup/pre-v6-2026-08-10`, `backup/pre-redesign-2026-08-09`, `redesign/v9`,
+`redesign/v7`, `redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
 
 ---
 
 ## Anhang: frühere Fassungen
 
-- **v6** (`backup/pre-v6-2026-08-10`, `0f3ce00`): erste monochrome Visitenkarte,
-  vier Blöcke, Registermarke, Cursor, Korn. Zu blass und zu gleichförmig — daraus
-  entstand v7.
-- **v4** (`backup/pre-redesign-2026-08-09`, `bf18260d`): technisches Datenblatt mit
-  Amber-Akzent und Node-Schema. Schriften und Barrierefreiheits-Arbeit von dort
-  sind bis heute in Gebrauch.
+- **v7** (`backup/pre-v9-2026-08-14`, `c3ab2b0`): monochrome Visitenkarte mit
+  Kreuz-Konstruktionszeichnung, Messschienen und Custom Cursor.
+- **v6** (`backup/pre-v7-2026-08-10`, `1ec3415`): erste monochrome Visitenkarte.
+- **v4** (`backup/pre-redesign-2026-08-09`, `bf18260d`): technisches Datenblatt
+  mit Amber-Akzent. Die selbst gehosteten Schriften stammen von dort und sind
+  bis heute in Gebrauch.
