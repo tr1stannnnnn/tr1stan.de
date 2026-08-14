@@ -30,21 +30,30 @@ Farbfamilien kommen nicht vor, kein Cyan, kein Grün, kein Orange.
 
 ### Die Szene
 
-Sie liegt **nur hinter dem Hero**, nicht hinter der ganzen Seite; alle weiteren
-Abschnitte stehen auf ruhigem dunklem Grund.
+Sie liegt **fixiert hinter der ganzen Seite**: beim Scrollen bleibt sie stehen,
+der Inhalt läuft darüber. Ab Hero-Ende legt sich eine mitscrollende
+Verlaufsfläche darüber, die die Szene nach unten hin ruhiger macht. Jeder
+Inhaltsblock steht zusätzlich auf einer eigenen halbtransparenten Fläche mit
+feiner Neonlinie.
+
+Auf Mobilgeräten ist die Szene **nicht** fixiert — dort ist das Verhalten
+unzuverlässig und flackert. Sie ist am obersten Screenful verankert, darunter
+läuft die Seite auf ruhigem dunklem Grund.
 
 - **Himmel** als vierstufiger Verlauf, harter Schnitt zum Boden am Horizont.
 - **Sterne**: dreizehn Punkte, jeder mit eigener Funkeldauer.
-- **Sonne** sitzt auf dem Horizont. Die Streifen in der unteren Hälfte sind mit
-  einer CSS-Maske ausgeschnitten, dadurch zeigen die Lücken den echten Himmel
-  dahinter statt einer nachgebauten Farbe. Der Schein kommt aus einem weichen
+- **Sonne** sitzt auf dem Horizont und **hinter den Bergen**. Die Streifen der
+  unteren Hälfte sind mit einer CSS-Maske ausgeschnitten; zusätzlich beschneidet
+  der runde Container mit `overflow: hidden` die Scheibe, damit die Streifen
+  nie über den Kreis hinauslaufen können. Der Schein kommt aus einem weichen
   radialen Halo plus `drop-shadow` — kein harter Ring, kein Rechteckrand.
 - **Berge** als Inline-SVG mit `preserveAspectRatio="none"`, dunkle Silhouette in
   Bodenfarbe, obere Kante als Neonlinie. Der Strich nutzt
   `vector-effect="non-scaling-stroke"`, sonst würde ihn die Streckung verzerren.
 - **Horizontlinie** mit Schein nach oben und unten.
 - **Raster** über `perspective` und `rotateX`, Linien als
-  `repeating-linear-gradient`, Bewegung über `background-position`.
+  `repeating-linear-gradient`, Bewegung über `transform` — eine Rasterzelle pro
+  Durchlauf, dadurch nahtlos und ohne Neuzeichnen.
 
 ### Lesbarkeit hat Vorrang
 
@@ -52,6 +61,13 @@ Der Hero-Text steht immer **unterhalb** der Sonne; der Horizont steigt auf kurze
 Viewports selbst an, damit der Name nie in die Sonne wandert. Hinter dem Text
 liegt ein weich auslaufendes dunkles Band — kein Textschatten. Gemessen gegen die
 tatsächlich gerenderten Pixel erreicht der Fließtext dort 17:1.
+
+### Abschnitte
+
+Jeder Block nutzt ein eigenes Muster: Überschrift links neben dem Text,
+breiter Block mit groß gesetzter erster Zeile, nummerierte Positionen mit
+Neon-Ziffern, zentrierte Aussage, drei Begriffe nebeneinander. Dazwischen
+dünne Neon-Trennlinien, die sich beim Sichtbarwerden von links aufziehen.
 
 ### Bewegung
 
