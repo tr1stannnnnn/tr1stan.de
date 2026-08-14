@@ -1,9 +1,9 @@
 # Redesign-Report — tr1stan.de
 
 **Stand:** 2026-08-14
-**Aktuelle Fassung:** v9 — Synthwave in Schwarz und Violett
-**Arbeitsbranch:** `redesign/v9`
-**Backup-Branch:** `backup/pre-v9-2026-08-14`
+**Aktuelle Fassung:** v10 — Synthwave, Szene trägt die ganze Seite
+**Arbeitsbranch:** `redesign/v10`
+**Backup-Branch:** `backup/pre-v10-2026-08-14`
 
 ---
 
@@ -11,215 +11,231 @@
 
 | | |
 |---|---|
-| **Backup-Branch** | `backup/pre-v9-2026-08-14` |
-| **Zeigt auf** | `c3ab2b0` — die Fassung, die vor v9 live war |
+| **Backup-Branch** | `backup/pre-v10-2026-08-14` |
+| **Zeigt auf** | `b45506a` — die Fassung v9, die vor v10 live war |
 | **Status** | gepusht, bleibt bestehen |
 
-Zwei Hinweise dazu:
-
-- Die Aufgabe nannte **v8** als Basis. Im Repository gibt es kein v8: der
-  Live-Stand war **v7** (`c3ab2b0`). Ich habe darauf aufgesetzt und die
-  vorgegebenen Branch-Namen beibehalten.
-- Ich hatte den Backup-Branch zunächst mit dem Datum aus dem alten Kontext
-  angelegt (`backup/pre-v9-2026-08-10`) und danach korrekt datiert neu erstellt.
-  Der Proxy dieser Umgebung lässt kein Löschen von Remote-Branches zu, deshalb
-  existieren beide. **Beide zeigen auf denselben Commit `c3ab2b0`**, maßgeblich
-  ist der mit dem richtigen Datum.
+Der exakte Befehl steht in Abschnitt 8.
 
 ---
 
-## 2. Geänderte Dateien
+## 2. Die beiden Sonnen-Bugs
 
-**Geändert:** `index.html` (Szene, neue Abschnitte), `style.css` (komplett neu),
-`script.js` (Cursor entfernt), `favicon.svg` (Sonne über dem Horizont statt
-Registermarke), `impressum.html`, `datenschutz.html`, `404.html` (nur Styling und
-Asset-Version), `README.md`, `REDESIGN-REPORT.md`.
+Beide waren real und sind jetzt **messbar** behoben, nicht nur nach Augenmaß.
 
-**Neu:** keine Datei. **Gelöscht:** keine Datei.
+**a) Streifen liefen über den Kreis hinaus.** Die Streifen entstanden allein aus
+einer CSS-Maske. Die Maske steuert nur die Deckkraft — die runde Beschneidung
+über `border-radius` griff daneben nicht durch, sodass ein Halbkreis auf einem
+Balkenblock saß. Jetzt beschneidet der Sonnen-Container die Scheibe zusätzlich
+hart mit `border-radius: 50%` und `overflow: hidden`.
 
-### Entfernt, wie verlangt
+*Nachweis:* Ein Pixeltest blendet Berge, Horizontlinie und Halo aus, fotografiert
+die Scheibe und sucht den am weitesten vom Mittelpunkt entfernten Sonnenpixel.
+Ergebnis bei 1280, 1920 und 390 px: **1,000 / 1,002 / 1,004 × Radius**. Vorher
+lag der Wert bei rund 1,49.
 
-Die Kreuz-Konstruktionszeichnung samt Maßlinien und Passmarken; die
-Registermarke im Header (jetzt reiner Text `tr1stan.de`); sämtliche Reste des
-Custom Cursors; das monochrome Farbsystem; die Korn-Textur. Ein eigenes
-Prüfskript sucht nach allen fünf Gruppen und meldet null Treffer.
+**b) Die Sonne lag vor den Bergen.** Die Reihenfolge im Markup war zwar richtig,
+die Scheibe wurde aber trotzdem darüber gemalt. Statt sich auf die
+Dokumentreihenfolge zu verlassen, trägt jetzt jede Szenenebene ein
+ausdrückliches `z-index`: Himmel 1, Sterne 2, Halo 3, Sonne 4, Berge 5,
+Horizontlinie 6, Raster 7 — der Inhalt darüber.
 
----
-
-## 3. Selbst getroffene Entscheidungen
-
-1. **Sonnenstreifen als Maske, nicht als aufgelegte Balken.** Die Lücken zeigen
-   damit den echten Himmelsverlauf dahinter statt einer nachgebauten Farbe, die
-   an dieser Stelle nie exakt gepasst hätte.
-
-2. **`vector-effect="non-scaling-stroke"` an der Bergkante.** Mit
-   `preserveAspectRatio="none"` wird das SVG in der Breite gestreckt — ohne
-   diesen Zusatz würde die Neonlinie mitgestreckt und ungleichmäßig dick.
-
-3. **Der Horizont steigt auf kurzen Viewports selbst an.** Statt `61%` steht dort
-   `min(61%, calc(100% - 21rem))`. Auf 1440 × 700 wäre der Name sonst 15 px in
-   die Sonne geklettert. Damit ist die Vorgabe „Text nie über der Sonne"
-   strukturell abgesichert und nicht nur zufällig erfüllt.
-
-4. **Der Hero ist `calc(100svh - var(--header-h))` hoch.** Der Sticky-Header
-   belegt 58 px im Fluss; mit vollen `100svh` rutschte die Unterzeile bei 320,
-   360, 768 und 1280 exakt um diese 58 px unter die Falz.
-
-5. **Die Hero-Spalte ist breiter als der Fließtext (bis 1400 px).** Bei 1920
-   braucht der Name mit 10vw rund 1150 px; in der 1120-px-Spalte wäre er
-   zweizeilig umgebrochen und dadurch in die Sonne gestiegen.
-
-6. **Der Scrim ist ein senkrechtes Band, kein radiales Feld.** Der erste Versuch
-   mit einem radialen Verlauf brach an der eigenen Box-Kante sichtbar ab — ein
-   dunkles Rechteck neben dem Namen. Das Band läuft seitlich randlos aus.
-
-7. **Das Raster bewegt sich über `background-position`.** Punkt 8 der Vorgabe
-   verlangt Animationen über `transform` und `opacity`, Punkt 3 verlangt für das
-   Raster ausdrücklich `background-position`. Ich bin der spezifischen Vorgabe
-   gefolgt; `background-position` löst ohnehin nur Neuzeichnen aus, kein neues
-   Layout. Alle übrigen Animationen laufen über `transform` und `opacity`.
-
-8. **Mobil wird das Raster verlangsamt, nicht abgeschaltet** (2,5 s auf 7 s pro
-   Rasterzeile). Ganz aus wäre erlaubt gewesen, hätte der Szene aber im
-   Hochformat ihren Charakter genommen.
-
-9. **Das Favicon zeigt jetzt Sonne, Horizont und Rasterlinien.** Es war nicht
-   ausdrücklich gefordert, aber eine monochrome Registermarke als Icon hätte dem
-   kompletten Stilwechsel widersprochen. Datei- und Pfadname sind unverändert.
-
-10. **Abschnittsüberschriften sind Mono in Flieder bei 1,15–1,75 rem.** Damit
-    sind sie klar größer als der Fließtext und klar kleiner als der Name, wie
-    verlangt — der kleine Mono-Kicker aus v7 wäre kleiner als der Fließtext
-    gewesen.
-
-11. **Umlaute ausgeschrieben.** Die Vorgabe kam in ASCII-Umschrift („Ueber das
-    Zocken"); auf der Seite steht die korrekte deutsche Schreibweise. Wortlaut
-    und Satzbau sind unverändert.
+*Nachweis:* Derselbe Test zählt die Sonnenpixel einmal mit ausgeblendeten und
+einmal mit sichtbaren Bergen. Die Berge verdecken **5,1 bis 5,6 %** der Scheibe.
+Läge die Sonne davor, wäre der Wert null.
 
 ---
 
-## 4. Prüfergebnisse
+## 3. Szene als durchgehender Hintergrund
 
-**Browser-Suite — 173 Einzelprüfungen, alle bestanden.** Unter anderem:
+Die Szene liegt jetzt in einem fixierten Container (`position: fixed`,
+`inset: 0`, `z-index: -3`, `pointer-events: none`) hinter der ganzen Seite. Beim
+Scrollen bleibt sie stehen, der Inhalt läuft darüber; Sonne, Berge und Horizont
+behalten ihre Position im Viewport, das Raster läuft durchgehend weiter.
 
-- keine externen Requests, keine JS-Fehler, beide Fonts geladen
+Damit der Text lesbar bleibt, greifen zwei Schichten:
+
+1. **Die Abdunklung** beginnt am Hero-Ende und scrollt mit dem Dokument. Sie
+   verläuft nach unten in Richtung dunkel — die Szene bleibt erkennbar, wird
+   aber ruhiger. Sie braucht kein JavaScript.
+2. **Jeder Inhaltsblock** steht auf einer eigenen halbtransparenten Fläche mit
+   feiner Neonlinie als Rand. Kein Text steht direkt auf dem Raster.
+
+**Auf Mobilgeräten ist die Szene bewusst nicht fixiert.** Fixierte Hintergründe
+sind dort unzuverlässig: mehrere Browser zeichnen sie beim Einklappen der
+Adressleiste verzögert neu, was als Springen wahrgenommen wird. Die Szene ist
+deshalb am obersten Screenful verankert, darunter läuft die Seite auf ruhigem
+dunklem Grund. Das ist die Ausweichlösung, die die Vorgabe ausdrücklich erlaubt.
+
+---
+
+## 4. Die Abschnitte
+
+Fünf verschiedene Muster, kein einziges wiederholt sich:
+
+| Abschnitt | Muster |
+|---|---|
+| Wie es anfing | zweispaltig, Überschrift links, Text rechts |
+| Warum es geblieben ist | breiter Block, erste Zeile per `::first-line` deutlich größer |
+| Was ich mache | nummerierte Positionen, Ziffern groß in Neon, Trennlinie je Zeile, Hover-Aufhellung |
+| Ehrlich gesagt | große ruhige Aussage, zentriert, mit Luft |
+| Was als Nächstes kommt | drei Begriffe nebeneinander |
+
+Alle Blöcke nutzen die volle Breite des Inhaltsrasters — maschinell geprüft: alle
+sechs Panels sind exakt so breit wie die Inhaltsspalte. Der größte vertikale
+Abstand zwischen zwei Blöcken beträgt **34 px bei 900 px Viewporthöhe**, die
+Vorgabe erlaubt ein Drittel, also 300 px. Zwischen den Abschnitten laufen dünne
+Neon-Trennlinien über die volle Breite.
+
+---
+
+## 5. Bewegung unterhalb des Hero
+
+- Abschnitte faden ein und schieben sich leicht nach oben.
+- Die Trennlinien ziehen sich beim Sichtbarwerden von links auf.
+- Listenzeilen kommen versetzt nach, **60 ms pro Zeile**, gedeckelt bei 300 ms.
+- Hover auf Listenzeilen, Buttons und Links hellt auf, ohne Sprung.
+- Nur `transform` und `opacity`, einmalig, nicht in Schleife.
+
+**Der Startzustand wird ausschließlich aus JavaScript gesetzt**, nie im
+Stylesheet: das Skript schreibt die Anfangswerte als Inline-Styles, unterdrückt
+für diesen einen Frame die Übergänge und gibt sie danach frei. Läuft das Skript
+nicht, ist schlicht nichts versteckt. Ein Test ohne JavaScript bestätigt: alle
+21 Abschnitte, Linien und Zeilen sind voll sichtbar.
+
+---
+
+## 6. Prüfergebnisse
+
+**Browser-Suite — 200 Einzelprüfungen, alle bestanden.** Darunter:
+
+- die beiden Sonnen-Pixeltests aus Abschnitt 2, bei drei Bildschirmbreiten
+- Stapelreihenfolge der sieben Szenenebenen als aufsteigende z-index-Kette
+- Szene nach 2000 px Scrollen weiterhin im Viewport, hinter allem, ohne Pointer-Events
 - kein horizontales Scrollen bei **320 / 360 / 390 / 430 / 768 / 1280 / 1920**
-- **Text nie über der Sonne**, geprüft bei 320, 390, 768, 1280 und 1920, zusätzlich
-  bei zwölf Kombinationen aus Breite und Höhe inklusive kurzer Desktop-Fenster
-- **Kontrast gegen die tatsächlich gerenderten Pixel**: Der Text wird versteckt,
-  die Seite fotografiert und der hellste Pixel hinter jedem Textblock gemessen.
-  Ergebnis unter anderem Name 15,6:1, Unterzeile 17,2:1, Abschnittstitel 15,0:1 —
-  Fließtext liegt überall über der geforderten 7:1
-- Szene: `aria-hidden`, `pointer-events: none`, `z-index -3` unter dem Inhalt,
-  alle neun Teile vorhanden, Berge und Raster sitzen auf ±3 px genau auf der
-  Horizontlinie, Sonne ebenso
-- **pausiert bei `document.hidden`** (Raster, Halo und Sterne gleichzeitig geprüft)
-- `prefers-reduced-motion`: keinerlei Animation, Szene vollständig sichtbar
-- ohne JavaScript: Szene sichtbar, Inhalt lesbar, Mailadresse erreichbar
-- Tap-Ziele mindestens 44 × 44 px auf allen vier Seiten, nichts hängt an Hover
-- genau eine `h1` je Seite, keine Ebenensprünge, Fokusring sichtbar,
-  Copy-Button schreibt die Adresse, alle Links, Anker und Redirects
+- Text nie über der Sonne, geprüft bei sieben Kombinationen aus Breite und Höhe
+  inklusive kurzer Desktop-Fenster
+- **Kontrast gegen die tatsächlich gerenderten Pixel**: Text wird ausgeblendet,
+  die Seite fotografiert, der hellste Pixel hinter jedem Textblock gemessen.
+  Alle Fließtexte über 7:1, alle Labels über 4,5:1, bei 1280 und bei 390 px
+- Panels mit eigener Fläche und Rand, volle Rasterbreite, Blockabstand unter
+  einem Drittel der Viewporthöhe, fünf unterschiedliche Muster nachgewiesen
+- Bewegung: Startzustand armiert, Versatz 60 ms, nach dem Scrollen alles freigegeben
+- ohne JavaScript und bei `prefers-reduced-motion`: nichts versteckt, Szene sichtbar
+- Tap-Ziele mindestens 44 × 44 px auf allen vier Seiten, Fokusring sichtbar,
+  genau eine `h1` je Seite, alle Links, Anker und Redirects
 
-**Statische Gates — 47 Prüfungen, alle bestanden:** keiner der verbotenen
-Begriffe außerhalb der Rechtsseiten (inklusive `6a2a`), keine Prozentwerte oder
-Balken, keine Ressource von fremden Hosts, **keine Bilddatei und kein `img`-Tag**,
-CNAME unverändert, `theme-color: #06020C` auf allen Seiten, **alle 14 Farbwerte
-stammen aus der vorgegebenen Palette** (Prüfung über Hex und `rgba()`), alle 16
-Textbausteine wortgleich vorhanden, Rechtstexte zeichengenau identisch.
+**Statische Gates — 53 Prüfungen, alle bestanden:** keine verbotenen Begriffe
+außerhalb der Rechtsseiten, keine Prozentwerte oder Balken, keine fremd geladene
+Ressource, keine Bilddatei und kein `img`-Tag, CNAME unverändert, `theme-color`
+konsistent, **alle Farbwerte aus der vorgegebenen Palette**, alle 17 Textbausteine
+wortgleich, Rechtstexte zeichengenau identisch, keine Reste von Kreuzzeichnung,
+Registermarke, Cursor oder Korn.
 
 ### Gefundene und behobene Fehler
 
-1. **Scrim als sichtbares Rechteck.** Der radiale Verlauf brach an seiner Box-Kante
-   ab; im Screenshot bei 1920 stand ein dunkles Rechteck links neben dem Namen.
-2. **Unterzeile unter der Falz** bei 320, 360, 768 und 1280 — Ursache war die
-   Höhe des Sticky-Headers.
-3. **Name stieg in die Sonne** bei 1440 × 700, 1600 × 760 und 1920 × 850. Zwei
-   Ursachen: zweizeiliger Umbruch bei 1920 und zu wenig Platz unter dem Horizont.
-4. **Tap-Ziel „Start" im Footer nur 42 px breit.**
+1. **Querscrollen auf allen Breiten.** Der Hero-Scrim reicht bewusst 50 vw über
+   beide Kanten hinaus; ohne `overflow: hidden` am Hero verbreiterte er das
+   Dokument um bis zu 650 px.
+2. **Der Zeilenversatz verschwand.** Das Skript setzte `transitionDelay` und
+   danach `style.transition = ""` — die Kurzform löschte den Versatz wieder mit.
+   Der Versatz wird jetzt danach gesetzt.
+3. **Übersprungene Blöcke blieben unsichtbar.** Wer per Anker springt oder sehr
+   schnell scrollt, löst beim Observer keinen Zustandswechsel aus. Ein
+   rAF-gedrosselter Scroll-Sweep gibt genau diese Blöcke frei und hängt sich
+   selbst ab, sobald nichts mehr aussteht.
 
-Drei weitere Treffer waren Fehler in meinen Prüfskripten, nicht auf der Seite:
-eine zu kurze Wartezeit ließ die Einblendung von `.mail` als Hover-Abhängigkeit
-erscheinen, ein Rect wurde an `getComputedStyle` übergeben, und ein Testlauf
-maß vor dem Scrollen.
+Zwei weitere Treffer waren Fehler in meinem Prüfskript: die Horizontlinie wurde
+bei der Kreismessung mitgezählt (sie ist selbst hell), und die Panelbreite wurde
+gegen die Außen- statt die Innenbreite der Inhaltsspalte gemessen.
+
+### Sichtprüfung
+
+18 Screenshots — 320, 390, 430, 768, 1280 und 1920 px, je oben, in der Mitte und
+unten. Angesehen und beurteilt: die Sonne ist überall kreisrund, sie sinkt hinter
+den Bergen, die Szene bleibt beim Scrollen sichtbar, und es gibt keine große
+leere Fläche mehr.
 
 ---
 
-## 5. Deploy
+## 7. Deploy
 
 | | |
 |---|---|
-| Merge | `redesign/v9` mit `--no-ff` nach `main` |
-| Push | `c3ab2b0..9363b2d` |
-| Pages-Lauf | `pages build and deployment` für `9363b2d` — **completed / success** |
+| Merge | `redesign/v10` mit `--no-ff` nach `main` |
+| Merge-Commit | `22afdde` |
+| Pages-Lauf | `pages build and deployment` für `22afdde` — **completed / success** |
 | Rückfall nötig? | Nein. Der Backup-Branch wurde nicht angefasst. |
 
 ---
 
-## 6. Offene Punkte und Risiken
+## 8. Offene Punkte und Risiken
 
 | Punkt | Einschätzung |
 |---|---|
-| **Live-Abruf nicht möglich** | Der Egress-Proxy blockt `tr1stan.de`. Der Deploy ist nur über die Actions-API bestätigt. **Bitte selbst im Browser gegenprüfen.** |
-| `mask-composite` | Die Sonnenstreifen brauchen `mask-composite: add` (mit `-webkit-`-Fallback). In sehr alten Browsern wäre die Sonne eine volle Scheibe ohne Streifen — sie verschwindet nicht, sie verliert nur die Streifen. |
-| Rastergeschwindigkeit | 2,5 s pro Rasterzeile ist der Richtwert aus der Vorgabe. Wer es ruhiger mag, erhöht `--grid-speed`. |
-| Raster auf schwachen Geräten | Ein perspektivisch gedrehtes Element mit animierter `background-position` ist teurer als eine reine Transform-Animation. Mobil auf 7 s gedrosselt; falls es dort dennoch ruckelt, `--grid-speed` weiter erhöhen oder die Animation unter 700 px ganz abschalten. |
-| Kontrast auf der Szene | Gemessen am hellsten Pixel hinter dem Text. Wer den Scrim schwächer macht, muss neu messen. |
-| `→` fehlt im Zeichensatz | Bleibt bestehen, `latin`-Subset. |
+| **Live-Abruf nicht möglich** | Der Egress-Proxy blockt `tr1stan.de`. Der Deploy ist nur über die Actions-API bestätigt. **Bitte selbst im Browser gegenprüfen**, besonders auf einem echten Telefon. |
+| Fixierter Hintergrund auf Mobil | Bewusst abgeschaltet. Ich konnte das Flackern nur nachlesen, nicht auf echter Hardware messen — der Container hat keine mobilen Browser. |
+| Szene hinter den Panels | Die Panels sind zu 68 % deckend, die Szene schimmert durch. Wer es ruhiger will, erhöht `--panel-bg`. |
+| `mask-composite` | Die Streifen brauchen es weiterhin. Fällt es aus, ist die Sonne eine volle Scheibe ohne Streifen — sie bleibt rund, weil der Container beschneidet. |
+| Rastergeschwindigkeit | 2,5 s pro Rasterzelle am Desktop, 7 s mobil. Über `--grid-speed` änderbar. |
+| Ruckeln beim Scrollen | Nicht messbar aufgetreten; die Szene animiert ausschließlich über `transform`. Auf sehr alter Hardware bleibt das Restrisiko eines fixierten Hintergrunds. |
 
 ---
 
-## 7. Was du manuell prüfen solltest
+## 9. Was du manuell prüfen solltest
 
-1. Startseite auf dem Desktop: Sonne mittig über dem Horizont, Berge davor,
-   Raster läuft ruhig auf dich zu, der Name steht klar darunter.
-2. Fenster schmal und niedrig ziehen — der Name darf die Sonne nie berühren und
-   die Unterzeile nie unter den Rand rutschen.
-3. Auf dem Handy im Hochformat: Sonne kleiner, Berge niedriger, Raster flacher,
-   Bewegung deutlich langsamer.
-4. Tab wechseln und zurückkommen: Die Szene war währenddessen eingefroren.
-5. Bewegung reduzieren einschalten und neu laden: alles steht still, die Szene
-   ist trotzdem vollständig da.
-6. JavaScript abschalten: Szene und Text bleiben, nur der Copy-Button verschwindet.
-7. Nur mit der Tastatur durchtabben, Fokusring muss überall sichtbar sein.
-8. Impressum und Datenschutz gegenlesen — inhaltlich unverändert, nur neu gestylt.
-9. Legacy-Pfade: `tr1stan.de/impressum`, `/privacy`, `/pages/index`.
+1. Langsam durch die ganze Seite scrollen: Die Szene muss stehen bleiben und
+   durchgehend sichtbar sein, der Inhalt darüber laufen.
+2. Die Sonne aus der Nähe ansehen: rund an jeder Stelle, und sie steckt hinter
+   den Bergen.
+3. Beim Hereinscrollen: Blöcke faden ein, die Linien ziehen sich von links auf,
+   die Listenzeilen kommen kurz nacheinander.
+4. Mit der Maus über die Listenzeilen und die Buttons fahren — nur Aufhellung,
+   kein Springen.
+5. Auf dem Handy: Szene oben, darunter ruhiger Grund, keine springenden
+   Hintergründe beim Scrollen, Raster deutlich langsamer.
+6. JavaScript abschalten: **alle** Abschnitte müssen sofort sichtbar sein.
+7. Bewegung reduzieren einschalten: nichts bewegt sich, alles ist sichtbar.
+8. Tab wechseln und zurückkommen: Die Szene war eingefroren.
+9. Nur mit der Tastatur durchtabben, Fokusring muss überall sichtbar sein.
+10. Impressum und Datenschutz gegenlesen — inhaltlich unverändert.
 
 ---
 
-## 8. Rollback
+## 10. Rollback
 
 ```bash
 git fetch origin
 git checkout main
-git reset --hard origin/backup/pre-v9-2026-08-14
+git reset --hard origin/backup/pre-v10-2026-08-14
 git push --force-with-lease origin main
 ```
 
-Zielstand ist `c3ab2b0`, also die monochrome Fassung v7. GitHub Pages baut nach
-dem Push automatisch neu.
+Zielstand ist `b45506a`, also v9. GitHub Pages baut nach dem Push automatisch neu.
 
 Nicht-destruktive Alternative:
 
 ```bash
 git fetch origin
 git checkout main
-git revert --no-commit 9363b2d^..9363b2d
-git commit -m "Revert v9"
+git revert --no-commit 22afdde^..22afdde
+git commit -m "Revert v10"
 git push origin main
 ```
 
-**Bestehende Branches, keiner gelöscht:** `backup/pre-v9-2026-08-14`,
-`backup/pre-v9-2026-08-10` (identischer Commit), `backup/pre-v7-2026-08-10`,
-`backup/pre-v6-2026-08-10`, `backup/pre-redesign-2026-08-09`, `redesign/v9`,
-`redesign/v7`, `redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
+**Bestehende Branches, keiner gelöscht:** `backup/pre-v10-2026-08-14`,
+`backup/pre-v9-2026-08-14`, `backup/pre-v9-2026-08-10` (gleicher Commit),
+`backup/pre-v7-2026-08-10`, `backup/pre-v6-2026-08-10`,
+`backup/pre-redesign-2026-08-09`, `redesign/v10`, `redesign/v9`, `redesign/v7`,
+`redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
 
 ---
 
 ## Anhang: frühere Fassungen
 
+- **v9** (`backup/pre-v10-2026-08-14`, `b45506a`): erste Synthwave-Fassung, Szene
+  nur hinter dem Hero, Sonne noch mit den beiden Bugs aus Abschnitt 2.
 - **v7** (`backup/pre-v9-2026-08-14`, `c3ab2b0`): monochrome Visitenkarte mit
-  Kreuz-Konstruktionszeichnung, Messschienen und Custom Cursor.
-- **v6** (`backup/pre-v7-2026-08-10`, `1ec3415`): erste monochrome Visitenkarte.
+  Kreuz-Konstruktionszeichnung.
 - **v4** (`backup/pre-redesign-2026-08-09`, `bf18260d`): technisches Datenblatt
-  mit Amber-Akzent. Die selbst gehosteten Schriften stammen von dort und sind
-  bis heute in Gebrauch.
+  mit Amber-Akzent. Die selbst gehosteten Schriften stammen von dort.
