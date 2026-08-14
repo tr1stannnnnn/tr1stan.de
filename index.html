@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tristan Witt — tr1stan.de</title>
   <meta name="description" content="Private Seite von Tristan Witt über Technik, Basteleien und Automatisierung." />
-  <meta name="theme-color" content="#0A0A0A" />
+  <meta name="theme-color" content="#06020C" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://tr1stan.de/" />
 
@@ -16,40 +16,20 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=11" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=12" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=11" />
+  <link rel="stylesheet" href="/style.css?v=12" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <!-- background layers: behind everything, never interactive -->
-  <div class="ambient" aria-hidden="true"><i></i><i></i></div>
-  <svg class="grain" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-    <filter id="grainFilter">
-      <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="2" stitchTiles="stitch" />
-      <feColorMatrix type="saturate" values="0" />
-    </filter>
-    <rect width="100%" height="100%" filter="url(#grainFilter)" />
-  </svg>
-
-  <!-- measuring rails in the outer margins, large screens only -->
-  <div class="frame" aria-hidden="true">
-    <i class="frame-rail frame-rail--l"></i>
-    <i class="frame-rail frame-rail--r"></i>
-    <span class="frame-label">tr1stan.de</span>
-  </div>
-
   <header class="hdr">
     <div class="hdr-inner shell">
-      <a class="brand" href="#top" aria-label="tr1stan.de, zum Seitenanfang">
-        <span class="mark" aria-hidden="true"></span>
-        <span class="brand-name">tr1stan.de</span>
-      </a>
+      <a class="brand" href="#top">tr1stan.de</a>
     </div>
   </header>
 
@@ -57,114 +37,105 @@
 
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="top">
-      <div class="shell">
-        <span class="passmark passmark--tr" aria-hidden="true"></span>
-        <div class="hero-grid">
-          <div>
-            <h1 class="hero-name" data-reveal>Tristan Witt</h1>
-            <p class="hero-line" data-reveal>Private Seite über Technik, Basteleien und Automatisierung.</p>
-          </div>
 
-          <div class="cross-wrap" data-reveal>
-            <!-- decorative construction drawing; carries no information -->
-            <svg class="cross" viewBox="0 0 460 520" aria-hidden="true" focusable="false"
-                 xmlns="http://www.w3.org/2000/svg">
-              <!-- construction: circumscribing circle and diagonals of the bounding square -->
-              <g class="cx-aux cx-breathe">
-                <circle cx="210" cy="250" r="150" />
-                <path d="M60 100 L360 400 M360 100 L60 400" />
-              </g>
+      <!-- decorative scene: sky, stars, sun, ridge, horizon, grid -->
+      <div class="scene" aria-hidden="true">
+        <div class="scene-sky"></div>
 
-              <!-- centre axes, dash-dot -->
-              <path class="cx-axis" d="M24 250 H400" />
-              <path class="cx-axis" d="M210 64 V436" />
+        <div class="stars">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
 
-              <!-- the cross itself: equal arms, outline only -->
-              <path class="cx-contour"
-                    d="M160 100 H260 V200 H360 V300 H260 V400 H160 V300 H60 V200 H160 Z" />
+        <div class="sun">
+          <span class="sun-halo"></span>
+          <span class="sun-disc"></span>
+        </div>
 
-              <!-- passmarks at the corners of the bounding square -->
-              <g class="cx-mark">
-                <path d="M55 100 H65 M60 95 V105" />
-                <path d="M355 100 H365 M360 95 V105" />
-                <path d="M55 400 H65 M60 395 V405" />
-                <path d="M355 400 H365 M360 395 V405" />
-              </g>
+        <div class="grid"><div class="grid-floor"></div></div>
 
-              <!-- overall width, dimensioned along the lower edge -->
-              <path class="cx-ext" d="M60 400 V468 M360 400 V468" />
-              <path class="cx-dim" d="M60 460 H360" />
-              <path class="cx-arrow" d="M60 460 L71 456.5 L71 463.5 Z" />
-              <path class="cx-arrow" d="M360 460 L349 456.5 L349 463.5 Z" />
-              <text class="cx-t" x="210" y="452" text-anchor="middle">6a</text>
+        <svg class="ridge" viewBox="0 0 1200 160" preserveAspectRatio="none" focusable="false"
+             xmlns="http://www.w3.org/2000/svg">
+          <path class="ridge-fill"
+                d="M0 160 L0 104 L58 126 L118 72 L168 110 L232 48 L292 96 L344 66 L402 118
+                   L470 40 L528 92 L590 58 L646 112 L706 80 L768 124 L826 54 L884 100 L942 70
+                   L1000 116 L1060 86 L1128 120 L1200 94 L1200 160 Z" />
+          <polyline class="ridge-line" vector-effect="non-scaling-stroke"
+                    points="0,104 58,126 118,72 168,110 232,48 292,96 344,66 402,118
+                            470,40 528,92 590,58 646,112 706,80 768,124 826,54 884,100
+                            942,70 1000,116 1060,86 1128,120 1200,94" />
+        </svg>
 
-              <!-- arm width, dimensioned along the right edge -->
-              <path class="cx-ext" d="M360 200 H424 M360 300 H424" />
-              <path class="cx-dim" d="M416 200 V300" />
-              <path class="cx-arrow" d="M416 200 L412.5 211 L419.5 211 Z" />
-              <path class="cx-arrow" d="M416 300 L412.5 289 L419.5 289 Z" />
-              <text class="cx-t" x="430" y="254">2a</text>
+        <div class="horizon"></div>
+      </div>
 
-              <!-- axis designations -->
-              <text class="cx-t cx-t--sm" x="24" y="243">X</text>
-              <text class="cx-t cx-t--sm" x="214" y="58">Y</text>
-            </svg>
-          </div>
+      <div class="hero-inner shell">
+        <div class="hero-copy">
+          <h1 class="hero-name">Tristan Witt</h1>
+          <p class="hero-line">Private Seite über Technik, Basteleien und Automatisierung.</p>
         </div>
       </div>
     </section>
 
-    <!-- ===================== ÜBER MICH ===================== -->
-    <section class="section section--b" id="ueber" aria-labelledby="ueberTitle">
+    <!-- ===================== WIE ES ANFING ===================== -->
+    <section class="section section--b" id="anfang" aria-labelledby="anfangTitle">
       <div class="shell">
-        <span class="passmark passmark--tl" aria-hidden="true"></span>
-        <h2 class="sec-kicker" id="ueberTitle">Über mich</h2>
-
-        <!-- pattern one: label beside a stack, one continuous rule -->
-        <div class="split" data-reveal>
-          <h3 class="split-label">Pros</h3>
-          <ul class="stack">
-            <li>Linux und Docker im Alltag</li>
-            <li>Homelab-Bastler mit Raspberry Pi und Home Assistant</li>
-            <li>Netzwerk und Fernzugriff</li>
-            <li>Automatisierung statt Handarbeit</li>
-            <li>kleine Tools in Python und PHP wenn mich was nervt</li>
-          </ul>
-        </div>
-
-        <!-- pattern two: a held statement, offset into the grid -->
-        <div class="statement" data-reveal style="margin-top: var(--sp-2xl)">
-          <h3 class="statement-label">Cons</h3>
-          <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
-        </div>
-
-        <div class="statement" data-reveal style="margin-top: var(--sp-xl)">
-          <h3 class="statement-label">Was als Nächstes kommt</h3>
-          <p class="statement-text">Monitoring, mehr Automatisierung, Security tiefer verstehen.</p>
+        <h2 class="sec-title" id="anfangTitle">Wie es anfing</h2>
+        <div data-reveal>
+          <p class="statement-text">Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
+          <p class="statement-text">Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
         </div>
       </div>
     </section>
 
-    <!-- ===================== BASTELEIEN ===================== -->
-    <section class="section section--a" id="basteleien" aria-labelledby="bastelnTitle">
+    <!-- ===================== WARUM ES GEBLIEBEN IST ===================== -->
+    <section class="section section--a section--rule" id="warum" aria-labelledby="warumTitle">
       <div class="shell">
-        <h2 class="sec-kicker" id="bastelnTitle">Basteleien</h2>
+        <h2 class="sec-title" id="warumTitle">Warum es geblieben ist</h2>
+        <div class="twocol" data-reveal>
+          <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
+          <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
+        </div>
+      </div>
+    </section>
 
-        <!-- pattern three: numbered positions, no rules -->
-        <ol class="parts" data-reveal>
-          <li><span class="parts-no">01</span><span class="parts-txt">Skripte, die mir wiederkehrende Handgriffe abnehmen.</span></li>
-          <li><span class="parts-no">02</span><span class="parts-txt">Container aufsetzen, zerlegen, neu bauen.</span></li>
-          <li><span class="parts-no">03</span><span class="parts-txt">Dem Zuhause ein paar Automatiken beibringen.</span></li>
-          <li><span class="parts-no">04</span><span class="parts-txt">Netzwerkkram so lange drehen, bis er sitzt.</span></li>
+    <!-- ===================== WAS ICH MACHE ===================== -->
+    <section class="section section--c" id="machen" aria-labelledby="machenTitle">
+      <div class="shell">
+        <h2 class="sec-title" id="machenTitle">Was ich mache</h2>
+        <ol class="numbers" data-reveal>
+          <li><span class="numbers-no">01</span><span class="numbers-txt">Linux und Docker im Alltag</span></li>
+          <li><span class="numbers-no">02</span><span class="numbers-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
+          <li><span class="numbers-no">03</span><span class="numbers-txt">Netzwerk und Fernzugriff</span></li>
+          <li><span class="numbers-no">04</span><span class="numbers-txt">Automatisierung statt Handarbeit</span></li>
+          <li><span class="numbers-no">05</span><span class="numbers-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
         </ol>
       </div>
     </section>
 
+    <!-- ===================== EHRLICH GESAGT ===================== -->
+    <section class="section section--b section--rule" id="ehrlich" aria-labelledby="ehrlichTitle">
+      <div class="shell">
+        <h2 class="sec-title" id="ehrlichTitle">Ehrlich gesagt</h2>
+        <div class="statement--aside" data-reveal>
+          <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+          <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WAS ALS NÄCHSTES KOMMT ===================== -->
+    <section class="section section--a" id="naechstes" aria-labelledby="naechstesTitle">
+      <div class="shell">
+        <h2 class="sec-title" id="naechstesTitle">Was als Nächstes kommt</h2>
+        <p class="oneline" data-reveal>Monitoring, mehr Automatisierung, Security tiefer verstehen.</p>
+      </div>
+    </section>
+
     <!-- ===================== KONTAKT ===================== -->
-    <section class="section section--c" id="kontakt" aria-labelledby="kontaktTitle">
+    <section class="section section--c section--rule" id="kontakt" aria-labelledby="kontaktTitle">
       <div class="shell contact">
-        <span class="passmark passmark--bl" aria-hidden="true"></span>
-        <h2 class="sec-kicker" id="kontaktTitle">Kontakt</h2>
+        <h2 class="sec-title" id="kontaktTitle">Kontakt</h2>
 
         <a class="mail" href="mailto:chef@tr1stan.de" data-reveal>chef@tr1stan.de</a>
 
@@ -191,6 +162,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=11" defer></script>
+  <script src="/script.js?v=12" defer></script>
 </body>
 </html>
