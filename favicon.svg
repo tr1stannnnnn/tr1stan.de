@@ -1,4 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="tr1stan.de">
-  <rect width="128" height="128" fill="#0A0A0A"/>
-  <path d="M64 30v68M30 64h68" stroke="#ECEAE6" stroke-width="6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="tr1stan.de">
+  <defs>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FEF3C7"/>
+      <stop offset=".52" stop-color="#FDA4D3"/>
+      <stop offset="1" stop-color="#C026D3"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" fill="#06020C"/>
+  <circle cx="32" cy="28" r="16" fill="url(#sun)"/>
+  <g fill="#06020C">
+    <rect x="14" y="30" width="36" height="2.4"/>
+    <rect x="14" y="34.4" width="36" height="2.4"/>
+    <rect x="14" y="38.8" width="36" height="2.4"/>
+  </g>
+  <rect x="0" y="43.4" width="64" height="1.8" fill="#FBE4FF"/>
+  <g stroke="#E879F9" stroke-width="1.4" opacity=".8">
+    <path d="M32 45.2 L20 64M32 45.2 L44 64M32 45.2 L4 64M32 45.2 L60 64"/>
+    <path d="M0 52h64M0 58h64"/>
+  </g>
 </svg>
