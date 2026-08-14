@@ -16,16 +16,46 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=12" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=13" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=12" />
+  <link rel="stylesheet" href="/style.css?v=13" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
+
+  <!-- decorative scene, fixed behind the whole page -->
+  <div class="scene" aria-hidden="true">
+    <div class="scene-sky"></div>
+
+    <div class="stars">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <div class="sun-halo"><i></i></div>
+
+    <div class="sun"><div class="sun-body"></div></div>
+
+    <svg class="ridge" viewBox="0 0 1200 160" preserveAspectRatio="none" focusable="false"
+         xmlns="http://www.w3.org/2000/svg">
+      <path class="ridge-fill"
+            d="M0 160 L0 104 L58 126 L118 72 L168 110 L232 48 L292 96 L344 66 L402 118
+               L470 40 L528 92 L590 58 L646 112 L706 80 L768 124 L826 54 L884 100 L942 70
+               L1000 116 L1060 86 L1128 120 L1200 94 L1200 160 Z" />
+      <polyline class="ridge-line" vector-effect="non-scaling-stroke"
+                points="0,104 58,126 118,72 168,110 232,48 292,96 344,66 402,118
+                        470,40 528,92 590,58 646,112 706,80 768,124 826,54 884,100
+                        942,70 1000,116 1060,86 1128,120 1200,94" />
+    </svg>
+
+    <div class="horizon"></div>
+
+    <div class="grid"><div class="grid-floor"></div></div>
+  </div>
 
   <header class="hdr">
     <div class="hdr-inner shell">
@@ -34,41 +64,10 @@
   </header>
 
   <main id="content">
+    <div class="veil" aria-hidden="true"></div>
 
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="top">
-
-      <!-- decorative scene: sky, stars, sun, ridge, horizon, grid -->
-      <div class="scene" aria-hidden="true">
-        <div class="scene-sky"></div>
-
-        <div class="stars">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          <i></i><i></i><i></i><i></i><i></i><i></i>
-        </div>
-
-        <div class="sun">
-          <span class="sun-halo"></span>
-          <span class="sun-disc"></span>
-        </div>
-
-        <div class="grid"><div class="grid-floor"></div></div>
-
-        <svg class="ridge" viewBox="0 0 1200 160" preserveAspectRatio="none" focusable="false"
-             xmlns="http://www.w3.org/2000/svg">
-          <path class="ridge-fill"
-                d="M0 160 L0 104 L58 126 L118 72 L168 110 L232 48 L292 96 L344 66 L402 118
-                   L470 40 L528 92 L590 58 L646 112 L706 80 L768 124 L826 54 L884 100 L942 70
-                   L1000 116 L1060 86 L1128 120 L1200 94 L1200 160 Z" />
-          <polyline class="ridge-line" vector-effect="non-scaling-stroke"
-                    points="0,104 58,126 118,72 168,110 232,48 292,96 344,66 402,118
-                            470,40 528,92 590,58 646,112 706,80 768,124 826,54 884,100
-                            942,70 1000,116 1060,86 1128,120 1200,94" />
-        </svg>
-
-        <div class="horizon"></div>
-      </div>
-
       <div class="hero-inner shell">
         <div class="hero-copy">
           <h1 class="hero-name">Tristan Witt</h1>
@@ -77,69 +76,83 @@
       </div>
     </section>
 
-    <!-- ===================== WIE ES ANFING ===================== -->
-    <section class="section section--b" id="anfang" aria-labelledby="anfangTitle">
-      <div class="shell">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== WIE ES ANFING — Überschrift links, Text rechts ===== -->
+    <section class="block shell" id="anfang" aria-labelledby="anfangTitle">
+      <div class="panel split" data-reveal>
         <h2 class="sec-title" id="anfangTitle">Wie es anfing</h2>
-        <div data-reveal>
-          <p class="statement-text">Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
-          <p class="statement-text">Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
+        <div class="split-body">
+          <p>Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
+          <p>Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
         </div>
       </div>
     </section>
 
-    <!-- ===================== WARUM ES GEBLIEBEN IST ===================== -->
-    <section class="section section--a section--rule" id="warum" aria-labelledby="warumTitle">
-      <div class="shell">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== WARUM ES GEBLIEBEN IST — breiter Block, erste Zeile groß ===== -->
+    <section class="block shell" id="warum" aria-labelledby="warumTitle">
+      <div class="panel" data-reveal>
         <h2 class="sec-title" id="warumTitle">Warum es geblieben ist</h2>
-        <div class="twocol" data-reveal>
+        <div class="leadblock" style="margin-top: var(--sp-md)">
           <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
           <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
         </div>
       </div>
     </section>
 
-    <!-- ===================== WAS ICH MACHE ===================== -->
-    <section class="section section--c" id="machen" aria-labelledby="machenTitle">
-      <div class="shell">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== WAS ICH MACHE — nummerierte Positionen ===== -->
+    <section class="block shell" id="machen" aria-labelledby="machenTitle">
+      <div class="panel" data-reveal>
         <h2 class="sec-title" id="machenTitle">Was ich mache</h2>
-        <ol class="numbers" data-reveal>
-          <li><span class="numbers-no">01</span><span class="numbers-txt">Linux und Docker im Alltag</span></li>
-          <li><span class="numbers-no">02</span><span class="numbers-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
-          <li><span class="numbers-no">03</span><span class="numbers-txt">Netzwerk und Fernzugriff</span></li>
-          <li><span class="numbers-no">04</span><span class="numbers-txt">Automatisierung statt Handarbeit</span></li>
-          <li><span class="numbers-no">05</span><span class="numbers-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
+        <ol class="rows" data-stagger style="margin-top: var(--sp-md)">
+          <li><span class="rows-no">01</span><span class="rows-txt">Linux und Docker im Alltag</span></li>
+          <li><span class="rows-no">02</span><span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
+          <li><span class="rows-no">03</span><span class="rows-txt">Netzwerk und Fernzugriff</span></li>
+          <li><span class="rows-no">04</span><span class="rows-txt">Automatisierung statt Handarbeit</span></li>
+          <li><span class="rows-no">05</span><span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
         </ol>
       </div>
     </section>
 
-    <!-- ===================== EHRLICH GESAGT ===================== -->
-    <section class="section section--b section--rule" id="ehrlich" aria-labelledby="ehrlichTitle">
-      <div class="shell">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== EHRLICH GESAGT — zentrierte Aussage ===== -->
+    <section class="block shell" id="ehrlich" aria-labelledby="ehrlichTitle">
+      <div class="panel centred" data-reveal>
         <h2 class="sec-title" id="ehrlichTitle">Ehrlich gesagt</h2>
-        <div class="statement--aside" data-reveal>
-          <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
-          <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
-        </div>
+        <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+        <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
       </div>
     </section>
 
-    <!-- ===================== WAS ALS NÄCHSTES KOMMT ===================== -->
-    <section class="section section--a" id="naechstes" aria-labelledby="naechstesTitle">
-      <div class="shell">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== WAS ALS NÄCHSTES KOMMT — drei Begriffe nebeneinander ===== -->
+    <section class="block shell" id="naechstes" aria-labelledby="naechstesTitle">
+      <div class="panel" data-reveal>
         <h2 class="sec-title" id="naechstesTitle">Was als Nächstes kommt</h2>
-        <p class="oneline" data-reveal>Monitoring, mehr Automatisierung, Security tiefer verstehen.</p>
+        <ul class="triple" data-stagger style="margin-top: var(--sp-md)">
+          <li>Monitoring</li>
+          <li>mehr Automatisierung</li>
+          <li>Security tiefer verstehen</li>
+        </ul>
       </div>
     </section>
 
-    <!-- ===================== KONTAKT ===================== -->
-    <section class="section section--c section--rule" id="kontakt" aria-labelledby="kontaktTitle">
-      <div class="shell contact">
+    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+
+    <!-- ===== KONTAKT ===== -->
+    <section class="block shell" id="kontakt" aria-labelledby="kontaktTitle">
+      <div class="panel contact" data-reveal>
         <h2 class="sec-title" id="kontaktTitle">Kontakt</h2>
 
-        <a class="mail" href="mailto:chef@tr1stan.de" data-reveal>chef@tr1stan.de</a>
+        <a class="mail" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
 
-        <div class="contact-row" data-reveal>
+        <div class="contact-row">
           <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
             <span data-copy-text>Adresse kopieren</span>
           </button>
@@ -162,6 +175,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=12" defer></script>
+  <script src="/script.js?v=13" defer></script>
 </body>
 </html>

@@ -2,18 +2,20 @@
 
 /* ============================================================================
    tr1stan.de — stylesheet
-   Synthwave in black and violet: night sky, striped sun, ridge on the horizon,
-   perspective grid running toward the viewer.
+   Synthwave in black and violet. The scene is fixed behind the whole page;
+   the content scrolls over it on its own darkened panels.
 
      1. TOKENS      palette and measures
      2. BASE        resets, element defaults, typography
-     3. LAYOUT      shell, sections, rhythm, dividers
-     4. SCENE       sky, stars, sun, ridge, horizon, grid — hero only
-     5. COMPONENTS  header, hero, the section patterns, contact, legal, 404
-     6. UTILITIES   helpers, motion preferences, print
+     3. LAYOUT      shell, panels, rhythm, rules
+     4. SCENE       sky, stars, halo, sun, ridge, horizon, grid
+     5. COMPONENTS  header, hero, the five section patterns, contact, legal, 404
+     6. MOTION      reveal states — armed from JS, never hidden by CSS alone
+     7. UTILITIES   helpers, motion preferences, print
 
-   Readability outranks the scene: every text block that sits on the scene
-   carries its own dark scrim, and no text is ever placed over the sun.
+   Readability outranks the scene: text never sits on the sun, every block
+   carries its own dark ground, and contrast is measured against the pixels
+   that actually end up behind the text.
    ========================================================================== */
 
 
@@ -22,44 +24,38 @@
    ========================================================================== */
 
 :root {
-  /* --- sky and ground ---------------------------------------------------- */
   --sky-top:      #06020C;
   --sky-mid:      #160628;
   --sky-horizon:  #2F0B46;
   --ground:       #0B0316;
 
-  /* --- neon -------------------------------------------------------------- */
   --neon-grid:    #E879F9;
   --neon-ridge:   #C084FC;
   --horizon-line: #FBE4FF;
 
-  /* --- sun --------------------------------------------------------------- */
   --sun-top:      #FEF3C7;
   --sun-mid:      #FDA4D3;
   --sun-bottom:   #C026D3;
 
-  /* --- type -------------------------------------------------------------- */
   --text-1:       #FFFFFF;
   --text-2:       #F3ECFA;
   --label:        #F5D0FE;
 
-  /* --- derived surfaces. Only the tokens above carry hue; everything here
-         is one of them at reduced alpha, so no other colour family can slip
-         into the design. ---------------------------------------------------*/
-  --scrim:        rgba(6, 2, 12, 0.94);
-  --scrim-soft:   rgba(6, 2, 12, 0.70);
-  --rule:         rgba(192, 132, 252, 0.22);
-  --rule-strong:  rgba(192, 132, 252, 0.45);
-  --panel:        rgba(47, 11, 70, 0.30);
+  /* derived surfaces — each one is a palette colour at reduced alpha */
+  --panel-bg:     rgba(11, 3, 22, 0.68);
+  --panel-edge:   rgba(192, 132, 252, 0.16);
+  --panel-hot:    rgba(232, 121, 249, 0.07);
+  --rule:         rgba(192, 132, 252, 0.20);
+  --rule-strong:  rgba(192, 132, 252, 0.42);
 
-  /* --- fonts ------------------------------------------------------------- */
   --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* The name is the loudest thing on the page: at least 10vw on desktop. */
   --fs-name:      clamp(3rem, 10vw, 13rem);
-  --fs-h2:        clamp(1.15rem, 0.95rem + 0.9vw, 1.75rem);
+  --fs-h2:        clamp(1.05rem, 0.92rem + 0.6vw, 1.45rem);
   --fs-statement: clamp(1.3rem, 1.02rem + 1.35vw, 2.15rem);
+  --fs-first:     clamp(1.25rem, 1rem + 1.15vw, 1.85rem);
+  --fs-num:       clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem);
   --fs-lead:      clamp(1.05rem, 1rem + 0.4vw, 1.3rem);
   --fs-item:      clamp(1rem, 0.97rem + 0.24vw, 1.12rem);
   --fs-body:      clamp(1rem, 0.97rem + 0.16vw, 1.08rem);
@@ -69,7 +65,6 @@
 
   --tr-label: 0.2em;
 
-  /* --- space ------------------------------------------------------------- */
   --sp-3xs: 0.25rem;
   --sp-2xs: 0.5rem;
   --sp-xs:  0.75rem;
@@ -79,25 +74,22 @@
   --sp-xl:  3.5rem;
   --sp-2xl: 5.5rem;
 
-  /* three rhythms, alternated between sections */
-  --pad-a: clamp(3rem, 7vw, 5rem);
-  --pad-b: clamp(4.25rem, 10vw, 7.5rem);
-  --pad-c: clamp(3.5rem, 8vw, 6rem);
+  /* Rhythm between blocks — far below the one-third-of-a-viewport ceiling. */
+  --gap-block: clamp(1.1rem, 3.2vh, 2.1rem);
+  --pad-panel: clamp(1.15rem, 2.6vw, 2.4rem);
 
-  /* --- measures ---------------------------------------------------------- */
   --shell-max: 1120px;
   --shell-pad: clamp(1.25rem, 5vw, 3rem);
   --measure:   58ch;
 
-  /* --- scene geometry ---------------------------------------------------- */
-  /* 61% of the hero, but never so low that the bottom band stops having room
-     for the copy: on short wide viewports the horizon rises instead of letting
-     the name climb into the sun. */
-  --horizon: min(61%, calc(100% - 21rem));
+  /* Scene geometry. Percentages resolve against the fixed scene, i.e. against
+     the viewport. The horizon rises on short viewports so the hero copy can
+     never be pushed up into the sun. */
+  --horizon: min(61%, calc(100% - 23rem));
   --sun-size: clamp(168px, 33vmin, 400px);
   --ridge-h:  clamp(58px, 11vh, 130px);
   --grid-cell: clamp(46px, 6vw, 84px);
-  --grid-speed: 2.5s;   /* one grid row per cycle */
+  --grid-speed: 2.5s;
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --dur-fast: 140ms;
@@ -184,17 +176,14 @@ button { font: inherit; color: inherit; cursor: pointer; background: none; borde
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  background: var(--panel);
+  background: var(--panel-hot);
   border: 1px solid var(--rule);
   padding: 0.08em 0.36em;
 }
 
 ::selection { background: var(--neon-grid); color: var(--sky-top); }
 
-:focus-visible {
-  outline: 2px solid var(--horizon-line);
-  outline-offset: 3px;
-}
+:focus-visible { outline: 2px solid var(--horizon-line); outline-offset: 3px; }
 :focus:not(:focus-visible) { outline: none; }
 
 
@@ -210,28 +199,44 @@ code {
   padding-inline: var(--shell-pad);
 }
 
-/* Everything below the hero sits on calm dark ground, no scene behind it. */
-.section { position: relative; }
-.section--a { padding-block: var(--pad-a); }
-.section--b { padding-block: var(--pad-b); }
-.section--c { padding-block: var(--pad-c); }
+main { position: relative; }
 
-/* A thin neon divider, faded at both ends. Used sparingly, not on every
-   section, so it stays an accent rather than a pattern. */
-.section--rule::before {
-  content: "";
+/* The veil sits above the fixed scene and below the content, starting where
+   the hero ends. It scrolls with the document, so the scene grows calmer the
+   further down you go — and it needs no script to do it. */
+.veil {
   position: absolute;
-  top: 0;
-  left: var(--shell-pad);
-  right: var(--shell-pad);
-  height: 1px;
-  background: linear-gradient(to right,
-              transparent, var(--rule-strong) 18%, var(--rule-strong) 82%, transparent);
+  left: 0;
+  right: 0;
+  top: calc(100svh - var(--header-h));
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+              rgba(6, 2, 12, 0) 0,
+              rgba(6, 2, 12, 0.70) 260px,
+              rgba(6, 2, 12, 0.82) 760px,
+              rgba(6, 2, 12, 0.82) 100%);
 }
 
-/* Section headings: clearly smaller than the name, clearly larger than the
-   body copy. Mono and uppercase, always in the pale lilac — never in a
-   saturated violet, which would lose contrast against the ground. */
+/* Every content block gets its own ground, so text never sits on bare grid. */
+.panel {
+  position: relative;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-edge);
+  padding: var(--pad-panel);
+}
+
+.block { margin-block: var(--gap-block); }
+
+/* full-width neon divider; drawn in from the left when it comes into view */
+.rule {
+  height: 1px;
+  transform-origin: left center;
+  background: linear-gradient(to right,
+              transparent 0, var(--rule-strong) 12%, var(--rule-strong) 88%, transparent 100%);
+}
+
 .sec-title {
   font-family: var(--font-mono);
   font-size: var(--fs-h2);
@@ -239,10 +244,8 @@ code {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--label);
-  margin-bottom: var(--sp-lg);
 }
 
-/* small kicker, used on the legal pages and on 404 */
 .sec-kicker {
   font-family: var(--font-mono);
   font-size: var(--fs-label);
@@ -255,23 +258,25 @@ code {
 
 
 /* ============================================================================
-   4. SCENE — hero background only
-   Decorative, aria-hidden in the markup, never interactive. Built entirely
-   from gradients and one inline SVG; no image file is loaded.
+   4. SCENE
+   Fixed behind everything. The layer order is set explicitly rather than left
+   to document order — back to front: sky, stars, halo, sun, ridge, horizon,
+   grid. Relying on document order alone had put the sun in front of the ridge.
    ========================================================================== */
 
 .scene {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -3;
   overflow: hidden;
   pointer-events: none;
 }
 
-/* 4.1 sky: four stops, then a hard cut to the ground at the horizon */
+.scene > * { position: absolute; }
+
 .scene-sky {
-  position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     to bottom,
     var(--sky-top) 0%,
@@ -282,8 +287,8 @@ code {
   );
 }
 
-/* 4.2 stars: a handful of small points, each with its own rhythm */
-.stars { position: absolute; inset: 0 0 auto 0; height: var(--horizon); }
+/* 4.1 stars */
+.stars { inset: 0 0 auto 0; height: var(--horizon); z-index: 2; }
 .stars i {
   position: absolute;
   width: 2px;
@@ -307,30 +312,20 @@ code {
 .stars i:nth-child(12) { left: 91%; top: 15%; animation-duration: 6.8s; }
 .stars i:nth-child(13) { left: 96%; top: 33%; animation-duration: 12s;  }
 
-@keyframes twinkle {
-  from { opacity: 0.28; }
-  to   { opacity: 0.95; }
-}
+@keyframes twinkle { from { opacity: 0.28; } to { opacity: 0.95; } }
 
-/* 4.3 sun: sits on the horizon, lower half broken by stripes.
-   The stripes are cut out with a mask, so the gaps show the real sky
-   behind rather than an approximated colour. */
-.sun {
-  position: absolute;
+/* 4.2 halo — its own layer behind the sun, so clipping the sun cannot clip it */
+.sun-halo {
   left: 50%;
   top: var(--horizon);
-  width: var(--sun-size);
-  height: var(--sun-size);
-  transform: translate(-50%, -100%);
+  width: calc(var(--sun-size) * 2.6);
+  height: calc(var(--sun-size) * 2.6);
+  transform: translate(-50%, -50%) translateY(calc(var(--sun-size) / -2));
+  z-index: 3;
 }
-
-.sun-halo {
+.sun-halo i {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 260%;
-  height: 260%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   border-radius: 50%;
   background: radial-gradient(closest-side circle,
               rgba(253, 164, 211, 0.34) 0%,
@@ -339,23 +334,31 @@ code {
               rgba(192, 132, 252, 0) 78%);
   animation: halo-breathe 11s var(--ease) infinite alternate;
 }
-
 @keyframes halo-breathe {
-  from { transform: translate(-50%, -50%) scale(0.94); opacity: 0.82; }
-  to   { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  from { transform: scale(0.94); opacity: 0.82; }
+  to   { transform: scale(1.08); opacity: 1; }
 }
 
-.sun-disc {
+/* 4.3 sun — the container clips to the circle. The stripe mask alone left a
+   rectangular block below the disc, so the silhouette was a half circle
+   sitting on a bar. overflow:hidden on a round box makes that impossible. */
+.sun {
+  left: 50%;
+  top: var(--horizon);
+  width: var(--sun-size);
+  height: var(--sun-size);
+  transform: translate(-50%, -100%);
+  border-radius: 50%;
+  overflow: hidden;
+  z-index: 4;
+}
+.sun-body {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
   background: linear-gradient(to bottom,
               var(--sun-top) 0%,
               var(--sun-mid) 52%,
               var(--sun-bottom) 100%);
-  /* soft edge glow, no hard ring */
-  filter: drop-shadow(0 0 18px rgba(253, 164, 211, 0.45))
-          drop-shadow(0 0 46px rgba(232, 121, 249, 0.30));
   -webkit-mask-image:
     linear-gradient(to bottom, #000 0 47%, transparent 47%),
     repeating-linear-gradient(to bottom, #000 0 3.1%, transparent 3.1% 6.6%);
@@ -366,15 +369,15 @@ code {
   mask-composite: add;
 }
 
-/* 4.4 ridge: irregular silhouette standing on the horizon */
+/* 4.4 ridge — in front of the sun, so the sun sinks behind it */
 .ridge {
-  position: absolute;
   left: 0;
   right: 0;
   top: var(--horizon);
   width: 100%;
   height: var(--ridge-h);
   transform: translateY(-100%);
+  z-index: 5;
 }
 .ridge-fill { fill: var(--ground); }
 .ridge-line {
@@ -384,13 +387,13 @@ code {
   stroke-linejoin: round;
 }
 
-/* 4.5 horizon: thin bright line glowing both ways */
+/* 4.5 horizon */
 .horizon {
-  position: absolute;
   left: 0;
   right: 0;
   top: var(--horizon);
   height: 2px;
+  z-index: 6;
   background: var(--horizon-line);
   box-shadow:
     0 0 10px 1px rgba(251, 228, 255, 0.55),
@@ -398,23 +401,25 @@ code {
     0 0 64px 14px rgba(192, 132, 252, 0.18);
 }
 
-/* 4.6 grid: perspective floor running toward the viewer */
+/* 4.6 grid — the whole area below the horizon, animated with transform only */
 .grid {
-  position: absolute;
   left: -25%;
   right: -25%;
   top: var(--horizon);
   bottom: 0;
+  z-index: 7;
   perspective: 220px;
   perspective-origin: 50% 0%;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 74%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0 74%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
 }
 .grid-floor {
   position: absolute;
-  inset: 0;
-  transform: rotateX(76deg);
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 220%;
   transform-origin: 50% 0%;
   background-image:
     repeating-linear-gradient(to right,
@@ -423,18 +428,18 @@ code {
       var(--neon-grid) 0 2px, transparent 2px var(--grid-cell));
   opacity: 0.55;
   animation: grid-run var(--grid-speed) linear infinite;
+  will-change: transform;
 }
 
-/* Moving the background rather than the box: this repaints, it never
-   re-runs layout. */
+/* Exactly one cell per cycle, so the loop is seamless. Transform only: this
+   composites, it never repaints or reflows. */
 @keyframes grid-run {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 0 0, 0 var(--grid-cell); }
+  from { transform: rotateX(76deg) translate3d(0, 0, 0); }
+  to   { transform: rotateX(76deg) translate3d(0, var(--grid-cell), 0); }
 }
 
-/* everything in the scene stops while the tab is in the background */
 html.is-hidden .stars i,
-html.is-hidden .sun-halo,
+html.is-hidden .sun-halo i,
 html.is-hidden .grid-floor { animation-play-state: paused; }
 
 
@@ -442,7 +447,6 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
    5. COMPONENTS
    ========================================================================== */
 
-/* --- 5.1 skip link -------------------------------------------------------- */
 .skip {
   position: absolute;
   left: var(--sp-sm);
@@ -460,8 +464,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 }
 .skip:focus { top: var(--sp-sm); }
 
-
-/* --- 5.2 header ----------------------------------------------------------- */
+/* --- header --------------------------------------------------------------- */
 .hdr {
   position: sticky;
   top: 0;
@@ -469,14 +472,8 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   background: var(--sky-top);
   border-bottom: 1px solid var(--rule);
 }
-.hdr-inner {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-md);
-  min-height: var(--header-h);
-}
+.hdr-inner { display: flex; align-items: center; gap: var(--sp-md); min-height: var(--header-h); }
 
-/* plain wordmark, no symbol */
 .brand {
   display: inline-flex;
   align-items: center;
@@ -505,6 +502,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 .nav a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 44px;
   min-width: 44px;
   font-family: var(--font-mono);
@@ -520,13 +518,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 
 .hdr-tools { display: flex; align-items: center; gap: var(--sp-2xs); }
 
-.nav-toggle {
-  display: none;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--rule-strong);
-  position: relative;
-}
+.nav-toggle { display: none; width: 44px; height: 44px; border: 1px solid var(--rule-strong); position: relative; }
 .nav-toggle i {
   position: absolute;
   left: 13px;
@@ -542,37 +534,24 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 .nav-toggle[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded="true"] i:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
-
-/* --- 5.3 hero -------------------------------------------------------------
-   The copy sits in the lower part, the sun in the upper: they never meet. */
+/* --- hero ----------------------------------------------------------------- */
 .hero {
   position: relative;
-  /* The sticky header takes 58px of flow above this section, so a full
-     100svh would push the copy exactly that far below the fold. */
   min-height: calc(100svh - var(--header-h));
   display: flex;
   align-items: flex-end;
+  /* the copy's scrim reaches 50vw past both edges on purpose; clip it here
+     so it darkens the full width without widening the document */
   overflow: hidden;
   padding-bottom: clamp(2.5rem, 7vh, 5rem);
 }
-.hero-inner {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  /* Wider than the body measure: at 1920 the name needs ~1150px to stay on one
-     line, and a second line would lift it into the sun. */
-  max-width: min(1400px, 100%);
-}
-
+.hero-inner { position: relative; z-index: 1; width: 100%; max-width: min(1400px, 100%); }
 .hero-copy { position: relative; }
 
-/* The scrim: a soft dark field behind the copy. Not a text shadow, and not a
-   visible box — it fades out well before any edge. */
+/* soft band behind the hero copy — not a text shadow, and no visible edge */
 .hero-copy::before {
   content: "";
   position: absolute;
-  /* Full-bleed sideways so no vertical edge can ever show; the hero clips it.
-     A radial field was tried first and cut off visibly at its own box edge. */
   inset: -4rem -50vw -8rem -50vw;
   z-index: -1;
   background: linear-gradient(to bottom,
@@ -592,7 +571,6 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   margin-bottom: var(--sp-md);
   overflow-wrap: break-word;
 }
-
 .hero-line {
   font-size: var(--fs-lead);
   font-weight: 380;
@@ -601,73 +579,75 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   text-wrap: pretty;
 }
 
+/* --- pattern A: heading left, text right ---------------------------------- */
+.split { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); }
+.split-body { display: grid; gap: var(--sp-sm); color: var(--text-2); }
+.split-body p { max-width: 62ch; }
 
-/* --- 5.4 pattern A: a large, calm statement ------------------------------- */
-.statement-text {
+/* --- pattern B: wide block, first line set larger -------------------------- */
+.leadblock { display: grid; gap: var(--sp-sm); }
+.leadblock p { color: var(--text-2); max-width: 78ch; }
+.leadblock p:first-child::first-line {
+  font-size: var(--fs-first);
+  color: var(--text-1);
+  font-weight: 420;
+  letter-spacing: -0.015em;
+}
+
+/* --- pattern C: numbered rows, big neon numbers ---------------------------- */
+.rows { display: grid; }
+.rows li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-sm) var(--sp-md);
+  padding-block: var(--sp-sm);
+  padding-inline: var(--sp-2xs);
+  border-top: 1px solid var(--rule);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.rows li:first-child { border-top: 0; }
+.rows li:hover { background: var(--panel-hot); }
+.rows-no {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--neon-grid);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.4ch;
+}
+.rows-txt { font-size: var(--fs-item); color: var(--text-2); }
+
+/* --- pattern D: centred statement with air --------------------------------- */
+.centred {
+  display: grid;
+  gap: var(--sp-md);
+  text-align: center;
+  justify-items: center;
+  padding-block: clamp(1.25rem, 4vh, 3rem);
+}
+.centred .statement-text {
   font-size: var(--fs-statement);
   font-weight: 300;
   line-height: 1.32;
   letter-spacing: -0.018em;
   color: var(--text-1);
-  max-width: 30ch;
+  max-width: 34ch;
   text-wrap: pretty;
 }
-.statement-text + .statement-text { margin-top: var(--sp-sm); }
 
-/* variant: narrower, indented, with a neon tick — same family, not a repeat */
-.statement--aside { position: relative; padding-left: var(--sp-md); }
-.statement--aside::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.35em;
-  bottom: 0.35em;
-  width: 2px;
-  background: linear-gradient(to bottom, var(--neon-ridge), transparent);
-}
-.statement--aside .statement-text { max-width: 34ch; font-size: var(--fs-lead); color: var(--text-2); }
-
-
-/* --- 5.5 pattern B: two columns ------------------------------------------- */
-.twocol {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-md);
-}
-.twocol p { color: var(--text-2); max-width: var(--measure); }
-
-
-/* --- 5.6 pattern C: numbered positions ------------------------------------ */
-.numbers { display: grid; gap: var(--sp-md); }
-.numbers li {
-  display: grid;
-  grid-template-columns: 2.6rem 1fr;
-  align-items: baseline;
-  gap: var(--sp-2xs);
-}
-.numbers-no {
-  font-family: var(--font-mono);
-  font-size: var(--fs-label);
-  font-weight: 500;
-  letter-spacing: var(--tr-label);
-  color: var(--label);
-  font-variant-numeric: tabular-nums;
-}
-.numbers-txt { font-size: var(--fs-item); color: var(--text-2); }
-
-
-/* --- 5.7 pattern D: one wide line ----------------------------------------- */
-.oneline {
-  font-size: var(--fs-lead);
-  font-weight: 400;
+/* --- pattern E: three terms side by side ----------------------------------- */
+.triple { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); }
+.triple li {
+  font-size: var(--fs-item);
   color: var(--text-1);
-  max-width: 46ch;
+  padding-block: var(--sp-2xs);
+  border-top: 1px solid var(--rule);
 }
 
-
-/* --- 5.8 contact ---------------------------------------------------------- */
+/* --- contact --------------------------------------------------------------- */
 .contact { display: grid; gap: var(--sp-md); }
-
 .mail {
   display: inline-flex;
   align-items: center;
@@ -681,13 +661,12 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   text-decoration: none;
   border-bottom: 1px solid var(--rule-strong);
   word-break: break-word;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 .mail:hover { color: var(--label); border-bottom-color: var(--label); }
-
 .contact-row { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-md); }
 
-
-/* --- 5.9 buttons ---------------------------------------------------------- */
+/* --- buttons --------------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -707,8 +686,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
               color var(--dur-fast) var(--ease),
               background-color var(--dur-fast) var(--ease);
 }
-.btn:hover { border-color: var(--neon-grid); color: var(--text-1); background: var(--panel); }
-
+.btn:hover { border-color: var(--neon-grid); color: var(--text-1); background: var(--panel-hot); }
 .btn-k { color: var(--label); border-right: 1px solid var(--rule); padding-right: 0.7rem; }
 
 .btn--solid {
@@ -720,12 +698,8 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 .btn--solid .btn-k { color: var(--sky-top); opacity: 0.66; border-color: rgba(6, 2, 12, 0.3); }
 .btn--solid:hover { background: var(--label); border-color: var(--label); color: var(--sky-top); }
 
-
-/* --- 5.10 footer ---------------------------------------------------------- */
-.ftr {
-  border-top: 1px solid var(--rule);
-  padding-block: var(--sp-lg);
-}
+/* --- footer ---------------------------------------------------------------- */
+.ftr { border-top: 1px solid var(--rule); padding-block: var(--sp-lg); background: var(--sky-top); }
 .ftr-inner {
   display: flex;
   flex-wrap: wrap;
@@ -743,17 +717,13 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  min-width: 44px;      /* short labels like "Start" must stay tappable */
+  min-width: 44px;
   text-decoration: none;
 }
 .ftr-nav a:hover { color: var(--text-1); }
 
-
-/* --- 5.11 legal pages ----------------------------------------------------- */
-.page-head {
-  padding-block: clamp(2.5rem, 7vw, 4rem) var(--sp-lg);
-  border-bottom: 1px solid var(--rule);
-}
+/* --- legal pages ----------------------------------------------------------- */
+.page-head { padding-block: clamp(2.5rem, 7vw, 4rem) var(--sp-lg); border-bottom: 1px solid var(--rule); }
 .page-title { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.2rem); letter-spacing: -0.03em; }
 .page-lead {
   margin-top: var(--sp-sm);
@@ -764,13 +734,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 }
 .page-lead strong { color: var(--text-1); font-weight: 600; }
 
-.legal {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--sp-xl);
-  padding-block: var(--sp-xl);
-  align-items: start;
-}
+.legal { display: grid; grid-template-columns: 1fr; gap: var(--sp-xl); padding-block: var(--sp-xl); align-items: start; }
 
 .toc { align-self: start; }
 .toc-title {
@@ -805,13 +769,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 .legal-body { max-width: var(--measure); color: var(--text-2); }
 .legal-body section { padding-block: var(--sp-md); border-top: 1px solid var(--rule); }
 .legal-body section:first-of-type { border-top: 0; padding-top: 0; }
-.legal-body h2 {
-  display: flex;
-  align-items: baseline;
-  gap: 0.7rem;
-  font-size: 1.05rem;
-  margin-bottom: var(--sp-2xs);
-}
+.legal-body h2 { display: flex; align-items: baseline; gap: 0.7rem; font-size: 1.05rem; margin-bottom: var(--sp-2xs); }
 .legal-body h2 > span {
   font-family: var(--font-mono);
   font-size: var(--fs-micro);
@@ -843,14 +801,12 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 
 .legal-note {
   border-left: 1px solid var(--neon-ridge);
-  background: var(--panel);
+  background: var(--panel-hot);
   padding: var(--sp-sm);
   margin-top: var(--sp-sm);
   font-size: var(--fs-small);
 }
-
 .legal-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin-top: var(--sp-sm); }
-
 .legal-meta {
   display: flex;
   flex-wrap: wrap;
@@ -864,21 +820,10 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   text-transform: uppercase;
   color: var(--label);
 }
+.legal-back { padding-block: var(--sp-lg) var(--sp-2xl); border-top: 1px solid var(--rule); }
 
-.legal-back {
-  padding-block: var(--sp-lg) var(--sp-2xl);
-  border-top: 1px solid var(--rule);
-}
-
-
-/* --- 5.12 404 ------------------------------------------------------------- */
-.nf {
-  min-height: 60vh;
-  display: grid;
-  align-content: center;
-  gap: var(--sp-md);
-  padding-block: var(--sp-2xl);
-}
+/* --- 404 ------------------------------------------------------------------- */
+.nf { min-height: 60vh; display: grid; align-content: center; gap: var(--sp-md); padding-block: var(--sp-2xl); }
 .nf-code {
   font-family: var(--font-mono);
   font-size: clamp(3.2rem, 13vw, 7rem);
@@ -892,7 +837,18 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 
 
 /* ============================================================================
-   6. UTILITIES
+   6. MOTION
+   Nothing in this block hides anything on its own. The script arms each
+   element with an inline start state; with no script the page is simply and
+   fully visible.
+   ========================================================================== */
+
+.will-reveal { transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease); }
+.will-draw   { transition: transform 0.85s var(--ease); }
+
+
+/* ============================================================================
+   7. UTILITIES
    ========================================================================== */
 
 .sr-only {
@@ -908,19 +864,17 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 
 html:not(.has-js) .js-only { display: none !important; }
 
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
-}
-[data-reveal].is-in { opacity: 1; transform: none; }
-html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
-
 
 /* ============================================================================
    RESPONSIVE — designed at 390 first, verified at 320 / 360 / 390 / 430 /
    768 / 1280 / 1920
    ========================================================================== */
+
+@media (min-width: 700px) {
+  .split { grid-template-columns: minmax(8rem, 22%) minmax(0, 1fr); gap: var(--sp-xl); align-items: start; }
+  .triple { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-lg); }
+  .triple li { border-top: 1px solid var(--rule-strong); }
+}
 
 @media (max-width: 760px) {
   .nav {
@@ -940,12 +894,26 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
                 visibility var(--dur-mid);
   }
   .nav[data-open="true"] { opacity: 1; visibility: visible; transform: none; }
-  .nav a { border-bottom: 1px solid var(--rule); font-size: var(--fs-small); }
+  .nav a { justify-content: flex-start; border-bottom: 1px solid var(--rule); font-size: var(--fs-small); }
   .nav-toggle { display: block; }
 }
 
-/* Portrait phones: the scene keeps all its parts, just smaller and flatter.
-   The grid animation is slowed well down so it costs almost nothing. */
+/* Phones: a fixed background is unreliable there. Several mobile browsers
+   repaint it late while the address bar collapses, which reads as a jump. The
+   scene is therefore anchored to the top screenful instead, and the rest of
+   the page runs on calm dark ground. */
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: 100svh;
+  }
+  .veil { top: 100svh; }
+}
+
 @media (max-width: 700px) {
   :root {
     --horizon: min(56%, calc(100% - 17rem));
@@ -953,26 +921,24 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
     --ridge-h: clamp(46px, 8vh, 90px);
     --grid-cell: 40px;
     --grid-speed: 7s;
+    --gap-block: clamp(0.9rem, 2.4vh, 1.5rem);
   }
   .grid { perspective: 150px; }
-  .grid-floor { transform: rotateX(80deg); }
+  @keyframes grid-run {
+    from { transform: rotateX(80deg) translate3d(0, 0, 0); }
+    to   { transform: rotateX(80deg) translate3d(0, var(--grid-cell), 0); }
+  }
   .hero-copy::before { inset: -2.5rem -50vw -8rem -50vw; }
 }
 
-@media (min-width: 640px) {
-  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-xl); }
-}
-
 @media (min-width: 900px) {
-  .twocol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-xl); }
   .legal { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--sp-2xl); }
   .toc { position: sticky; top: calc(var(--header-h) + 1.5rem); }
-  .numbers { column-gap: var(--sp-2xl); }
 }
 
 
 /* ============================================================================
-   MOTION PREFERENCES — the scene stays fully visible, it simply stops
+   MOTION PREFERENCES — everything still, everything visible
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -988,14 +954,11 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
   }
 
   .stars i,
-  .sun-halo,
+  .sun-halo i,
   .grid-floor { animation: none !important; }
-
-  /* hold the animated values at a sensible resting state */
-  .stars i  { opacity: 0.8; }
-  .sun-halo { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
-
-  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .stars i { opacity: 0.8; }
+  .sun-halo i { transform: scale(1); opacity: 0.95; }
+  .grid-floor { transform: rotateX(76deg); }
 }
 
 
@@ -1005,9 +968,10 @@ html:not(.has-js) [data-reveal] { opacity: 1; transform: none; }
 
 @media print {
   body { background: #fff; color: #000; }
-  .scene, .hdr, .skip, .nav-toggle { display: none !important; }
+  .scene, .veil, .hdr, .skip, .nav-toggle, .rule { display: none !important; }
+  .panel { background: none; border: 0; padding: 0; }
   .hero { min-height: 0; padding-block: 1cm; }
-  .hero-name, h1, h2, .statement-text, .oneline, .mail { color: #000; }
+  .hero-name, h1, h2, .statement-text, .mail, .rows-txt, .triple li { color: #000; }
   .hero-copy::before { display: none; }
   a { text-decoration: underline; }
 }
