@@ -62,6 +62,27 @@ Viewports selbst an, damit der Name nie in die Sonne wandert. Hinter dem Text
 liegt ein weich auslaufendes dunkles Band — kein Textschatten. Gemessen gegen die
 tatsächlich gerenderten Pixel erreicht der Fließtext dort 17:1.
 
+### Chrome-Typografie und Spiegelung
+
+Der Name im Hero — und nur er — trägt einen mehrstufigen Verlauf, per
+`background-clip: text` auf die Glyphen beschnitten: weiß, helles Flieder, ein
+dunkler Umschlag, direkt darunter wieder weiß als harte Kante, unten rosa nach
+violett. Dazu ein feiner Schlagschatten.
+
+Der Verlauf steht ausschließlich in einem `@supports`-Block. Fällt
+`background-clip: text` aus, bleibt die Grundregel stehen und der Name ist
+schlicht weiß — nie unsichtbar.
+
+Darunter liegt eine gespiegelte Kopie: vertikal geflippt, stark reduziert, per
+`mask-image` nach unten ausblendend, `aria-hidden`, damit der Name nicht doppelt
+vorgelesen wird. Sie erscheint nur, wenn genug Platz da ist (ab 860 × 720 px).
+
+### CRT-Overlay
+
+Feine Scanlines und eine Vignette liegen über der Szene, aber **unter** dem
+Inhalt — kein Text muss durch eine Scanline gelesen werden. Beide bewegen sich
+nicht und bleiben auch bei `prefers-reduced-motion` sichtbar.
+
 ### Abschnitte
 
 Jeder Block nutzt ein eigenes Muster: Überschrift links neben dem Text,

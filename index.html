@@ -16,11 +16,11 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=13" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=14" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=13" />
+  <link rel="stylesheet" href="/style.css?v=14" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
@@ -40,6 +40,8 @@
 
     <div class="sun"><div class="sun-body"></div></div>
 
+    <div class="scene-ground"></div>
+
     <svg class="ridge" viewBox="0 0 1200 160" preserveAspectRatio="none" focusable="false"
          xmlns="http://www.w3.org/2000/svg">
       <path class="ridge-fill"
@@ -54,8 +56,10 @@
 
     <div class="horizon"></div>
 
-    <div class="grid"><div class="grid-floor"></div></div>
+    <div class="grid"><div class="grid-shift"><div class="grid-floor"></div></div></div>
   </div>
+
+  <div class="crt" aria-hidden="true"></div>
 
   <header class="hdr">
     <div class="hdr-inner shell">
@@ -70,7 +74,10 @@
     <section class="hero" id="top">
       <div class="hero-inner shell">
         <div class="hero-copy">
-          <h1 class="hero-name">Tristan Witt</h1>
+          <div class="hero-title">
+            <h1 class="hero-name">Tristan Witt</h1>
+            <div class="hero-mirror" aria-hidden="true"><span>Tristan Witt</span></div>
+          </div>
           <p class="hero-line">Private Seite über Technik, Basteleien und Automatisierung.</p>
         </div>
       </div>
@@ -109,11 +116,16 @@
       <div class="panel" data-reveal>
         <h2 class="sec-title" id="machenTitle">Was ich mache</h2>
         <ol class="rows" data-stagger style="margin-top: var(--sp-md)">
-          <li><span class="rows-no">01</span><span class="rows-txt">Linux und Docker im Alltag</span></li>
-          <li><span class="rows-no">02</span><span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
-          <li><span class="rows-no">03</span><span class="rows-txt">Netzwerk und Fernzugriff</span></li>
-          <li><span class="rows-no">04</span><span class="rows-txt">Automatisierung statt Handarbeit</span></li>
-          <li><span class="rows-no">05</span><span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
+          <li><span class="rows-no">01</span>
+              <span class="rows-txt">Linux und Docker im Alltag</span></li>
+          <li><span class="rows-no">02</span>
+              <span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
+          <li><span class="rows-no">03</span>
+              <span class="rows-txt">Netzwerk und Fernzugriff</span></li>
+          <li><span class="rows-no">04</span>
+              <span class="rows-txt">Automatisierung statt Handarbeit</span></li>
+          <li><span class="rows-no">05</span>
+              <span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
         </ol>
       </div>
     </section>
@@ -175,6 +187,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=13" defer></script>
+  <script src="/script.js?v=14" defer></script>
 </body>
 </html>

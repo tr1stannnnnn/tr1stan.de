@@ -121,6 +121,41 @@
   })();
 
   /* --------------------------------------------------------------------------
+     Scroll-coupled scene
+
+     Writes the scroll offset into a single custom property; the stylesheet
+     decides what moves and by how much. Only transforms read it, so this
+     never triggers layout. Off on phones — the scene is not fixed there — and
+     off entirely under reduced motion.
+     ------------------------------------------------------------------------ */
+  (function scrollScene() {
+    if (reduceMotion) return;
+    if (!window.matchMedia("(min-width: 761px)").matches) return;
+
+    var ticking = false;
+    var last = -1;
+
+    function update() {
+      ticking = false;
+      var y = window.scrollY || window.pageYOffset || 0;
+      if (y === last) return;
+      last = y;
+      root.style.setProperty("--sc", y + "px");
+    }
+
+    function onScroll() {
+      if (ticking || document.hidden) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) onScroll(); });
+    update();
+  })();
+
+  /* --------------------------------------------------------------------------
      Scroll reveals
 
      Three kinds, one mechanism:

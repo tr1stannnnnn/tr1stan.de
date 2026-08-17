@@ -55,7 +55,7 @@
   --fs-h2:        clamp(1.05rem, 0.92rem + 0.6vw, 1.45rem);
   --fs-statement: clamp(1.3rem, 1.02rem + 1.35vw, 2.15rem);
   --fs-first:     clamp(1.25rem, 1rem + 1.15vw, 1.85rem);
-  --fs-num:       clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem);
+  --fs-num:       clamp(2rem, 1.35rem + 2.4vw, 3.6rem);
   --fs-lead:      clamp(1.05rem, 1rem + 0.4vw, 1.3rem);
   --fs-item:      clamp(1rem, 0.97rem + 0.24vw, 1.12rem);
   --fs-body:      clamp(1rem, 0.97rem + 0.16vw, 1.08rem);
@@ -97,6 +97,9 @@
   --dur-slow: 700ms;
 
   --header-h: 58px;
+
+  /* scroll offset in px, written by the script; 0 without it */
+  --sc: 0px;
 }
 
 
@@ -244,6 +247,8 @@ main { position: relative; }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--label);
+  /* a hint of glow, not a light box — the glyphs stay crisp */
+  text-shadow: 0 0 14px rgba(232, 121, 249, 0.30);
 }
 
 .sec-kicker {
@@ -288,7 +293,13 @@ main { position: relative; }
 }
 
 /* 4.1 stars */
-.stars { inset: 0 0 auto 0; height: var(--horizon); z-index: 2; }
+.stars {
+  inset: 0 0 auto 0;
+  height: var(--horizon);
+  z-index: 2;
+  /* a touch slower than the content, for depth */
+  transform: translate3d(0, calc(var(--sc) * -0.03), 0);
+}
 .stars i {
   position: absolute;
   width: 2px;
@@ -320,7 +331,9 @@ main { position: relative; }
   top: var(--horizon);
   width: calc(var(--sun-size) * 2.6);
   height: calc(var(--sun-size) * 2.6);
-  transform: translate(-50%, -50%) translateY(calc(var(--sun-size) / -2));
+  transform: translate(-50%, -50%)
+             translateY(calc(var(--sun-size) / -2))
+             translate3d(0, min(calc(var(--sc) * 0.14), 240px), 0);
   z-index: 3;
 }
 .sun-halo i {
@@ -347,7 +360,8 @@ main { position: relative; }
   top: var(--horizon);
   width: var(--sun-size);
   height: var(--sun-size);
-  transform: translate(-50%, -100%);
+  /* sinks further behind the ridge as the page scrolls */
+  transform: translate(-50%, -100%) translate3d(0, min(calc(var(--sc) * 0.14), 240px), 0);
   border-radius: 50%;
   overflow: hidden;
   z-index: 4;
@@ -370,6 +384,17 @@ main { position: relative; }
 }
 
 /* 4.4 ridge — in front of the sun, so the sun sinks behind it */
+/* Solid ground above the sun: once the sun sinks on scroll, the part below
+   the horizon has to disappear rather than float over the floor. */
+.scene-ground {
+  left: 0;
+  right: 0;
+  top: var(--horizon);
+  bottom: 0;
+  background: var(--ground);
+  z-index: 5;
+}
+
 .ridge {
   left: 0;
   right: 0;
@@ -377,7 +402,7 @@ main { position: relative; }
   width: 100%;
   height: var(--ridge-h);
   transform: translateY(-100%);
-  z-index: 5;
+  z-index: 6;
 }
 .ridge-fill { fill: var(--ground); }
 .ridge-line {
@@ -393,7 +418,7 @@ main { position: relative; }
   right: 0;
   top: var(--horizon);
   height: 2px;
-  z-index: 6;
+  z-index: 7;
   background: var(--horizon-line);
   box-shadow:
     0 0 10px 1px rgba(251, 228, 255, 0.55),
@@ -407,13 +432,20 @@ main { position: relative; }
   right: -25%;
   top: var(--horizon);
   bottom: 0;
-  z-index: 7;
+  z-index: 8;
   perspective: 220px;
   perspective-origin: 50% 0%;
   overflow: hidden;
   -webkit-mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
 }
+.grid-shift {
+  position: absolute;
+  inset: 0;
+  /* extra travel while scrolling, on top of the steady loop */
+  transform: translate3d(0, calc(var(--sc) * 0.10), 0);
+}
+
 .grid-floor {
   position: absolute;
   left: 0;
@@ -441,6 +473,34 @@ main { position: relative; }
 html.is-hidden .stars i,
 html.is-hidden .sun-halo i,
 html.is-hidden .grid-floor { animation-play-state: paused; }
+
+
+/* --- 4.7 CRT overlay: scanlines and vignette ------------------------------
+   Above the scene, below the veil and the content, so no text ever has to be
+   read through a scanline. Both are static — nothing here moves. */
+.crt {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+.crt::before,
+.crt::after { content: ""; position: absolute; inset: 0; }
+
+/* one dim line every third pixel row — visible, never a black bar */
+.crt::before {
+  background: repeating-linear-gradient(to bottom,
+              rgba(6, 2, 12, 0.16) 0 1px,
+              rgba(6, 2, 12, 0) 1px 3px);
+}
+
+/* corners pulled down, centre left alone */
+.crt::after {
+  background: radial-gradient(ellipse 78% 72% at 50% 48%,
+              rgba(6, 2, 12, 0) 0%,
+              rgba(6, 2, 12, 0.18) 62%,
+              rgba(6, 2, 12, 0.52) 100%);
+}
 
 
 /* ============================================================================
@@ -562,14 +622,55 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
               rgba(6, 2, 12, 0.96) 100%);
 }
 
-.hero-name {
+.hero-title { margin-bottom: var(--sp-md); }
+
+.hero-name,
+.hero-mirror span {
   font-size: var(--fs-name);
   line-height: 0.86;
   letter-spacing: -0.045em;
   font-weight: 680;
+  /* Base state, and the guaranteed fallback: plain white. The chrome is only
+     applied inside @supports, so a browser without background-clip: text
+     shows a solid white name rather than nothing at all. */
   color: var(--text-1);
-  margin-bottom: var(--sp-md);
   overflow-wrap: break-word;
+}
+.hero-name { margin: 0; }
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero-name,
+  .hero-mirror span {
+    background-image: linear-gradient(to bottom,
+                      #FFFFFF 0%,
+                      #F5D0FE 26%,
+                      #2F0B46 49%,
+                      #FFFFFF 50%,
+                      #FDA4D3 74%,
+                      #C026D3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-name { filter: drop-shadow(0 3px 0 rgba(6, 2, 12, 0.9)); }
+}
+
+/* The reflection: a flipped copy, only its upper sliver shown, fading out.
+   Decorative and hidden from assistive technology so the name is announced
+   once, not twice. */
+.hero-mirror {
+  display: none;
+  height: 0.42em;
+  font-size: var(--fs-name);
+  overflow: hidden;
+  opacity: 0.34;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+}
+.hero-mirror span {
+  display: block;
+  transform: scaleY(-1);
 }
 .hero-line {
   font-size: var(--fs-lead);
@@ -597,6 +698,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 /* --- pattern C: numbered rows, big neon numbers ---------------------------- */
 .rows { display: grid; }
 .rows li {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -608,10 +710,26 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 }
 .rows li:first-child { border-top: 0; }
 .rows li:hover { background: var(--panel-hot); }
+
+/* a fine neon edge runs in from the left on hover */
+.rows li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(to right, var(--neon-grid), rgba(232, 121, 249, 0));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-mid) var(--ease);
+}
+.rows li:hover::after { transform: scaleX(1); }
 .rows-no {
   font-family: var(--font-mono);
   font-size: var(--fs-num);
-  font-weight: 300;
+  font-weight: 250;
+  text-shadow: 0 0 18px rgba(232, 121, 249, 0.35);
   line-height: 1;
   color: var(--neon-grid);
   font-variant-numeric: tabular-nums;
@@ -663,7 +781,12 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   word-break: break-word;
   transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
-.mail:hover { color: var(--label); border-bottom-color: var(--label); }
+.mail:hover,
+.mail:focus-visible {
+  color: var(--label);
+  border-bottom-color: var(--neon-grid);
+  text-shadow: 0 0 16px rgba(232, 121, 249, 0.35);
+}
 .contact-row { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-md); }
 
 /* --- buttons --------------------------------------------------------------- */
@@ -686,7 +809,13 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
               color var(--dur-fast) var(--ease),
               background-color var(--dur-fast) var(--ease);
 }
-.btn:hover { border-color: var(--neon-grid); color: var(--text-1); background: var(--panel-hot); }
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--neon-grid);
+  color: var(--text-1);
+  background: var(--panel-hot);
+  box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.35), 0 0 18px rgba(232, 121, 249, 0.22);
+}
 .btn-k { color: var(--label); border-right: 1px solid var(--rule); padding-right: 0.7rem; }
 
 .btn--solid {
@@ -914,6 +1043,11 @@ html:not(.has-js) .js-only { display: none !important; }
   .veil { top: 100svh; }
 }
 
+@media (max-width: 760px) {
+  /* scroll coupling off on phones: the scene is not fixed there anyway */
+  :root { --sc: 0px !important; }
+}
+
 @media (max-width: 700px) {
   :root {
     --horizon: min(56%, calc(100% - 17rem));
@@ -929,6 +1063,14 @@ html:not(.has-js) .js-only { display: none !important; }
     to   { transform: rotateX(80deg) translate3d(0, var(--grid-cell), 0); }
   }
   .hero-copy::before { inset: -2.5rem -50vw -8rem -50vw; }
+}
+
+/* The reflection needs room below the name; on short or narrow screens it
+   would push the copy up into the sun, so it is simply left out there. */
+@media (min-width: 860px) and (min-height: 720px) {
+  .hero-mirror { display: block; }
+  /* the reflection adds roughly half a name height to the copy block */
+  :root { --horizon: min(61%, calc(100% - 28rem)); }
 }
 
 @media (min-width: 900px) {
@@ -952,6 +1094,8 @@ html:not(.has-js) .js-only { display: none !important; }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+
+  :root { --sc: 0px !important; }
 
   .stars i,
   .sun-halo i,
