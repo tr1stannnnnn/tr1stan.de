@@ -16,18 +16,20 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=14" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=15" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=14" />
+  <link rel="stylesheet" href="/style.css?v=15" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
 
-  <!-- decorative scene, fixed behind the whole page -->
+  <!-- Decorative. Sky, stars, halo, sun, ridge and horizon belong to the hero
+       alone: this layer is anchored to the first screenful and scrolls away
+       with it, so none of it can ever turn up again beside the text. -->
   <div class="scene" aria-hidden="true">
     <div class="scene-sky"></div>
 
@@ -55,7 +57,12 @@
     </svg>
 
     <div class="horizon"></div>
+  </div>
 
+  <!-- Decorative. The only part of the scene that carries on past the hero:
+       the floor. It starts at the hero horizon and runs under the whole page
+       down to the footer, growing darker and calmer as you go. -->
+  <div class="floor" aria-hidden="true">
     <div class="grid"><div class="grid-shift"><div class="grid-floor"></div></div></div>
   </div>
 
@@ -83,92 +90,96 @@
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
-
-    <!-- ===== WIE ES ANFING — Überschrift links, Text rechts ===== -->
-    <section class="block shell" id="anfang" aria-labelledby="anfangTitle">
-      <div class="panel split" data-reveal>
-        <h2 class="sec-title" id="anfangTitle">Wie es anfing</h2>
-        <div class="split-body">
-          <p>Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
-          <p>Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
+    <!-- ===== WIE ES ANFING — links im Raster, mittlere Spalte ===== -->
+    <section class="block" id="anfang" aria-labelledby="anfangTitle">
+      <div class="shell">
+        <div class="pane split at-left w-md" data-group>
+          <h2 class="sec-title" id="anfangTitle" data-reveal>Wie es anfing</h2>
+          <div class="split-body" data-reveal data-delay="100">
+            <p>Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
+            <p>Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
-
-    <!-- ===== WARUM ES GEBLIEBEN IST — breiter Block, erste Zeile groß ===== -->
-    <section class="block shell" id="warum" aria-labelledby="warumTitle">
-      <div class="panel" data-reveal>
-        <h2 class="sec-title" id="warumTitle">Warum es geblieben ist</h2>
-        <div class="leadblock" style="margin-top: var(--sp-md)">
-          <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
-          <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
+    <!-- ===== WARUM ES GEBLIEBEN IST — nach rechts eingerückt, breiter ===== -->
+    <section class="block sp-l" id="warum" aria-labelledby="warumTitle">
+      <div class="shell">
+        <div class="pane at-inset w-lg" data-group>
+          <h2 class="sec-title" id="warumTitle" data-reveal>Warum es geblieben ist</h2>
+          <div class="leadblock" data-reveal data-delay="100">
+            <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
+            <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
-
-    <!-- ===== WAS ICH MACHE — nummerierte Positionen ===== -->
-    <section class="block shell" id="machen" aria-labelledby="machenTitle">
-      <div class="panel" data-reveal>
-        <h2 class="sec-title" id="machenTitle">Was ich mache</h2>
-        <ol class="rows" data-stagger style="margin-top: var(--sp-md)">
-          <li><span class="rows-no">01</span>
-              <span class="rows-txt">Linux und Docker im Alltag</span></li>
-          <li><span class="rows-no">02</span>
-              <span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
-          <li><span class="rows-no">03</span>
-              <span class="rows-txt">Netzwerk und Fernzugriff</span></li>
-          <li><span class="rows-no">04</span>
-              <span class="rows-txt">Automatisierung statt Handarbeit</span></li>
-          <li><span class="rows-no">05</span>
-              <span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
-        </ol>
+    <!-- ===== WAS ICH MACHE — deutlich breiter als die Textabschnitte ===== -->
+    <section class="block sp-xl" id="machen" aria-labelledby="machenTitle">
+      <div class="shell shell--wide">
+        <div class="pane at-wide w-full" data-group>
+          <h2 class="sec-title" id="machenTitle" data-reveal>Was ich mache</h2>
+          <ol class="rows" data-reveal data-delay="100" data-stagger>
+            <li><span class="rows-no">01</span>
+                <span class="rows-txt">Linux und Docker im Alltag</span></li>
+            <li><span class="rows-no">02</span>
+                <span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
+            <li><span class="rows-no">03</span>
+                <span class="rows-txt">Netzwerk und Fernzugriff</span></li>
+            <li><span class="rows-no">04</span>
+                <span class="rows-txt">Automatisierung statt Handarbeit</span></li>
+            <li><span class="rows-no">05</span>
+                <span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
+          </ol>
+        </div>
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
-
-    <!-- ===== EHRLICH GESAGT — zentrierte Aussage ===== -->
-    <section class="block shell" id="ehrlich" aria-labelledby="ehrlichTitle">
-      <div class="panel centred" data-reveal>
-        <h2 class="sec-title" id="ehrlichTitle">Ehrlich gesagt</h2>
-        <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
-        <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
+    <!-- ===== EHRLICH GESAGT — zentriert, schmal, viel Luft ===== -->
+    <section class="block sp-l" id="ehrlich" aria-labelledby="ehrlichTitle">
+      <div class="shell">
+        <div class="pane at-centre w-sm" data-group>
+          <h2 class="sec-title" id="ehrlichTitle" data-reveal>Ehrlich gesagt</h2>
+          <div class="statement" data-reveal data-delay="100">
+            <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+            <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
-
-    <!-- ===== WAS ALS NÄCHSTES KOMMT — drei Begriffe nebeneinander ===== -->
-    <section class="block shell" id="naechstes" aria-labelledby="naechstesTitle">
-      <div class="panel" data-reveal>
-        <h2 class="sec-title" id="naechstesTitle">Was als Nächstes kommt</h2>
-        <ul class="triple" data-stagger style="margin-top: var(--sp-md)">
-          <li>Monitoring</li>
-          <li>mehr Automatisierung</li>
-          <li>Security tiefer verstehen</li>
-        </ul>
+    <!-- ===== WAS ALS NÄCHSTES KOMMT — breit, drei Begriffe nebeneinander ===== -->
+    <section class="block sp-s" id="naechstes" aria-labelledby="naechstesTitle">
+      <div class="shell">
+        <div class="pane at-wide w-lg" data-group>
+          <h2 class="sec-title" id="naechstesTitle" data-reveal>Was als Nächstes kommt</h2>
+          <ul class="triple" data-reveal data-delay="100" data-stagger>
+            <li>Monitoring</li>
+            <li>mehr Automatisierung</li>
+            <li>Security tiefer verstehen</li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <div class="shell"><div class="rule" data-draw aria-hidden="true"></div></div>
+    <!-- ===== KONTAKT — wieder links, schmal ===== -->
+    <section class="block sp-xl" id="kontakt" aria-labelledby="kontaktTitle">
+      <div class="shell">
+        <div class="pane contact at-left w-sm" data-group>
+          <h2 class="sec-title" id="kontaktTitle" data-reveal>Kontakt</h2>
 
-    <!-- ===== KONTAKT ===== -->
-    <section class="block shell" id="kontakt" aria-labelledby="kontaktTitle">
-      <div class="panel contact" data-reveal>
-        <h2 class="sec-title" id="kontaktTitle">Kontakt</h2>
+          <div class="contact-body" data-reveal data-delay="100">
+            <a class="mail" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
 
-        <a class="mail" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
-
-        <div class="contact-row">
-          <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
-            <span data-copy-text>Adresse kopieren</span>
-          </button>
-          <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
+            <div class="contact-row">
+              <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
+                <span data-copy-text>Adresse kopieren</span>
+              </button>
+              <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -187,6 +198,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=14" defer></script>
+  <script src="/script.js?v=15" defer></script>
 </body>
 </html>

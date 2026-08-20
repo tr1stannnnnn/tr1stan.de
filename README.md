@@ -30,15 +30,23 @@ Farbfamilien kommen nicht vor, kein Cyan, kein Grün, kein Orange.
 
 ### Die Szene
 
-Sie liegt **fixiert hinter der ganzen Seite**: beim Scrollen bleibt sie stehen,
-der Inhalt läuft darüber. Ab Hero-Ende legt sich eine mitscrollende
-Verlaufsfläche darüber, die die Szene nach unten hin ruhiger macht. Jeder
-Inhaltsblock steht zusätzlich auf einer eigenen halbtransparenten Fläche mit
-feiner Neonlinie.
+Sie besteht aus **zwei getrennten Ebenen**.
 
-Auf Mobilgeräten ist die Szene **nicht** fixiert — dort ist das Verhalten
-unzuverlässig und flackert. Sie ist am obersten Screenful verankert, darunter
-läuft die Seite auf ruhigem dunklem Grund.
+`.scene` trägt alles, was eine eigene Form hat — Himmel, Sterne, Halo, Sonne,
+Berge, Horizontlinie. Sie ist am ersten Screenful verankert und scrollt mit dem
+Hero weg. Damit kann unter dem Hero keine zweite Sonne und kein zweiter Horizont
+mehr neben dem Text stehen; genau das war passiert, solange die Szene fixiert
+war.
+
+`.floor` trägt nur das Raster. Es bleibt am Viewport, beginnt an der
+Horizontlinie des Hero und läuft als Boden unter der ganzen restlichen Seite bis
+zum Footer. Nach unten wird es dunkler und ruhiger — über eine mitscrollende
+Verlaufsfläche und über `--depth` —, bleibt aber durchgehend sichtbar. Oben
+blendet es weich ein: eine harte Kante dort wäre wieder ein Horizont.
+
+Der Horizont wird in `svh` gerechnet, nicht in Prozent. Nur so setzen die
+dokumentverankerte Szene und der viewportfeste Boden ihn an dieselbe Stelle,
+auch während auf dem Telefon die Adressleiste einfährt.
 
 - **Himmel** als vierstufiger Verlauf, harter Schnitt zum Boden am Horizont.
 - **Sterne**: dreizehn Punkte, jeder mit eigener Funkeldauer.
@@ -53,7 +61,8 @@ läuft die Seite auf ruhigem dunklem Grund.
 - **Horizontlinie** mit Schein nach oben und unten.
 - **Raster** über `perspective` und `rotateX`, Linien als
   `repeating-linear-gradient`, Bewegung über `transform` — eine Rasterzelle pro
-  Durchlauf, dadurch nahtlos und ohne Neuzeichnen.
+  Durchlauf, dadurch nahtlos und ohne Neuzeichnen. Die Fläche ist bewusst weit
+  höher als der sichtbare Ausschnitt, damit ihre vordere Kante nie im Bild endet.
 
 ### Lesbarkeit hat Vorrang
 
@@ -83,19 +92,46 @@ Feine Scanlines und eine Vignette liegen über der Szene, aber **unter** dem
 Inhalt — kein Text muss durch eine Scanline gelesen werden. Beide bewegen sich
 nicht und bleiben auch bei `prefers-reduced-motion` sichtbar.
 
-### Abschnitte
+### Abschnitte ohne Kästen
 
-Jeder Block nutzt ein eigenes Muster: Überschrift links neben dem Text,
-breiter Block mit groß gesetzter erster Zeile, nummerierte Positionen mit
-Neon-Ziffern, zentrierte Aussage, drei Begriffe nebeneinander. Dazwischen
-dünne Neon-Trennlinien, die sich beim Sichtbarwerden von links aufziehen.
+Kein Abschnitt hat einen Rahmen, eine Umrandung, eine Fläche oder eine
+Trennlinie — es gibt im Inhalt überhaupt keine Kastenform mehr. Die Lesbarkeit
+kommt aus zwei Verlaufsschleiern pro Abschnitt: ein vollbreiter, der oben und
+unten auf Alpha 0 ausläuft und deshalb gar keine waagerechte Kante hat, und eine
+Ellipse mit der Größe `50% 50%`, die ihre Null exakt an ihren eigenen Rändern
+erreicht und deshalb kein Rechteck zeichnen kann. Buttons behalten ihren
+Neonrahmen, Abschnitte nicht.
 
-### Bewegung
+Jeder Block nutzt ein eigenes Muster und eine eigene Bahn: Überschrift links
+neben dem Text, nach rechts eingerückter breiter Block mit groß gesetzter erster
+Zeile, deutlich breiter laufende nummerierte Positionen, zentrierte Aussage,
+drei Begriffe nebeneinander, Kontakt wieder links und schmal. Ausrichtung,
+Spaltenbreite und vertikaler Abstand wechseln von Abschnitt zu Abschnitt; der
+größte Abstand bleibt weit unter einem Bildschirm.
 
-Sterne funkeln, der Halo atmet über 11 s, das Raster läuft eine Rasterzeile in
-2,5 s. Alles pausiert bei `document.hidden`. Auf schmalen Viewports läuft das
-Raster mit 7 s deutlich langsamer. Bei `prefers-reduced-motion` steht die Szene
-vollständig still, bleibt aber sichtbar. Ohne JavaScript ist sie ebenfalls da.
+### Bewegung: die Seite als Fahrt
+
+Sterne funkeln, der Halo atmet über 11 s. Das Raster läuft langsam vor sich hin
+und wird beim Scrollen deutlich schneller, danach läuft es weich aus: Die
+Geschwindigkeit ist ein gedämpfter Folger der Scrollrate, kein Umschalten
+zwischen zwei Zuständen. Gemessen: rund 26 px/s im Ruhezustand, rund 485 px/s
+beim Scrollen, nach 1,4 s wieder bei 29 px/s.
+
+Die Phase rechnet das Skript und übergibt sie als Länge (`--run`); dadurch muss
+nie eine Keyframe-Animation neu gestartet werden, was sonst als Ruck sichtbar
+wäre. Die Zellbreite wird dafür an einem unsichtbaren Element gemessen — sie
+steckt in einem `clamp()`, und eine nicht registrierte Custom Property gibt es
+unverändert zurück, ist also nicht als Zahl lesbar.
+
+Ohne Skript übernimmt weiterhin die CSS-Schleife, auf dem Telefon ebenfalls:
+dort ist ein konstant langsames Raster billiger als eine Frame-Schleife. Bricht
+die Bildrate beim Scrollen ein, gibt das Skript den Boden von sich aus an CSS
+zurück. Alles pausiert bei `document.hidden`. Bei `prefers-reduced-motion` steht
+die Szene vollständig still, bleibt aber sichtbar.
+
+Abschnitte blenden nicht einfach ein, sie kommen aus der Tiefe: leicht kleiner,
+leicht von unten, dann klaren sie auf — nur `transform` und `opacity`. Die
+Überschrift läuft ihrem Fließtext um 100 ms voraus.
 
 ---
 
@@ -103,7 +139,7 @@ vollständig still, bleibt aber sichtbar. Ohne JavaScript ist sie ebenfalls da.
 
 ```text
 tr1stan.de/
-├── index.html          # Hero mit Szene, fünf Textabschnitte, Kontakt
+├── index.html          # Hero mit Szene, Rasterboden, sechs Abschnitte
 ├── impressum.html      # Impressum nach § 5 DDG
 ├── datenschutz.html    # Datenschutzhinweise nach Art. 13 DSGVO
 ├── 404.html            # Fehlerseite inkl. Legacy-Redirects

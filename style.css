@@ -2,19 +2,21 @@
 
 /* ============================================================================
    tr1stan.de — stylesheet
-   Synthwave in black and violet. The scene is fixed behind the whole page;
-   the content scrolls over it on its own darkened panels.
+   Synthwave in black and violet. The sky, the sun and the mountains belong to
+   the hero and scroll away with it; only the grid floor carries on under the
+   rest of the page. The sections have no boxes at all — they sit on soft
+   veils that fade out to nothing.
 
      1. TOKENS      palette and measures
      2. BASE        resets, element defaults, typography
-     3. LAYOUT      shell, panels, rhythm, rules
-     4. SCENE       sky, stars, halo, sun, ridge, horizon, grid
-     5. COMPONENTS  header, hero, the five section patterns, contact, legal, 404
+     3. LAYOUT      shell, veils, rhythm, alignment
+     4. SCENE       hero sky, stars, halo, sun, ridge, horizon — and the floor
+     5. COMPONENTS  header, hero, the six section patterns, contact, legal, 404
      6. MOTION      reveal states — armed from JS, never hidden by CSS alone
      7. UTILITIES   helpers, motion preferences, print
 
    Readability outranks the scene: text never sits on the sun, every block
-   carries its own dark ground, and contrast is measured against the pixels
+   dims the ground it stands on, and contrast is measured against the pixels
    that actually end up behind the text.
    ========================================================================== */
 
@@ -41,9 +43,10 @@
   --text-2:       #F3ECFA;
   --label:        #F5D0FE;
 
-  /* derived surfaces — each one is a palette colour at reduced alpha */
-  --panel-bg:     rgba(11, 3, 22, 0.68);
-  --panel-edge:   rgba(192, 132, 252, 0.16);
+  /* derived surfaces — each one is a palette colour at reduced alpha.
+     There is no panel background and no panel edge any more: the sections
+     carry gradient veils instead, and a veil has nothing to draw a box with. */
+  --ink:          6, 2, 12;
   --panel-hot:    rgba(232, 121, 249, 0.07);
   --rule:         rgba(192, 132, 252, 0.20);
   --rule-strong:  rgba(192, 132, 252, 0.42);
@@ -55,7 +58,7 @@
   --fs-h2:        clamp(1.05rem, 0.92rem + 0.6vw, 1.45rem);
   --fs-statement: clamp(1.3rem, 1.02rem + 1.35vw, 2.15rem);
   --fs-first:     clamp(1.25rem, 1rem + 1.15vw, 1.85rem);
-  --fs-num:       clamp(2rem, 1.35rem + 2.4vw, 3.6rem);
+  --fs-num:       clamp(3.1rem, 2.05rem + 4.2vw, 6.4rem);
   --fs-lead:      clamp(1.05rem, 1rem + 0.4vw, 1.3rem);
   --fs-item:      clamp(1rem, 0.97rem + 0.24vw, 1.12rem);
   --fs-body:      clamp(1rem, 0.97rem + 0.16vw, 1.08rem);
@@ -74,18 +77,23 @@
   --sp-xl:  3.5rem;
   --sp-2xl: 5.5rem;
 
-  /* Rhythm between blocks — far below the one-third-of-a-viewport ceiling. */
-  --gap-block: clamp(1.1rem, 3.2vh, 2.1rem);
-  --pad-panel: clamp(1.15rem, 2.6vw, 2.4rem);
+  /* Rhythm between blocks. It varies from section to section, but even the
+     widest gap stays far below a screenful, so the page never runs empty. */
+  --gap-block: clamp(3rem, 7.5vh, 5.5rem);
+  /* how far the soft veil reaches past the text before it is gone */
+  --veil-y:    clamp(2rem, 4.5vh, 3.4rem);
 
-  --shell-max: 1120px;
+  --shell-max:  1120px;
+  --shell-wide: 1360px;
   --shell-pad: clamp(1.25rem, 5vw, 3rem);
   --measure:   58ch;
 
-  /* Scene geometry. Percentages resolve against the fixed scene, i.e. against
-     the viewport. The horizon rises on short viewports so the hero copy can
-     never be pushed up into the sun. */
-  --horizon: min(61%, calc(100% - 23rem));
+  /* Scene geometry. The horizon is given in svh rather than in per cent, so
+     the hero scene and the viewport-fixed floor put it in exactly the same
+     place even while a mobile address bar is collapsing. It rises on short
+     viewports so the hero copy can never be pushed up into the sun. */
+  --horizon: min(61svh, calc(100svh - 23rem));
+  --tilt: 76deg;
   --sun-size: clamp(168px, 33vmin, 400px);
   --ridge-h:  clamp(58px, 11vh, 130px);
   --grid-cell: clamp(46px, 6vw, 84px);
@@ -98,8 +106,13 @@
 
   --header-h: 58px;
 
-  /* scroll offset in px, written by the script; 0 without it */
+  /* Written by the script; all three have working defaults without it.
+     --sc    scroll offset in px, drives the hero parallax
+     --run   grid phase in px, drives the floor when the script paces it
+     --depth 0..1, how far down the page you are — the floor calms down */
   --sc: 0px;
+  --run: 0px;
+  --depth: 0;
 }
 
 
@@ -202,11 +215,14 @@ code {
   padding-inline: var(--shell-pad);
 }
 
+/* one section is allowed to break out of the common measure */
+.shell--wide { max-width: var(--shell-wide); }
+
 main { position: relative; }
 
-/* The veil sits above the fixed scene and below the content, starting where
-   the hero ends. It scrolls with the document, so the scene grows calmer the
-   further down you go — and it needs no script to do it. */
+/* The page veil sits above the floor and below the content. It is anchored to
+   the document rather than to the viewport, so the floor grows darker and
+   calmer the further down you read — and it needs no script to do it. */
 .veil {
   position: absolute;
   left: 0;
@@ -216,29 +232,82 @@ main { position: relative; }
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(to bottom,
-              rgba(6, 2, 12, 0) 0,
-              rgba(6, 2, 12, 0.70) 260px,
-              rgba(6, 2, 12, 0.82) 760px,
-              rgba(6, 2, 12, 0.82) 100%);
+              rgba(var(--ink), 0) 0,
+              rgba(var(--ink), 0.34) 300px,
+              rgba(var(--ink), 0.46) 900px,
+              rgba(var(--ink), 0.52) 100%);
 }
 
-/* Every content block gets its own ground, so text never sits on bare grid. */
-.panel {
+/* --- section rhythm — varied, but never a screenful of nothing ------------
+   Only the top margin is set. Adjacent margins would otherwise collapse into
+   each other and three different spacings would come out as one. */
+.block {
   position: relative;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-edge);
-  padding: var(--pad-panel);
+  margin-block: var(--gap-block) 0;
+  /* The veils bleed past both edges on purpose so they never show a vertical
+     seam; clipped here so they cannot widen the document. Only the horizontal
+     axis is clipped — the veil has to keep reaching past the text vertically. */
+  overflow-x: clip;
+}
+.block.sp-s  { margin-top: calc(var(--gap-block) * 0.60); }
+.block.sp-l  { margin-top: calc(var(--gap-block) * 1.35); }
+.block.sp-xl { margin-top: calc(var(--gap-block) * 1.85); }
+.block:last-of-type { margin-bottom: calc(var(--gap-block) * 1.5); }
+
+/* --- the veils that took the place of the panels --------------------------
+   Two gradients and nothing else: no background colour, no border, no
+   outline, no radius, no shadow. The first is full-bleed, so it has no
+   horizontal edge that could ever be on screen, and it fades to zero at the
+   top and at the bottom. The second is an ellipse sized 50% × 50%, which
+   reaches zero alpha exactly at its own edges — a rectangle simply cannot
+   appear. Together they take the ground under the text down far enough to
+   read, and they stop before anything that could be called a shape. */
+.pane {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--sp-md);
 }
 
-.block { margin-block: var(--gap-block); }
-
-/* full-width neon divider; drawn in from the left when it comes into view */
-.rule {
-  height: 1px;
-  transform-origin: left center;
-  background: linear-gradient(to right,
-              transparent 0, var(--rule-strong) 12%, var(--rule-strong) 88%, transparent 100%);
+.pane::before,
+.pane::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
 }
+
+.pane::before {
+  inset: calc(var(--veil-y) * -1) -50vw;
+  background: linear-gradient(to bottom,
+              rgba(var(--ink), 0) 0%,
+              rgba(var(--ink), 0.30) 15%,
+              rgba(var(--ink), 0.50) 36%,
+              rgba(var(--ink), 0.50) 64%,
+              rgba(var(--ink), 0.30) 85%,
+              rgba(var(--ink), 0) 100%);
+}
+
+.pane::after {
+  inset: calc(var(--veil-y) * -0.72) -13%;
+  background: radial-gradient(50% 50% at 50% 50%,
+              rgba(var(--ink), 0.64) 0%,
+              rgba(var(--ink), 0.58) 40%,
+              rgba(var(--ink), 0.36) 66%,
+              rgba(var(--ink), 0.11) 86%,
+              rgba(var(--ink), 0) 100%);
+}
+
+/* --- alignment and column width, alternated from section to section ------- */
+.at-left   { margin-inline-start: 0; margin-inline-end: auto; }
+.at-inset  { margin-inline-start: clamp(0rem, 11vw, 13rem); margin-inline-end: auto; }
+.at-centre { margin-inline: auto; text-align: center; justify-items: center; }
+.at-wide   { margin-inline: 0; }
+
+.w-sm   { max-width: 34rem; }
+.w-md   { max-width: 46rem; }
+.w-lg   { max-width: 60rem; }
+.w-full { max-width: none; }
 
 .sec-title {
   font-family: var(--font-mono);
@@ -264,15 +333,28 @@ main { position: relative; }
 
 /* ============================================================================
    4. SCENE
-   Fixed behind everything. The layer order is set explicitly rather than left
-   to document order — back to front: sky, stars, halo, sun, ridge, horizon,
-   grid. Relying on document order alone had put the sun in front of the ridge.
+   Two layers, deliberately separated.
+
+   .scene holds everything that has a shape of its own — sky, stars, halo, sun,
+   ridge, horizon. It is anchored to the first screenful and scrolls away with
+   the hero, so a second sun or a second horizon simply cannot appear beside
+   the text further down. It used to be fixed, which is exactly how they did.
+
+   .floor holds the grid alone. It stays with the viewport, starts at the hero
+   horizon and runs on under the whole page down to the footer.
+
+   Inside .scene the layer order is set explicitly rather than left to document
+   order — back to front: sky, stars, halo, sun, ground, ridge, horizon.
+   Relying on document order alone had once put the sun in front of the ridge.
    ========================================================================== */
 
 .scene {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100svh;
+  z-index: -4;
   overflow: hidden;
   pointer-events: none;
 }
@@ -426,24 +508,39 @@ main { position: relative; }
     0 0 64px 14px rgba(192, 132, 252, 0.18);
 }
 
-/* 4.6 grid — the whole area below the horizon, animated with transform only */
+/* --- 4.6 the floor — the only part of the scene that carries on ----------
+   Fixed to the viewport, so the grid is under the text at every scroll
+   position, all the way down to the footer. Its top sits on the hero horizon
+   and fades in rather than starting on an edge: with the horizon line gone,
+   a hard top edge here would read as a second horizon. */
+.floor {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .grid {
+  position: absolute;
   left: -25%;
   right: -25%;
   top: var(--horizon);
   bottom: 0;
-  z-index: 8;
   perspective: 220px;
   perspective-origin: 50% 0%;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 11%, #000 100%);
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 11%, #000 100%);
 }
+
+/* further down the page the floor gets quieter — never off, just calmer */
 .grid-shift {
   position: absolute;
   inset: 0;
-  /* extra travel while scrolling, on top of the steady loop */
-  transform: translate3d(0, calc(var(--sc) * 0.10), 0);
+  opacity: calc(1 - var(--depth) * 0.34);
 }
 
 .grid-floor {
@@ -451,23 +548,36 @@ main { position: relative; }
   left: 0;
   right: 0;
   top: 0;
-  height: 220%;
+  /* tall enough that the near edge of the plane is off screen at every
+     viewport in the matrix — at 220% it ended in mid-air, which read as a
+     stripe rather than as a floor */
+  height: 800%;
   transform-origin: 50% 0%;
   background-image:
     repeating-linear-gradient(to right,
       var(--neon-grid) 0 2px, transparent 2px var(--grid-cell)),
     repeating-linear-gradient(to bottom,
       var(--neon-grid) 0 2px, transparent 2px var(--grid-cell));
-  opacity: 0.55;
+  opacity: 0.58;
+  transform: rotateX(var(--tilt));
   animation: grid-run var(--grid-speed) linear infinite;
   will-change: transform;
 }
 
 /* Exactly one cell per cycle, so the loop is seamless. Transform only: this
-   composites, it never repaints or reflows. */
+   composites, it never repaints or reflows. This is the fallback pace — it is
+   what runs when the script does not. */
 @keyframes grid-run {
-  from { transform: rotateX(76deg) translate3d(0, 0, 0); }
-  to   { transform: rotateX(76deg) translate3d(0, var(--grid-cell), 0); }
+  from { transform: rotateX(var(--tilt)) translate3d(0, 0, 0); }
+  to   { transform: rotateX(var(--tilt)) translate3d(0, var(--grid-cell), 0); }
+}
+
+/* With the script pacing the floor, the phase comes from --run instead. That
+   is what lets the speed answer to the scroll and ease back out again without
+   a keyframe ever being restarted, which would show as a jump. */
+html.js-grid .grid-floor {
+  animation: none;
+  transform: rotateX(var(--tilt)) translate3d(0, var(--run), 0);
 }
 
 html.is-hidden .stars i,
@@ -681,7 +791,7 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 }
 
 /* --- pattern A: heading left, text right ---------------------------------- */
-.split { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); }
+.split { grid-template-columns: 1fr; }
 .split-body { display: grid; gap: var(--sp-sm); color: var(--text-2); }
 .split-body p { max-width: 62ch; }
 
@@ -695,57 +805,70 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   letter-spacing: -0.015em;
 }
 
-/* --- pattern C: numbered rows, big neon numbers ---------------------------- */
-.rows { display: grid; }
+/* --- pattern C: numbered rows — the number is the graphic ------------------
+   No rules between the rows, no zebra, no frame: the gap alone holds a row
+   together, so nothing here can be read as a table. The number and the text
+   are separate elements with real whitespace between them, so copying a row
+   and reading it out both give "01 Linux und Docker im Alltag". */
+.rows { display: grid; gap: clamp(0.35rem, 1.4vh, 1rem); }
 .rows li {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--sp-sm) var(--sp-md);
-  padding-block: var(--sp-sm);
-  padding-inline: var(--sp-2xs);
-  border-top: 1px solid var(--rule);
-  transition: background-color var(--dur-fast) var(--ease);
+  gap: clamp(0.6rem, 1.5vh, 1rem) clamp(1.4rem, 3.4vw, 3.4rem);
+  padding-block: clamp(0.3rem, 1.1vh, 0.85rem);
+  padding-inline: clamp(0.5rem, 1.4vw, 1.25rem);
 }
-.rows li:first-child { border-top: 0; }
-.rows li:hover { background: var(--panel-hot); }
 
-/* a fine neon edge runs in from the left on hover */
-.rows li::after {
+/* hover lightens the row — a soft pool, with no edge of its own */
+.rows li::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: linear-gradient(to right, var(--neon-grid), rgba(232, 121, 249, 0));
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--dur-mid) var(--ease);
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(50% 50% at 30% 50%,
+              rgba(232, 121, 249, 0.17) 0%,
+              rgba(232, 121, 249, 0.10) 44%,
+              rgba(232, 121, 249, 0) 100%);
+  transition: opacity var(--dur-mid) var(--ease);
 }
-.rows li:hover::after { transform: scaleX(1); }
+.rows li:hover::before { opacity: 1; }
+
 .rows-no {
   font-family: var(--font-mono);
   font-size: var(--fs-num);
-  font-weight: 250;
-  text-shadow: 0 0 18px rgba(232, 121, 249, 0.35);
-  line-height: 1;
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 24px rgba(232, 121, 249, 0.35);
+  line-height: 0.88;
   color: var(--neon-grid);
   font-variant-numeric: tabular-nums;
-  min-width: 2.4ch;
+  transition: color var(--dur-mid) var(--ease),
+              text-shadow var(--dur-mid) var(--ease);
 }
-.rows-txt { font-size: var(--fs-item); color: var(--text-2); }
+.rows li:hover .rows-no {
+  color: var(--horizon-line);
+  text-shadow: 0 0 12px rgba(251, 228, 255, 0.6),
+               0 0 38px rgba(232, 121, 249, 0.55);
+}
+.rows-txt {
+  font-size: var(--fs-item);
+  color: var(--text-2);
+  transition: color var(--dur-mid) var(--ease);
+}
+.rows li:hover .rows-txt { color: var(--text-1); }
 
 /* --- pattern D: centred statement with air --------------------------------- */
-.centred {
+.statement {
   display: grid;
   gap: var(--sp-md);
-  text-align: center;
   justify-items: center;
-  padding-block: clamp(1.25rem, 4vh, 3rem);
+  padding-block: clamp(0.5rem, 2vh, 1.5rem);
 }
-.centred .statement-text {
+.statement-text {
   font-size: var(--fs-statement);
   font-weight: 300;
   line-height: 1.32;
@@ -755,17 +878,30 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   text-wrap: pretty;
 }
 
-/* --- pattern E: three terms side by side ----------------------------------- */
-.triple { display: grid; grid-template-columns: 1fr; gap: var(--sp-sm); }
+/* --- pattern E: three terms side by side -----------------------------------
+   A neon dot marks each term. It replaces the rule that used to sit above
+   them, which was one line too many for a page with no dividers left. */
+.triple { display: grid; grid-template-columns: 1fr; gap: var(--sp-md) var(--sp-lg); }
+.triple li { position: relative; padding-left: 1.5rem; }
+.triple li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon-grid);
+  box-shadow: 0 0 12px 1px rgba(232, 121, 249, 0.55);
+}
 .triple li {
   font-size: var(--fs-item);
   color: var(--text-1);
   padding-block: var(--sp-2xs);
-  border-top: 1px solid var(--rule);
 }
 
 /* --- contact --------------------------------------------------------------- */
-.contact { display: grid; gap: var(--sp-md); }
+.contact-body { display: grid; gap: var(--sp-md); justify-items: start; }
 .mail {
   display: inline-flex;
   align-items: center;
@@ -776,10 +912,13 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--text-1);
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 0.32em;
   word-break: break-word;
-  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  transition: color var(--dur-fast) var(--ease),
+              text-decoration-color var(--dur-fast) var(--ease);
 }
 .mail:hover,
 .mail:focus-visible {
@@ -826,6 +965,11 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
 }
 .btn--solid .btn-k { color: var(--sky-top); opacity: 0.66; border-color: rgba(6, 2, 12, 0.3); }
 .btn--solid:hover { background: var(--label); border-color: var(--label); color: var(--sky-top); }
+
+/* On the legal pages .legal-body a wins on specificity, which had left this
+   one button white on near-white. The dark ink has to be restored by name. */
+.legal-body a.btn--solid,
+.legal-body a.btn--solid:hover { color: var(--sky-top); }
 
 /* --- footer ---------------------------------------------------------------- */
 .ftr { border-top: 1px solid var(--rule); padding-block: var(--sp-lg); background: var(--sky-top); }
@@ -972,8 +1116,10 @@ html.is-hidden .grid-floor { animation-play-state: paused; }
    fully visible.
    ========================================================================== */
 
-.will-reveal { transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease); }
-.will-draw   { transition: transform 0.85s var(--ease); }
+.will-reveal {
+  transition: opacity var(--dur-slow) var(--ease),
+              transform var(--dur-slow) var(--ease);
+}
 
 
 /* ============================================================================
@@ -1000,9 +1146,8 @@ html:not(.has-js) .js-only { display: none !important; }
    ========================================================================== */
 
 @media (min-width: 700px) {
-  .split { grid-template-columns: minmax(8rem, 22%) minmax(0, 1fr); gap: var(--sp-xl); align-items: start; }
+  .split { grid-template-columns: minmax(9rem, 26%) minmax(0, 1fr); gap: var(--sp-lg) var(--sp-lg); align-items: start; }
   .triple { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-lg); }
-  .triple li { border-top: 1px solid var(--rule-strong); }
 }
 
 @media (max-width: 760px) {
@@ -1027,42 +1172,30 @@ html:not(.has-js) .js-only { display: none !important; }
   .nav-toggle { display: block; }
 }
 
-/* Phones: a fixed background is unreliable there. Several mobile browsers
-   repaint it late while the address bar collapses, which reads as a jump. The
-   scene is therefore anchored to the top screenful instead, and the rest of
-   the page runs on calm dark ground. */
-@media (max-width: 760px), (hover: none) and (pointer: coarse) {
-  .scene {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    height: 100svh;
-  }
-  .veil { top: 100svh; }
-}
-
 @media (max-width: 760px) {
-  /* scroll coupling off on phones: the scene is not fixed there anyway */
+  /* No hero parallax on phones: the scene scrolls away there by itself, and
+     a scroll listener that only feeds a parallax is not worth the frames. */
   :root { --sc: 0px !important; }
+  /* the indented section falls back into line — 390px has no room to give */
+  .at-inset { margin-inline-start: 0; }
 }
 
 @media (max-width: 700px) {
   :root {
-    --horizon: min(56%, calc(100% - 17rem));
+    --horizon: min(56svh, calc(100svh - 17rem));
     --sun-size: clamp(150px, 46vw, 260px);
     --ridge-h: clamp(46px, 8vh, 90px);
     --grid-cell: 40px;
     --grid-speed: 7s;
-    --gap-block: clamp(0.9rem, 2.4vh, 1.5rem);
+    --tilt: 80deg;
+    /* noticeably tighter on a phone, in every direction */
+    --gap-block: clamp(1.9rem, 4.6vh, 2.8rem);
+    --veil-y:    clamp(1.35rem, 3vh, 2rem);
+    --fs-num:    clamp(2.6rem, 1.9rem + 3.4vw, 3.6rem);
   }
   .grid { perspective: 150px; }
-  @keyframes grid-run {
-    from { transform: rotateX(80deg) translate3d(0, 0, 0); }
-    to   { transform: rotateX(80deg) translate3d(0, var(--grid-cell), 0); }
-  }
   .hero-copy::before { inset: -2.5rem -50vw -8rem -50vw; }
+  .pane::after { inset: calc(var(--veil-y) * -0.72) -7%; }
 }
 
 /* The reflection needs room below the name; on short or narrow screens it
@@ -1097,12 +1230,15 @@ html:not(.has-js) .js-only { display: none !important; }
 
   :root { --sc: 0px !important; }
 
+  :root { --run: 0px !important; --depth: 0 !important; }
+
   .stars i,
   .sun-halo i,
   .grid-floor { animation: none !important; }
   .stars i { opacity: 0.8; }
   .sun-halo i { transform: scale(1); opacity: 0.95; }
-  .grid-floor { transform: rotateX(76deg); }
+  .grid-floor,
+  html.js-grid .grid-floor { transform: rotateX(var(--tilt)); }
 }
 
 
@@ -1112,8 +1248,9 @@ html:not(.has-js) .js-only { display: none !important; }
 
 @media print {
   body { background: #fff; color: #000; }
-  .scene, .veil, .hdr, .skip, .nav-toggle, .rule { display: none !important; }
-  .panel { background: none; border: 0; padding: 0; }
+  .scene, .floor, .veil, .crt, .hdr, .skip, .nav-toggle { display: none !important; }
+  .pane::before, .pane::after, .rows li::before { display: none !important; }
+  .pane { max-width: none; margin-inline: 0; }
   .hero { min-height: 0; padding-block: 1cm; }
   .hero-name, h1, h2, .statement-text, .mail, .rows-txt, .triple li { color: #000; }
   .hero-copy::before { display: none; }
