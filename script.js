@@ -121,14 +121,15 @@
   })();
 
   /* --------------------------------------------------------------------------
-     Scroll-coupled scene
+     Hero parallax
 
      Writes the scroll offset into a single custom property; the stylesheet
-     decides what moves and by how much. Only transforms read it, so this
-     never triggers layout. Off on phones — the scene is not fixed there — and
-     off entirely under reduced motion.
+     decides what moves and by how much. Only transforms read it, so this never
+     triggers layout. The scene scrolls away on its own — this only adds the
+     sun sinking a little slower than the page. Off on phones and off entirely
+     under reduced motion.
      ------------------------------------------------------------------------ */
-  (function scrollScene() {
+  (function heroParallax() {
     if (reduceMotion) return;
     if (!window.matchMedia("(min-width: 761px)").matches) return;
 
@@ -156,41 +157,173 @@
   })();
 
   /* --------------------------------------------------------------------------
+     The pace of the floor
+
+     The grid moves slowly on its own and speeds up while the page is being
+     scrolled, then eases back down again. The speed is a damped follower of
+     the scroll rate rather than a switch between an idle and a scrolling
+     state, so there is no step anywhere in it — it rises quickly, falls slowly
+     and never snaps.
+
+     The phase is accumulated here and handed to the stylesheet as a length, so
+     no keyframe is ever restarted mid-flight; restarting one is exactly what
+     shows up as a jump. The property is written on the floor element, not on
+     the root, which keeps style invalidation down to three nodes, and only a
+     transform reads it: no layout, no repaint of the page while scrolling.
+
+     Phones keep the plain CSS loop. A constant slow floor is fine there, and
+     it costs one compositor animation instead of a frame loop. If the frame
+     rate does drop on a desktop, the loop hands the floor back to CSS.
+     ------------------------------------------------------------------------ */
+  (function floorRide() {
+    if (reduceMotion) return;
+
+    var floor = $(".floor");
+    if (!floor || !$(".grid-floor")) return;
+    if (!window.matchMedia("(min-width: 761px)").matches) return;
+    if (!window.requestAnimationFrame) return;
+
+    var BASE = 26;      // px per second with the page standing still
+    var GAIN = 1.15;    // share of the scroll rate that is added on top
+    var MAX = 560;      // ceiling, px per second
+    var UP = 0.17;      // damping towards a faster target
+    var DOWN = 0.045;   // ... and the slower fall back out of it
+
+    var cell = 60;
+    var phase = 0;
+    var speed = BASE;
+    var lastY = window.scrollY || window.pageYOffset || 0;
+    var lastT = 0;
+    var lastDepth = -1;
+    var frames = 0;
+    var slow = 0;
+    var raf = 0;
+
+    /* The phase has to wrap on exactly one cell, or the loop shows a step.
+       --grid-cell is a clamp(), and an unregistered custom property is handed
+       back verbatim, so reading it as a number gives nothing. A hidden probe
+       that is one cell wide gives the resolved length instead — measured on
+       load and on resize only, never while scrolling. */
+    var probe = document.createElement("i");
+    probe.style.cssText = "position:absolute;left:0;top:0;height:0;width:var(--grid-cell);visibility:hidden;pointer-events:none";
+    floor.appendChild(probe);
+
+    function readCell() {
+      var w = probe.getBoundingClientRect().width;
+      if (w > 0) cell = w;
+    }
+
+    function frame(t) {
+      raf = 0;
+      if (document.hidden) return;
+
+      var dt = lastT ? Math.min((t - lastT) / 1000, 0.1) : 0.016;
+      lastT = t;
+
+      var y = window.scrollY || window.pageYOffset || 0;
+      var rate = Math.abs(y - lastY) / Math.max(dt, 0.001);
+      lastY = y;
+
+      var target = Math.min(BASE + rate * GAIN, MAX);
+      speed += (target - speed) * (target > speed ? UP : DOWN);
+
+      phase = (phase + speed * dt) % cell;
+      floor.style.setProperty("--run", phase.toFixed(2) + "px");
+
+      // how far into the page we are: the floor calms down as it goes
+      var depth = Math.min(y / (window.innerHeight * 1.4), 1);
+      if (Math.abs(depth - lastDepth) > 0.01) {
+        lastDepth = depth;
+        floor.style.setProperty("--depth", depth.toFixed(3));
+      }
+
+      // Frame rate is only judged while the floor is actually being pushed;
+      // that is the only time this loop costs more than the CSS loop would.
+      if (speed > BASE * 1.5) {
+        frames++;
+        if (dt > 0.022) slow++;
+        if (frames >= 90) {
+          if (slow / frames > 0.5) return handBack();
+          frames = 0;
+          slow = 0;
+        }
+      }
+
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    function start() {
+      if (raf || document.hidden) return;
+      lastT = 0;
+      lastY = window.scrollY || window.pageYOffset || 0;
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    function handBack() {
+      root.classList.remove("js-grid");
+      floor.style.removeProperty("--run");
+      if (probe.parentNode) probe.parentNode.removeChild(probe);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("resize", onResize);
+      raf = 0;
+    }
+
+    function onVisibility() {
+      if (document.hidden) {
+        if (raf) window.cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        start();
+      }
+    }
+
+    function onResize() { readCell(); }
+
+    readCell();
+    root.classList.add("js-grid");
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("resize", onResize, { passive: true });
+    start();
+  })();
+
+  /* --------------------------------------------------------------------------
      Scroll reveals
 
-     Three kinds, one mechanism:
-       [data-reveal]   blocks fade in and rise slightly
-       [data-draw]     neon rules draw themselves in from the left
-       [data-stagger]  children of a list come in one after another
+     Sections arrive out of depth rather than simply fading: a shade smaller, a
+     little lower, unclear — then they settle. Transform and opacity only.
 
-     Each element is armed here — inline start state, transitions suppressed
-     for that one frame — and released when it first comes into view. Under
-     reduced motion nothing is armed at all.
+     Every element is armed from here with inline styles and released when its
+     section comes into view. Nothing is hidden by the stylesheet, so without
+     this script the page is simply fully visible. Under reduced motion nothing
+     is armed at all.
+
+     A section is released as a whole, so the heading always leads its own body
+     text by its data-delay and never by whatever the observer happened to fire
+     first.
      ------------------------------------------------------------------------ */
   (function reveals() {
     if (reduceMotion || !("IntersectionObserver" in window)) return;
 
+    var START = "translate3d(0, 22px, 0) scale(0.968)";
     var armed = [];
+    var groups = [];
 
-    function arm(el, styles, cls, delay) {
+    function arm(el, delay) {
       el.style.transition = "none";
-      for (var k in styles) el.style[k] = styles[k];
-      armed.push({ el: el, cls: cls, delay: delay || 0 });
+      el.style.opacity = "0";
+      el.style.transform = START;
+      armed.push({ el: el, delay: delay });
     }
 
     $$("[data-reveal]").forEach(function (el) {
-      arm(el, { opacity: "0", transform: "translateY(16px)" }, "will-reveal");
-    });
-
-    $$("[data-draw]").forEach(function (el) {
-      arm(el, { transform: "scaleX(0)" }, "will-draw");
-    });
-
-    $$("[data-stagger]").forEach(function (list) {
-      Array.prototype.forEach.call(list.children, function (child, i) {
-        arm(child, { opacity: "0", transform: "translateY(10px)" },
-            "will-reveal", Math.min(i * 60, 300));
-      });
+      var base = parseInt(el.getAttribute("data-delay"), 10) || 0;
+      if (el.hasAttribute("data-stagger") && el.children.length) {
+        Array.prototype.forEach.call(el.children, function (child, i) {
+          arm(child, base + Math.min(i * 55, 240));
+        });
+      } else {
+        arm(el, base);
+      }
     });
 
     if (!armed.length) return;
@@ -199,27 +332,41 @@
     // animates away from rather than something the browser skips over.
     void document.body.offsetWidth;
     armed.forEach(function (a) {
-      a.el.style.transition = "";
-      a.el.classList.add(a.cls);
+      a.el.style.transition = "";          // clears the delay with it
+      a.el.classList.add("will-reveal");
       if (a.delay) a.el.style.transitionDelay = a.delay + "ms";
     });
 
-    /* Release when an element comes into view. An observer alone is not
-       enough: jumping straight to the bottom never changes the state of the
-       blocks that were skipped over, so they would stay invisible forever.
-       A cheap scroll sweep catches exactly those. */
-    var pending = armed.map(function (a) { return a.el; });
+    // group the armed elements under the section they belong to
+    armed.forEach(function (a) {
+      var box = (a.el.closest && a.el.closest("[data-group]")) || a.el;
+      var g = null;
+      for (var i = 0; i < groups.length; i++) {
+        if (groups[i].box === box) { g = groups[i]; break; }
+      }
+      if (!g) { g = { box: box, members: [] }; groups.push(g); }
+      g.members.push(a.el);
+    });
 
-    function release(el) {
-      var i = pending.indexOf(el);
-      if (i === -1) return;
-      pending.splice(i, 1);
-      el.style.opacity = "";
-      el.style.transform = "";
-      io.unobserve(el);
+    var pending = groups.slice();
+
+    function release(box) {
+      for (var i = 0; i < pending.length; i++) {
+        if (pending[i].box !== box) continue;
+        pending[i].members.forEach(function (el) {
+          el.style.opacity = "";
+          el.style.transform = "";
+        });
+        pending.splice(i, 1);
+        io.unobserve(box);
+        break;
+      }
       if (!pending.length) teardown();
     }
 
+    /* An observer alone is not enough: jumping straight to the bottom never
+       changes the state of the sections that were skipped over, so they would
+       stay invisible for good. A cheap scroll sweep catches exactly those. */
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting || entry.boundingClientRect.top < 0) release(entry.target);
@@ -230,8 +377,8 @@
     function sweep() {
       ticking = false;
       var edge = window.innerHeight * 0.92;
-      pending.slice().forEach(function (el) {
-        if (el.getBoundingClientRect().top < edge) release(el);
+      pending.slice().forEach(function (g) {
+        if (g.box.getBoundingClientRect().top < edge) release(g.box);
       });
     }
     function onScroll() {
@@ -245,7 +392,7 @@
       window.removeEventListener("resize", onScroll);
     }
 
-    armed.forEach(function (a) { io.observe(a.el); });
+    groups.forEach(function (g) { io.observe(g.box); });
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
   })();
