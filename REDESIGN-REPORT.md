@@ -1,9 +1,9 @@
 # Redesign-Report — tr1stan.de
 
-**Stand:** 2026-08-17
-**Aktuelle Fassung:** v11 — Synthwave mit Chrome-Typo, CRT und scroll-gekoppelter Szene
-**Arbeitsbranch:** `redesign/v11`
-**Backup-Branch:** `backup/pre-v11-2026-08-17`
+**Stand:** 2026-08-20
+**Aktuelle Fassung:** v12 — Abschnitte ohne Kästen, Hero-Szene getrennt vom laufenden Rasterboden
+**Arbeitsbranch:** `redesign/v12`
+**Backup-Branch:** `backup/pre-v12-2026-08-20`
 
 ---
 
@@ -11,132 +11,130 @@
 
 | | |
 |---|---|
-| **Backup-Branch** | `backup/pre-v11-2026-08-17` |
-| **Zeigt auf** | `6c5cf3f` — die Fassung v10, die vor v11 live war |
-| **Status** | gepusht, bleibt bestehen |
+| Backup-Branch | `backup/pre-v12-2026-08-20` |
+| Commit darin | `c60a997` (Live-Stand v11) |
+| Zurückrollen | `git checkout main && git reset --hard backup/pre-v12-2026-08-20 && git push --force-with-lease origin main` |
 
-Rollback:
-
-```bash
-git fetch origin
-git checkout main
-git reset --hard origin/backup/pre-v11-2026-08-17
-git push --force-with-lease origin main
-```
-
-Nicht-destruktive Alternative:
-
-```bash
-git fetch origin
-git checkout main
-git revert --no-commit aec109e^..aec109e
-git commit -m "Revert v11"
-git push origin main
-```
+Der Branch ist auf GitHub. `CNAME`, `robots.txt` und `favicon.svg` sind Byte für
+Byte dieselben wie dort — geprüft über SHA-256, nicht über Augenmaß.
 
 ---
 
-## 2. Der gemeldete Textfehler
+## 2. Die zwei gemeldeten Fehler
 
-Bestätigt und behoben. Im Markup standen Positionsnummer und Text als zwei
-Spans **direkt aneinander**, ohne Trennzeichen dazwischen. Visuell sah das
-richtig aus, weil beide Grid-Elemente sind — beim Kopieren und für Screenreader
-ergab es aber `01Linux und Docker im Alltag`.
+**Fehler 1 — die Kästen.** Jeder Abschnitt saß in einem sichtbaren Rechteck
+(`.panel`: eigene Fläche plus 1-px-Neonrahmen), dazwischen lagen Trennlinien.
+Beides ist weg, ersatzlos. Es gibt im gesamten Inhalt kein Element mehr mit
+Rahmen, Outline, Fläche oder Schattenkante — nur die Buttons behalten ihren
+Neonrahmen, so wie es sein soll.
 
-Zwischen den Spans steht jetzt ein Zeilenumbruch. Da Grid-Container reine
-Leerraum-Textknoten nicht als Element behandeln, ändert sich am Layout nichts.
-Die Prüfung liest den Text jetzt als **„01 Linux und Docker im Alltag"** aus.
+**Fehler 2 — die Szene wiederholte sich.** Die ganze Szene war viewportfest.
+Beim Weiterscrollen standen Sonne, Bergzug und Horizontlinie damit mitten in den
+Textabschnitten. Jetzt gehört alles, was eine eigene Form hat, zum Hero und
+scrollt mit ihm weg.
 
 ---
 
 ## 3. Was neu ist
 
-| Bereich | Umsetzung |
-|---|---|
-| **Chrome-Typo** | Nur der Name im Hero: mehrstufiger Verlauf, per `background-clip: text` auf die Glyphen beschnitten — weiß, helles Flieder, dunkler Umschlag, harte weiße Kante, unten rosa nach violett. Dazu ein Schlagschatten für Tiefe. |
-| **Pflicht-Fallback** | Der Verlauf steht ausschließlich in einem `@supports`-Block. Die Grundregel darunter setzt Weiß. Maschinell geprüft: Wird der `@supports`-Block zur Laufzeit aus dem Stylesheet gelöscht, ist der Name `rgb(255, 255, 255)`. |
-| **Spiegelung** | Geflippte Kopie, Deckkraft 0,34, per `mask-image` nach unten ausblendend, `aria-hidden`. Erscheint nur ab 860 × 720 px. |
-| **CRT** | Scanlines (eine gedimmte Zeile je drei Pixel) und Vignette, beide über der Szene und **unter** dem Inhalt, ohne Pointer-Events, bei reduzierter Bewegung weiterhin sichtbar. |
-| **Scroll-Kopplung** | Das Skript schreibt den Scrollversatz in eine einzige Custom Property `--sc`; nur Transforms lesen sie. Gemessen bei 900 px Scrollweg: Sonne sinkt **126 px**, Raster läuft **90 px** zusätzlich, Sterne versetzen sich **−27 px**. |
-| **Neon-Details** | Überschriften mit dezentem Schein, Positionsnummern von 2,5 auf 3,6 rem und leuchtend, Neonrand fährt bei Hover von links in die Listenzeile, Buttons und Links mit Neonrahmen bei Hover und Fokus. |
+- **Zwei Ebenen statt einer.** `.scene` (Himmel, Sterne, Halo, Sonne, Berge,
+  Horizont) ist am ersten Screenful verankert und scrollt weg. `.floor` trägt nur
+  das Raster, bleibt am Viewport, beginnt an der Horizontlinie des Hero und läuft
+  als Boden bis zum Footer.
+- **Verlaufsschleier statt Kästen.** Pro Abschnitt zwei Verläufe: ein vollbreiter,
+  der oben und unten auf Alpha 0 ausläuft, und eine Ellipse der Größe `50% 50%`,
+  die ihre Null exakt an ihren eigenen Rändern erreicht.
+- **Die Seite ist eine Fahrt.** Die Rastergeschwindigkeit folgt gedämpft der
+  Scrollrate. Abschnitte kommen aus der Tiefe statt einfach einzublenden,
+  Überschriften 100 ms vor ihrem Fließtext.
+- **Rhythmus.** Ausrichtung, Spaltenbreite und vertikaler Abstand wechseln von
+  Abschnitt zu Abschnitt; „Was ich mache" läuft in einer eigenen, breiteren Bahn.
+- **Die Liste.** Die Positionsnummern sind mit 87 px ein grafisches Element, 42 px
+  vom Text entfernt, ohne Linien, ohne Zebra. Hover hellt die Zeile auf und lässt
+  die Nummer stärker leuchten.
+
+Der Hero ist unverändert: Sonne, Berge, Horizont, Chrome-Typografie und
+Spiegelung stehen genau wie in v11.
 
 ---
 
 ## 4. Selbst getroffene Entscheidungen
 
-1. **Eigene Bodendeckung eingezogen.** Sobald die Sonne beim Scrollen sinkt,
-   würde sie unter dem Horizont über dem Rasterboden schweben — der Boden kam
-   bisher aus dem Himmelsverlauf, der *unter* der Sonne liegt. Eine eigene
-   Ebene in Bodenfarbe zwischen Sonne und Bergen verdeckt sie sauber.
-
-2. **Horizontreserve erhöht, wenn die Spiegelung sichtbar ist.** Sie verlängert
-   den Textblock um rund eine halbe Namenshöhe. Ohne Anpassung stieg der Name
-   bei 1920 × 850 wieder in die Sonne — genau der Fehler, der in v10 behoben
-   worden war. Die Reserve wächst jetzt in derselben Media Query von 23 auf
-   28 rem mit.
-
-3. **Raster wird über eine zusätzliche Ebene beschleunigt.** Die Dauer der
-   laufenden Animation mitten im Lauf zu ändern, ruckelt. Stattdessen liegt ein
-   Wrapper darüber, der beim Scrollen zusätzlich verschiebt — reine Transform,
-   die Grundschleife bleibt unangetastet.
-
-4. **CRT unter der Abdunklung, nicht darüber.** So werden die Scanlines in den
-   unteren Abschnitten mitgedämpft und stören den Fließtext nicht.
-
-5. **Chrome-Name aus der normalen Kontrastmessung genommen.** Er trägt keine
-   Textfarbe mehr, die Standardmessung liefert dort keinen sinnvollen Wert. Die
-   Vorgabe nimmt ihn ausdrücklich aus. Stattdessen misst ein eigener Test den
-   hellsten Teil der Glyphen gegen den hellsten Pixel dahinter:
-   **12,29:1 bei 1280 px und 20,33:1 bei 390 px**.
-
-6. **Scroll-Kopplung mobil ganz aus.** Dort ist die Szene ohnehin nicht fixiert;
-   Parallaxe auf einer mitscrollenden Szene sähe falsch aus. Eine Regel mit
-   `!important` setzt `--sc` zusätzlich zurück, falls ein Fenster nachträglich
-   unter die Schwelle verkleinert wird.
+- **Horizont in `svh` statt in Prozent.** Die dokumentverankerte Szene und der
+  viewportfeste Boden müssen den Horizont an dieselbe Stelle setzen. In Prozent
+  hätten sie sich um bis zu 37 px unterschieden, sobald auf dem Telefon die
+  Adressleiste einfährt — sichtbar als dunkler Spalt zwischen Neonlinie und
+  Raster.
+- **Das Raster blendet oben weich ein.** Sobald die Horizontlinie weggescrollt
+  ist, wäre eine harte Oberkante des Rasters wieder ein Horizont. Im Hero deckt
+  der Schein der Linie die Einblendung ohnehin zu.
+- **Die Rasterfläche ist 800 % hoch statt 220 %.** Bei 220 % endete die Fläche
+  mitten im Bild — der Boden las sich als Streifen, nicht als Boden. Empirisch an
+  vier Perspektiv- und drei Neigungswerten gemessen und dann die Höhe erhöht,
+  damit Perspektive und Neigung des Hero unangetastet bleiben.
+- **Die Phase kommt aus dem Skript, nicht aus einer Keyframe-Animation.** Eine
+  Animation, deren Dauer sich ändert, springt. Ein selbst gerechneter Versatz,
+  als Länge an `transform` übergeben, tut das nicht.
+- **Auf dem Telefon läuft weiter die CSS-Schleife.** Ein konstant langsames
+  Raster ist dort billiger als eine Frame-Schleife — und ausdrücklich erlaubt.
+- **Nur `margin-top` an den Abschnitten.** Mit Abständen oben und unten fallen
+  benachbarte Ränder zusammen; drei verschiedene Abstufungen kamen dann als eine
+  heraus.
+- **`overflow-x: clip` an den Abschnitten.** Die Schleier greifen absichtlich über
+  beide Kanten hinaus, damit sie keine senkrechte Naht zeigen. Ohne Beschnitt
+  verbreiterten sie das Dokument auf das 1,45-fache.
 
 ---
 
 ## 5. Prüfergebnisse
 
-**Browser-Suite — 236 Einzelprüfungen, alle bestanden.** Neu darunter:
+**347 Browserprüfungen, 95 statische Prüfungen — alle bestanden.**
 
-- Nummer und Text getrennt, zwei Elemente je Zeile
-- Chrome-Verlauf auf dem Namen, **kein** Chrome auf Überschriften oder Fließtext
-- Fallback: `@supports`-Block gelöscht, Name bleibt weiß
-- Spiegelung sichtbar bei 1280 × 900 und 1920 × 1080, weggelassen bei 390 × 844
-  und 768 × 600; `aria-hidden`, Deckkraft 0,34, Maske, vertikal gespiegelt
-- CRT fixiert, `z-index` zwischen Szene und Inhalt, Scanlines und Vignette
-  vorhanden, bei reduzierter Bewegung weiterhin sichtbar
-- Scroll-Kopplung mit den Messwerten aus Abschnitt 3; mobil und bei reduzierter
-  Bewegung nachweislich `--sc: 0px`
-- Neon: Schein an Überschriften und Nummern, Hover-Rand fährt ein,
-  Fokusring bleibt mit `solid 2px` klar vom Neonrahmen unterscheidbar
-- dazu unverändert alle v10-Prüfungen: Sonne kreisrund (≤ 1,004 × Radius),
-  Berge verdecken 5,1–5,6 % der Scheibe, kein Querscrollen bei
-  320/360/390/430/768/1280/1920, Kontrast gegen echte Pixel, ohne JavaScript
-  alles sichtbar, Tap-Ziele, Heading-Hierarchie, Links und Redirects
-
-**Statische Gates — 62 Prüfungen, alle bestanden**, darunter: CRT, Spiegelung,
-Bodendeckung und Raster-Versatz vorhanden und dekorativ ausgezeichnet, Chrome
-nur hinter `@supports` mit weißem Fallback davor, Nummer und Text im Markup
-getrennt, Rechtstexte zeichengenau identisch, CNAME unverändert, keine fremd
-geladene Ressource, keine Bilddatei.
+| Prüfung | Ergebnis |
+|---|---|
+| Keine Kastenmerkmale im Inhalt | kein Rahmen, keine Outline, keine Fläche, keine Schattenkante |
+| Keine Kante im Hintergrund | stärkster Sprung senkrecht 3,1e-4, waagerecht 4,0e-4 (Schwelle 3,5e-3) |
+| Szene unter dem Hero | 0 sonnenartige Pixel an 16 Scrollpositionen über vier Breiten |
+| Rasterboden weiterhin sichtbar | 1 200 bis 23 726 Neonpixel an jeder dieser Positionen |
+| Rastergeschwindigkeit | 26 px/s Ruhe, 485 px/s beim Scrollen (18,5-fach), 437 px/s direkt danach, 29 px/s nach 1,4 s |
+| Fließtext gegen echte Pixel | schlechtester Wert 12,27:1 (gefordert 7:1) |
+| Bedienelemente und Labels | schlechtester Wert 8,24:1 (gefordert 4,5:1) |
+| Bildrate beim Scrollen | Median 16,7 ms, 90. Perzentil 17,2 ms |
+| Waagerechtes Scrollen | keins bei 320, 360, 390, 430 px |
+| Ohne JavaScript | alle Abschnitte voll sichtbar, Raster läuft |
+| Reduzierte Bewegung | alles sichtbar, nichts bewegt sich |
+| Kopieren der Liste | „01" und „Linux und Docker im Alltag" sauber getrennt |
+| Rechtstexte gegen `origin/main` | Zeichen für Zeichen identisch (1 499 und 4 896 Zeichen) |
 
 ### Gefundene und behobene Fehler
 
-1. **Name stieg wieder in die Sonne** bei 1920 × 850, verursacht durch die
-   zusätzliche Höhe der Spiegelung. Horizontreserve mitgewachsen.
-2. Zwei weitere Treffer waren Messartefakte meiner eigenen Tests, verursacht
-   durch die neuen Effekte: das CRT-Overlay dämpfte die Sonne so weit, dass die
-   Geometriemessung sie teilweise nicht mehr als Sonne erkannte, und der
-   Chrome-Name lieferte in der Standard-Kontrastmessung keinen sinnvollen Wert.
-   Beide Tests messen jetzt richtig.
+1. **Die Zellbreite war nicht messbar.** `--grid-cell` steckt in einem `clamp()`;
+   eine nicht registrierte Custom Property gibt der Browser unverändert zurück,
+   `parseFloat` liefert `NaN`. Das Skript wäre auf 60 px zurückgefallen und hätte
+   die Phase an der falschen Stelle umgeschlagen — ein sichtbarer Ruck bei jedem
+   Durchlauf. Jetzt wird die Breite an einem unsichtbaren Element gemessen.
+2. **Die Schleier verbreiterten das Dokument** auf das 1,45-fache und erzeugten
+   waagerechtes Scrollen auf allen Telefonbreiten. Behoben mit `overflow-x: clip`.
+3. **Die Abstände variierten nicht**, weil benachbarte Ränder zusammenfielen.
+4. **Der Rasterboden endete mitten im Bild** und las sich als Streifen.
+5. **Nicht aus dieser Runde, aber gefunden und mitbehoben:** auf dem Impressum
+   war der gefüllte Mail-Button weiß auf fast weiß, gemessen 1,0:1. `.legal-body a`
+   schlug `.btn--solid` auf Spezifität. Der Fehler war schon vor v12 live.
+
+Vier weitere Meldungen kamen aus meinen eigenen Prüfskripten, nicht von der
+Seite: der Kantenscan scrollte weich und erwischte die Hero-Szene noch im Bild;
+der Sonnentest zählte weißen Text als Sonne; ein Regex erwartete ein Leerzeichen
+vor `px`; und die Kontrastmessung blendete Elemente samt eigener Fläche aus,
+wodurch dunkle Schrift auf hellem Button gegen die dunkle Seite gemessen wurde.
+Die Messung liest jetzt die echten Zeilenkästen des Textes.
 
 ### Sichtprüfung
 
-18 Screenshots — 320, 390, 430, 768, 1280 und 1920 px, je oben, Mitte und unten.
-Beurteilt: Der Name ist überall klar lesbar, die Scanlines bleiben dezent und
-verdecken keinen Text, die Spiegelung wirkt nur dort, wo Platz ist.
+Je vier Aufnahmen bei 390, 768, 1280 und 1920 px, über die volle Seitenhöhe
+verteilt, dazu Aufnahmen ohne JavaScript, mit reduzierter Bewegung sowie von
+Impressum und 404. Kein Rechteck, keine Trennlinie, keine Tabellenoptik, unter
+dem Hero keine Sonne, kein Bergzug, keine Horizontlinie. Der Boden läuft bis zum
+Footer durch.
 
 ---
 
@@ -144,60 +142,61 @@ verdecken keinen Text, die Spiegelung wirkt nur dort, wo Platz ist.
 
 | | |
 |---|---|
-| Merge | `redesign/v11` mit `--no-ff` nach `main` |
-| Merge-Commit | `aec109e` |
-| Pages-Lauf | `pages build and deployment` für `aec109e` — **completed / success** |
-| Rückfall nötig? | Nein. Der Backup-Branch wurde nicht angefasst. |
+| Merge-Commit | `2221736` |
+| Inhalts-Commit | `1ea7472` |
+| Workflow | `pages build and deployment` |
+| Ergebnis | erfolgreich |
+
+Die Seite selbst kann ich aus dieser Umgebung nicht abrufen — der Egress-Proxy
+sperrt `tr1stan.de` und `github.io`. Bestätigt ist der Deploy über die
+Actions-API, geprüft wurde gegen einen lokalen Nachbau von GitHub Pages.
 
 ---
 
 ## 7. Offene Punkte und Risiken
 
-| Punkt | Einschätzung |
-|---|---|
-| **Live-Abruf nicht möglich** | Der Egress-Proxy blockt `tr1stan.de`. Der Deploy ist nur über die Actions-API bestätigt. **Bitte selbst im Browser gegenprüfen**, besonders auf einem echten Telefon. |
-| Bildrate beim Scrollen | Im Container nicht belastbar messbar. Alle scrollgekoppelten Effekte laufen über `transform` und eine rAF-gedrosselte Custom Property, es wird kein Layout neu berechnet. Falls es auf schwacher Hardware doch hakt: `--sc`-Faktoren in `style.css` verkleinern oder die Kopplung wie mobil abschalten. |
-| Scanline-Stärke | 16 % Deckkraft auf jeder dritten Pixelzeile. Wer es kräftiger mag, erhöht den Wert in `.crt::before` — der Kontrast muss danach neu gemessen werden. |
-| Chrome auf sehr alten Browsern | Ohne `background-clip: text` ist der Name schlicht weiß. Das ist der abgesicherte Zustand, kein Fehler. |
-| Spiegelung unter 860 × 720 px | Bewusst weggelassen, damit der Textblock nicht in die Sonne wächst. |
+- **`overflow-x: clip`** braucht Safari 16. Fällt es aus, greift weiterhin
+  `overflow-x: hidden` am Body: es kann dann nicht gescrollt werden, das Dokument
+  meldet sich aber breiter.
+- **Der viewportfeste Boden auf dem Telefon.** Er füllt immer den sichtbaren
+  Bereich, kann also beim Einfahren der Adressleiste nicht springen. Sollte er auf
+  einem echten Gerät trotzdem nachziehen, ist die Ebene einzeln abschaltbar.
+- **Die Frame-Schleife läuft dauerhaft**, solange der Tab sichtbar ist. Gemessen
+  kostet sie nichts, aber sie hat eine eingebaute Notbremse: bricht die Bildrate
+  ein, gibt sie den Boden an CSS zurück.
+- **`--depth` und `--run` liegen am Boden-Element**, nicht an `:root`. Wer sie
+  dort sucht, findet sie nicht.
 
 ---
 
 ## 8. Was du manuell prüfen solltest
 
-1. Den Namen ansehen: harte weiße Kante in der Mitte, Spiegelung darunter, die
-   nach unten ausläuft.
-2. Langsam scrollen: Die Sonne muss sichtbar weiter hinter die Berge sinken,
-   das Raster etwas schneller laufen, die Sterne leicht nachhängen.
-3. Scanlines aus der Nähe prüfen: gerade noch sichtbar, keine schwarzen Balken,
-   kein Text schlechter lesbar.
-4. Über die Listenzeilen fahren: Der Neonrand fährt von links ein, die Zeile
-   hellt auf, nichts springt.
-5. Mit Tab durch Buttons und Links: Der Fokusring muss deutlich anders aussehen
-   als der Hover-Zustand.
-6. Eine Listenzeile markieren und kopieren — es muss `01 Linux und Docker im
-   Alltag` herauskommen, nicht `01Linux…`.
-7. Mit Screenreader über den Hero: Der Name darf **einmal** vorgelesen werden.
-8. Auf dem Handy: Chrome-Name und Scanlines da, keine Spiegelung, keine
-   Scroll-Kopplung, flüssiges Scrollen.
-9. Bewegung reduzieren einschalten: nichts bewegt sich, Szene und CRT bleiben da.
-10. JavaScript abschalten: alle Abschnitte sichtbar, Name weiterhin lesbar.
-11. Impressum und Datenschutz gegenlesen — inhaltlich unverändert.
+1. Auf einem echten Telefon scrollen: läuft der Boden ruhig mit, während die
+   Adressleiste ein- und ausfährt?
+2. Schnell und ruckartig scrollen: beschleunigt das Raster spürbar und läuft es
+   weich wieder aus?
+3. Mit der Maus über die Liste fahren: hellt die Zeile auf, leuchtet die Nummer?
+4. Eine Zeile der Liste markieren und kopieren: steht die Nummer sauber getrennt?
+5. Auf dem Impressum den gefüllten Mail-Button ansehen — er war weiß auf weiß.
+6. Mit der Tastatur durch die Seite: ist der Fokusring überall klar zu sehen?
 
 ---
 
 ## 9. Bestehende Branches
 
-Keiner wurde gelöscht: `backup/pre-v11-2026-08-17`, `backup/pre-v10-2026-08-14`,
-`backup/pre-v9-2026-08-14`, `backup/pre-v9-2026-08-10` (gleicher Commit),
-`backup/pre-v7-2026-08-10`, `backup/pre-v6-2026-08-10`,
-`backup/pre-redesign-2026-08-09`, `redesign/v11`, `redesign/v10`, `redesign/v9`,
-`redesign/v7`, `redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
+Keiner wurde gelöscht: `backup/pre-v12-2026-08-20`, `backup/pre-v11-2026-08-17`,
+`backup/pre-v10-2026-08-14`, `backup/pre-v9-2026-08-14`, `backup/pre-v9-2026-08-10`
+(gleicher Commit), `backup/pre-v7-2026-08-10`, `backup/pre-v6-2026-08-10`,
+`backup/pre-redesign-2026-08-09`, `redesign/v12`, `redesign/v11`, `redesign/v10`,
+`redesign/v9`, `redesign/v7`, `redesign/v6`, `redesign/v4`,
+`claude/visual-redesign-v5-yhc4qp`.
 
 ---
 
 ## Anhang: frühere Fassungen
 
+- **v11** (`backup/pre-v12-2026-08-20`, `c60a997`): Chrome-Typografie, Spiegelung
+  des Namens, CRT-Overlay, scroll-gekoppelte Szene.
 - **v10** (`backup/pre-v11-2026-08-17`, `6c5cf3f`): Szene erstmals fixiert hinter
   der ganzen Seite, Sonne kreisrund und hinter den Bergen, fünf Blockmuster.
 - **v9** (`backup/pre-v10-2026-08-14`, `b45506a`): erste Synthwave-Fassung.
