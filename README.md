@@ -28,7 +28,52 @@ Farbfamilien kommen nicht vor, kein Cyan, kein Grün, kein Orange.
 | Text primär / sekundär | `--text-1` / `--text-2` | `#FFFFFF` `#F3ECFA` |
 | Mono-Labels | `--label` | `#F5D0FE` |
 
-### Die Szene
+### Die Szene in drei Dimensionen
+
+Auf Geräten, die es tragen, liegt hinter der Seite eine echte 3D-Szene: eine
+Kamerafahrt durch einen Korridor zwischen zwei Bergketten, auf eine gestreifte
+Sonne am Horizont zu. Gerendert mit **three.js r185**, das als Datei im Repo
+liegt (`/vendor/`, MIT, siehe `vendor/README.md`) — kein CDN, kein npm, kein
+Build, und zur Laufzeit kein einziger Request an einen fremden Host.
+
+Nur der Kern-Build. Nichts aus `examples/`: kein EffectComposer, kein
+Bloom-Pass, keine Controls. Das Leuchten der Sonne ist eine Textur, keine
+Nachbearbeitung; sämtliche Texturen — Himmel, Sonnenscheibe, Schein — entstehen
+im Code auf einem Canvas, es gibt keine einzige Bilddatei.
+
+- **Terrain** ist eine Plane mit 96 × 24 Feldern, deren Vertices über eine
+  selbst geschriebene Höhenfunktion aus fünf Sinustermen verschoben werden.
+  Eine weiche Maske hält in der Mitte den Korridor frei, nach außen werden die
+  Kämme höher. Gezeichnet wird es zweimal: als dunkle Fläche, damit die Berge
+  die Sonne wirklich verdecken, und als Drahtgitter in Neon-Magenta darüber.
+- **Unendlich** wird es über drei Kacheln, die dieselbe Geometrie benutzen und
+  im Kreis nach vorn wandern. Die z-Anteile der Höhenfunktion sind ganzzahlige
+  Vielfache von 2π/Kacheltiefe, die Funktion ist damit exakt kachelperiodisch
+  und die Naht liegt auf dem Vertex genau — nachgerechnet, nicht geschätzt.
+- **Tiefe** kommt aus Nebel in Richtung Horizont, sodass entfernte Linien weich
+  verschwinden statt hart abzureißen, und aus einem Sternenfeld im oberen
+  Bereich, das der Nebel nicht anfasst.
+- **Die Fahrt** läuft dauerhaft langsam und beschleunigt beim Scrollen, gedämpft
+  in beide Richtungen. Beim Verlassen des Hero hebt sich die Kamera an und nickt
+  nach unten: Sonne, Berge und Horizont wandern über den oberen Rand, unter dem
+  Text läuft nur noch der Rasterboden — und der wird dabei leiser, damit der
+  Text ihn nicht erst überstrahlen muss.
+- **Die Maus** kippt die Kamera um höchstens rund drei Grad, und nur auf
+  Geräten mit feinem Zeiger. Es gibt keine Steuerung, keine Controls.
+
+### Wann die 3D-Szene *nicht* läuft
+
+Sie ist durchgehend optional. three.js wird erst angefordert, wenn alles
+dafür spricht — kein WebGL 2, `prefers-reduced-motion` oder kein JavaScript
+heißt: kein Download, nicht ein Byte. Scheitert der Ladevorgang, geht der
+Kontext verloren oder bricht die Bildrate trotz Vergröberung ein, schaltet die
+Seite still zurück. Es gibt dabei keine Fehlermeldung und keine leere Fläche:
+der Canvas wird erst sichtbar, wenn das erste Bild wirklich steht.
+
+Deshalb bleibt die CSS-Szene aus v12 **vollständig im Code** und ist unten
+unverändert beschrieben. Sie ist kein Rest, sie ist der Rückfall.
+
+### Die CSS-Szene
 
 Sie besteht aus **zwei getrennten Ebenen**.
 
@@ -140,6 +185,8 @@ leicht von unten, dann klaren sie auf — nur `transform` und `opacity`. Die
 ```text
 tr1stan.de/
 ├── index.html          # Hero mit Szene, Rasterboden, sechs Abschnitte
+├── scene3d.js          # die 3D-Szene, nur bei Bedarf geladen
+├── vendor/             # three.js r185, MIT, unverändert übernommen
 ├── impressum.html      # Impressum nach § 5 DDG
 ├── datenschutz.html    # Datenschutzhinweise nach Art. 13 DSGVO
 ├── 404.html            # Fehlerseite inkl. Legacy-Redirects

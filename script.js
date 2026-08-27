@@ -129,7 +129,7 @@
      sun sinking a little slower than the page. Off on phones and off entirely
      under reduced motion.
      ------------------------------------------------------------------------ */
-  (function heroParallax() {
+  function heroParallax() {
     if (reduceMotion) return;
     if (!window.matchMedia("(min-width: 761px)").matches) return;
 
@@ -154,7 +154,7 @@
     window.addEventListener("resize", onScroll, { passive: true });
     document.addEventListener("visibilitychange", function () { if (!document.hidden) onScroll(); });
     update();
-  })();
+  }
 
   /* --------------------------------------------------------------------------
      The pace of the floor
@@ -175,7 +175,7 @@
      it costs one compositor animation instead of a frame loop. If the frame
      rate does drop on a desktop, the loop hands the floor back to CSS.
      ------------------------------------------------------------------------ */
-  (function floorRide() {
+  function floorRide() {
     if (reduceMotion) return;
 
     var floor = $(".floor");
@@ -284,7 +284,76 @@
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("resize", onResize, { passive: true });
     start();
-  })();
+  }
+
+  /* --------------------------------------------------------------------------
+     Die dreidimensionale Bühne
+
+     Sie ersetzt die CSS-Szene, aber nur wenn wirklich alles dafür spricht. Der
+     Reihe nach: WebGL 2 muss da sein, die Bewegung erwünscht, dynamische
+     Importe unterstützt. Erst dann wird three.js überhaupt angefordert — auf
+     einem Gerät ohne WebGL lädt die Seite kein einziges Byte davon.
+
+     Die CSS-Szene bleibt vollständig erhalten und läuft weiter, bis das erste
+     Bild wirklich steht. Geht danach irgendetwas schief — Kontextverlust, zu
+     wenig Bilder pro Sekunde, ein Ladefehler —, wird still zurückgeschaltet:
+     Canvas aus, CSS-Szene an, keine Meldung, keine leere Fläche.
+     ------------------------------------------------------------------------ */
+  function stage3d() {
+    var canvas = $(".stage");
+    if (!canvas) return false;
+    if (reduceMotion) return false;
+
+    // Dynamischer Import in älteren Browsern ist ein Syntaxfehler beim Parsen,
+    // deshalb steht er hinter einem Function-Konstruktor und nicht im Text.
+    var load;
+    try { load = new Function("u", "return import(u);"); } catch (err) { return false; }
+
+    if (!hasWebGL2()) return false;
+
+    var narrow = window.matchMedia("(max-width: 479px)").matches;
+    var scene = null;
+    var handedBack = false;
+
+    function handBack() {
+      if (handedBack) return;
+      handedBack = true;
+      root.classList.remove("has-3d");
+      if (scene) { try { scene.dispose(); } catch (err) {} scene = null; }
+      heroParallax();
+      floorRide();
+    }
+
+    load("/scene3d.js?v=16").then(function (mod) {
+      if (!mod || typeof mod.start !== "function") { handBack(); return; }
+      scene = mod.start(canvas, {
+        quality: narrow ? "low" : "high",
+        onFail: handBack
+      });
+      if (!scene) { handBack(); return; }
+      root.classList.add("has-3d");
+    })["catch"](function () { handBack(); });
+
+    return true;
+  }
+
+  function hasWebGL2() {
+    try {
+      var probe = document.createElement("canvas");
+      var gl = probe.getContext("webgl2");
+      if (!gl) return false;
+      var lose = gl.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  if (!stage3d()) {
+    heroParallax();
+    floorRide();
+  }
 
   /* --------------------------------------------------------------------------
      Scroll reveals
