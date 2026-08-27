@@ -16,16 +16,21 @@
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=15" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=16" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=15" />
+  <link rel="stylesheet" href="/style.css?v=16" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
+
+  <!-- Decorative. The three-dimensional stage. It stays blank and invisible
+       unless the script decides the device can carry it; the CSS scene below
+       is the fallback and is never removed. -->
+  <canvas class="stage" aria-hidden="true"></canvas>
 
   <!-- Decorative. Sky, stars, halo, sun, ridge and horizon belong to the hero
        alone: this layer is anchored to the first screenful and scrolls away
@@ -198,6 +203,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=15" defer></script>
+  <script src="/script.js?v=16" defer></script>
 </body>
 </html>

@@ -585,6 +585,37 @@ html.is-hidden .sun-halo i,
 html.is-hidden .grid-floor { animation-play-state: paused; }
 
 
+/* --- 4.7 the three-dimensional stage -------------------------------------
+   A canvas fixed behind everything. It is always in the document but stays at
+   opacity 0 and without a rendering context until the script has a first frame
+   on screen; only then does html.has-3d fade it in and take the CSS scene out.
+   That way the crossover has nothing blank in it, and every path that fails —
+   no WebGL, reduced motion, a load error, too few frames — simply never sets
+   the class and leaves the CSS scene exactly where it was. */
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms var(--ease);
+}
+html.has-3d .stage { opacity: 1; }
+html.has-3d .scene,
+html.has-3d .floor { display: none; }
+
+/* The rendered scene is brighter than the drawn one, so the page veil has to
+   take more off it below the hero. The scene gets darker, never the text. */
+html.has-3d .veil {
+  background: linear-gradient(to bottom,
+              rgba(var(--ink), 0) 0,
+              rgba(var(--ink), 0.44) 300px,
+              rgba(var(--ink), 0.56) 900px,
+              rgba(var(--ink), 0.60) 100%);
+}
+
 /* --- 4.7 CRT overlay: scanlines and vignette ------------------------------
    Above the scene, below the veil and the content, so no text ever has to be
    read through a scanline. Both are static — nothing here moves. */
@@ -1248,7 +1279,7 @@ html:not(.has-js) .js-only { display: none !important; }
 
 @media print {
   body { background: #fff; color: #000; }
-  .scene, .floor, .veil, .crt, .hdr, .skip, .nav-toggle { display: none !important; }
+  .scene, .floor, .stage, .veil, .crt, .hdr, .skip, .nav-toggle { display: none !important; }
   .pane::before, .pane::after, .rows li::before { display: none !important; }
   .pane { max-width: none; margin-inline: 0; }
   .hero { min-height: 0; padding-block: 1cm; }
