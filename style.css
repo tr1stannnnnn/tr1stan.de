@@ -931,6 +931,141 @@ html.has-3d .veil {
   padding-block: var(--sp-2xs);
 }
 
+/* --- das Terminal ---------------------------------------------------------
+   Der einzige Kasten auf der Seite, und der einzige, der einen haben darf:
+   ein Terminal ohne Rand wäre keins. Alle anderen Abschnitte bleiben, wie sie
+   seit v12 sind. */
+.term {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  border: 1px solid var(--rule-strong);
+  background: rgba(var(--ink), 0.90);
+  box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.10),
+              0 0 40px rgba(232, 121, 249, 0.10);
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2xs);
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  background: rgba(22, 6, 40, 0.55);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+}
+.term-lamp {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-grid);
+  box-shadow: 0 0 10px 1px rgba(232, 121, 249, 0.55);
+}
+.term-name { color: var(--text-1); }
+.term-tip { margin-left: auto; color: var(--label); }
+
+/* eigener Scrollbereich mit fester Höhe: die Seite darf beim Ausgeben nicht
+   springen */
+.term-out {
+  height: clamp(14rem, 38vh, 23rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+.term-out::-webkit-scrollbar { width: 10px; }
+.term-out::-webkit-scrollbar-thumb { background: var(--rule-strong); }
+
+.term-line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.term-line--cmd  { color: var(--neon-grid); }
+.term-line--head { color: var(--text-1); }
+.term-line--note { color: var(--label); }
+.term-line--art  { color: var(--neon-ridge); white-space: pre; }
+.term-out a { color: var(--horizon-line); }
+.term-out a:hover { color: var(--neon-grid); }
+
+/* Der blinkende Cursor sitzt am Ende der Ausgabe, nicht im Eingabefeld —
+   dort blinkt die Schreibmarke des Browsers ohnehin. */
+.term-caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  vertical-align: -0.15em;
+  background: var(--neon-grid);
+  animation: term-blink 1.1s steps(1, end) infinite;
+}
+@keyframes term-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+
+.term-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3xs);
+  padding: 0 0.9rem 0.7rem;
+}
+.term-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  color: var(--label);
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.75rem;
+  transition: border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease),
+              background-color var(--dur-fast) var(--ease);
+}
+.term-chip:hover,
+.term-chip:focus-visible {
+  border-color: var(--neon-grid);
+  color: var(--text-1);
+  background: var(--panel-hot);
+}
+
+.term-form {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+.term-ps1 { color: var(--neon-grid); }
+.term-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: none;
+  border: 0;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  /* 16 px, sonst zoomt iOS beim Fokussieren in die Seite hinein */
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.45rem 0;
+  caret-color: var(--neon-grid);
+}
+
+.term-nojs { color: var(--label); font-size: var(--fs-small); }
+html.has-js .term-nojs { display: none; }
+
+/* Auf dem Finger müssen die Ziele gross genug sein. */
+@media (hover: none) and (pointer: coarse) {
+  .term-chip { min-height: 44px; min-width: 44px; padding-inline: 0.9rem; }
+  .term-in { padding-block: 0.7rem; }
+}
+
 /* --- contact --------------------------------------------------------------- */
 .contact-body { display: grid; gap: var(--sp-md); justify-items: start; }
 .mail {
@@ -1212,6 +1347,8 @@ html:not(.has-js) .js-only { display: none !important; }
 }
 
 @media (max-width: 700px) {
+  .term-out { height: clamp(11rem, 32vh, 16rem); font-size: 0.84rem; }
+  .term-tip { display: none; }
   :root {
     --horizon: min(56svh, calc(100svh - 17rem));
     --sun-size: clamp(150px, 46vw, 260px);
@@ -1263,6 +1400,8 @@ html:not(.has-js) .js-only { display: none !important; }
 
   :root { --run: 0px !important; --depth: 0 !important; }
 
+  .term-caret { animation: none !important; opacity: 1; }
+
   .stars i,
   .sun-halo i,
   .grid-floor { animation: none !important; }
@@ -1279,7 +1418,7 @@ html:not(.has-js) .js-only { display: none !important; }
 
 @media print {
   body { background: #fff; color: #000; }
-  .scene, .floor, .stage, .veil, .crt, .hdr, .skip, .nav-toggle { display: none !important; }
+  .scene, .floor, .stage, .veil, .crt, .hdr, .skip, .nav-toggle, .term { display: none !important; }
   .pane::before, .pane::after, .rows li::before { display: none !important; }
   .pane { max-width: none; margin-inline: 0; }
   .hero { min-height: 0; padding-block: 1cm; }

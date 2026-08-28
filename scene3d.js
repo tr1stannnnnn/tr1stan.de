@@ -33,14 +33,27 @@ var FOG_NEAR = 130;
 var FOG_FAR = 880;      // kürzer als die drei Kacheln tief sind, damit die
                         // hintere Kante des Terrains nie als Linie auftaucht
 
-/* Die Fahrt hat zwei Zustände, zwischen denen der Scrollstand blendet.
-   Bei 0 steht die Kamera tief im Korridor, der Horizont in der Bildmitte, die
-   Sonne im Bild. Bei 1 ist sie angehoben und nickt nach unten: Sonne, Berge und
-   Horizont sind über dem oberen Rand, es läuft nur noch der Rasterboden — und
-   der ist von oben aus deutlich mehr zu sehen als aus der Froschperspektive. */
-var MAX_PITCH = 0.62;
-var CAM_Y0 = 9.5;
-var CAM_Y1 = 54;
+/* Die Kamera fliegt geradeaus, immer. Sie hebt sich nicht, sie nickt nicht,
+   sie kippt nicht — beim Scrollen wird sie ausschließlich schneller. Höhe und
+   Blickwinkel stehen deshalb fest.
+
+   Damit bleibt der Horizont auf gleicher Bildschirmhöhe und die Sonne über die
+   ganze Seite sichtbar. Sie stünde dann aber hinter dem Fließtext, und genau
+   das war der Fehler aus v11. Zwei Dinge halten das auseinander: die Sonne
+   wandert beim Scrollen sehr langsam zur Seite aus der Mitte heraus, und sie
+   wird dabei so weit heruntergenommen, dass von ihr ein ruhiger Schein bleibt.
+   Abgedunkelt wird die Szene, nie der Text aufgehellt. */
+var CAM_Y = 9.5;
+/* Die Drift wird am sichtbaren Ausschnitt gemessen, nicht in festen
+   Welteinheiten: ein Hochformat sieht bei gleicher Entfernung nur einen
+   Bruchteil der Breite, dort hätte ein fester Wert die Sonne aus dem Bild
+   geschoben. Nach oben begrenzt, damit sie nicht über den Rand des Terrains
+   hinauswandert und im Leeren stünde. */
+var SUN_DRIFT_NDC = 0.62;
+var SUN_DRIFT_MAX = 620;
+var SUN_FADE_TO = 0.13;  // Restdeckkraft der Scheibe unter dem Hero
+var GLOW_FADE_TO = 0.22;
+var STAR_FADE_TO = 0.10;  // Sterne stehen jetzt die ganze Seite über im Bild
 
 var C = {
   skyTop: "#06020C",
@@ -176,6 +189,41 @@ function glowTexture() {
   return t;
 }
 
+/* Eine Sternschnuppe: heller Kopf rechts, nach links ausblendender Schweif,
+   senkrecht ausgedünnt. Weiß ins helle Flieder, wie die Horizontlinie. */
+function meteorTexture() {
+  var W = 256, H = 16;
+  var c = makeCanvas(W, H);
+  var g = c.getContext("2d");
+
+  var tail = g.createLinearGradient(0, 0, W, 0);
+  tail.addColorStop(0.00, "rgba(251, 228, 255, 0)");
+  tail.addColorStop(0.55, "rgba(251, 228, 255, 0.32)");
+  tail.addColorStop(0.88, "rgba(255, 255, 255, 0.9)");
+  tail.addColorStop(1.00, "rgba(255, 255, 255, 1)");
+  g.fillStyle = tail;
+  g.fillRect(0, 0, W, H);
+
+  var head = g.createRadialGradient(W - 7, H / 2, 0, W - 7, H / 2, 8);
+  head.addColorStop(0.0, "rgba(255, 255, 255, 1)");
+  head.addColorStop(1.0, "rgba(255, 255, 255, 0)");
+  g.fillStyle = head;
+  g.fillRect(W - 24, 0, 24, H);
+
+  g.globalCompositeOperation = "destination-in";
+  var thin = g.createLinearGradient(0, 0, 0, H);
+  thin.addColorStop(0.00, "rgba(0, 0, 0, 0)");
+  thin.addColorStop(0.50, "rgba(0, 0, 0, 1)");
+  thin.addColorStop(1.00, "rgba(0, 0, 0, 0)");
+  g.fillStyle = thin;
+  g.fillRect(0, 0, W, H);
+
+  var t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+
 /* --- Aufbau --------------------------------------------------------------- */
 export function start(canvas, options) {
   var opts = options || {};
@@ -216,7 +264,7 @@ export function start(canvas, options) {
   scene.fog = new THREE.Fog(C.fog, FOG_NEAR, FOG_FAR);
 
   camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 1, 2600);
-  camera.position.set(0, 9.5, 0);
+  camera.position.set(0, CAM_Y, 0);
   scene.add(camera);
 
   /* Terrain: eine Geometrie, dreimal benutzt. Nichts davon wird pro Bild neu
@@ -334,6 +382,104 @@ export function start(canvas, options) {
   disposables.push(starGeo, starMat);
   scene.add(new THREE.Points(starGeo, starMat));
 
+  /* --- Sternschnuppen ------------------------------------------------------
+     Drei Objekte, die immer wieder benutzt werden — pro Sternschnuppe entsteht
+     nichts Neues. Sie fliegen auf einer festen Ebene vor der Kamera, weit über
+     dem Horizont: damit liegen sie nie über dem Terrain und nie über der
+     Sonnenscheibe, deren Oberkante auf dieser Ebene bei etwa 0,57 der halben
+     Bildhöhe steht. Und sie starten nur, solange der Hero im Bild ist —
+     darunter wäre der obere Himmel von Text überdeckt. */
+  var MET_Z = -600;
+  var MET_MIN_NDC = 0.60;   // nie tiefer als hier: darüber liegt nur Himmel
+  var MET_MAX_NDC = 0.94;
+  var MET_GAP_MIN = 8;      // Sekunden
+  var MET_GAP_MAX = 15;
+
+  var metTex = meteorTexture();
+  var metMat = new THREE.MeshBasicMaterial({
+    map: metTex, transparent: true, depthWrite: false, fog: false,
+    blending: THREE.AdditiveBlending, opacity: 0
+  });
+  disposables.push(metTex, metMat);
+
+  var metPool = [];
+  for (var mi = 0; mi < 3; mi++) {
+    var mm = new THREE.Mesh(quad, metMat.clone());
+    mm.visible = false;
+    mm.position.z = MET_Z;
+    scene.add(mm);
+    disposables.push(mm.material);
+    metPool.push({ mesh: mm, live: false, t: 0, dur: 1, x0: 0, y0: 0, dx: 0, dy: 0, len: 0 });
+  }
+  var metWait = 2.5 + Math.random() * 4;
+
+  function metHalf() {
+    var hh = Math.abs(MET_Z) * Math.tan((camera.fov * Math.PI) / 360);
+    return { h: hh, w: hh * camera.aspect };
+  }
+
+  function meteors(dt, e) {
+    var half = metHalf();
+    var active = 0, i, m;
+
+    for (i = 0; i < metPool.length; i++) {
+      m = metPool[i];
+      if (!m.live) continue;
+      active++;
+      m.t += dt;
+      var u = m.t / m.dur;
+      if (u >= 1) { m.live = false; m.mesh.visible = false; continue; }
+
+      var hx = m.x0 + m.dx * u;
+      var hy = m.y0 + m.dy * u;
+      // Ein- und Ausblenden, damit nichts hart erscheint oder abreißt
+      var a = u < 0.12 ? u / 0.12 : (u > 0.62 ? (1 - u) / 0.38 : 1);
+      var ang = Math.atan2(m.dy, m.dx);
+      m.mesh.material.opacity = a * 0.95;
+      m.mesh.rotation.z = ang;
+      m.mesh.scale.set(m.len, m.len * 0.045, 1);
+      // der Kopf sitzt am vorderen Ende der Textur
+      m.mesh.position.x = hx - Math.cos(ang) * m.len * 0.5;
+      m.mesh.position.y = hy - Math.sin(ang) * m.len * 0.5;
+    }
+
+    metWait -= dt;
+    if (metWait > 0) return;
+
+    // Unter dem Hero nicht starten: dort steht Text im oberen Himmel.
+    if (e > 0.35 || active >= 2) { metWait = 1.5; return; }
+
+    var free = null;
+    for (i = 0; i < metPool.length; i++) if (!metPool[i].live) { free = metPool[i]; break; }
+    if (!free) { metWait = 1.5; return; }
+
+    var ndcY = MET_MIN_NDC + Math.random() * (MET_MAX_NDC - MET_MIN_NDC);
+    var toLeft = Math.random() < 0.5;
+    var x0 = (toLeft ? 1 : -1) * half.w * (0.55 + Math.random() * 0.5);
+    var y0 = ndcY * half.h;
+
+    // nie zwei am selben Ort
+    for (i = 0; i < metPool.length; i++) {
+      m = metPool[i];
+      if (!m.live) continue;
+      if (Math.abs(m.mesh.position.x - x0) < half.w * 0.45) { metWait = 2; return; }
+    }
+
+    var span = half.w * (0.7 + Math.random() * 0.6);
+    var drop = Math.min((ndcY - MET_MIN_NDC) * half.h, span * 0.5);
+    free.x0 = x0;
+    free.y0 = y0;
+    free.dx = (toLeft ? -1 : 1) * span;
+    free.dy = -drop;
+    free.len = half.w * (0.16 + Math.random() * 0.12);
+    free.dur = 0.9 + Math.random() * 0.7;
+    free.t = 0;
+    free.live = true;
+    free.mesh.visible = true;
+    free.mesh.material.opacity = 0;
+    metWait = MET_GAP_MIN + Math.random() * (MET_GAP_MAX - MET_GAP_MIN);
+  }
+
   /* --- Fahrt ---------------------------------------------------------------
      Die Kamera steht still, das Terrain kommt auf sie zu. Die Geschwindigkeit
      ist ein gedämpfter Folger der Scrollrate: sie steigt schnell an und fällt
@@ -409,21 +555,36 @@ export function start(canvas, options) {
        hinter dem Text; unten läuft nur noch der Boden weiter. Gedämpft, damit
        auch ein Sprung im Scrollstand — ein Anker, das Ende der Seite — als
        Bewegung ankommt und nicht als Schnitt. */
-    var prog = Math.min(1, y / (window.innerHeight * 0.8));
-    ride = damp(ride, prog, 0.07, dt);
+    /* Wie weit die Seite verlassen ist. Treibt nur noch die Dämpfung der Szene
+       und die seitliche Drift der Sonne — nicht mehr die Kamera. */
+    var prog = Math.min(1, y / (window.innerHeight * 1.1));
+    ride = damp(ride, prog, 0.05, dt);
     var e = ride * ride * (3 - 2 * ride);
-    camera.position.y = CAM_Y0 + (CAM_Y1 - CAM_Y0) * e;
 
-    /* Unter dem Hero steht Text auf dem Boden. Also wird der Boden leiser,
-       nicht der Text heller: die Linien nehmen zurück, je weiter die Fahrt
-       fortgeschritten ist. Sichtbar bleiben sie durchgehend. */
-    lineMat.opacity = 0.92 - 0.40 * e;
+    /* Unter dem Hero steht Text auf Boden und Sonne. Also werden Boden und
+       Sonne leiser, nicht der Text heller. Sichtbar bleibt beides durchgehend. */
+    lineMat.opacity = 0.92 - 0.44 * e;
+    sunMat.opacity = 1 - (1 - SUN_FADE_TO) * e;
+    glowMat.opacity = 1 - (1 - GLOW_FADE_TO) * e;
+    /* Die Sterne blieben früher über dem Hero. Jetzt, wo die Kamera nicht mehr
+       wegnickt, stehen sie die ganze Seite über im Bild — als helle Punkte
+       hinter Buchstaben. Also nehmen auch sie zurück. */
+    starMat.opacity = 0.9 - (0.9 - STAR_FADE_TO) * e;
 
+    var halfW = Math.abs(SUN_Z) * Math.tan((camera.fov * Math.PI) / 360) * camera.aspect;
+    var sx = Math.min(SUN_DRIFT_NDC * halfW, SUN_DRIFT_MAX) * e;
+    sun.position.x = sx;
+    glow.position.x = sx;
+
+    /* Die Maus kippt die Kamera minimal — das ist die einzige Neigung, die es
+       noch gibt, und sie hängt nicht am Scrollen. */
     if (fine) {
       tiltX = damp(tiltX, wantX, 0.05, dt);
       tiltY = damp(tiltY, wantY, 0.05, dt);
+      camera.rotation.set(tiltX, tiltY, 0, "YXZ");
     }
-    camera.rotation.set(-MAX_PITCH * e + tiltX, tiltY, 0, "YXZ");
+
+    meteors(dt, e);
 
     renderer.render(scene, camera);
 
@@ -517,6 +678,36 @@ export function start(canvas, options) {
       renderer.dispose();
     },
     quality: function () { return { segX: segX, segZ: segZ, step: step }; },
+    /* Nur lesende Auskünfte. Sie kosten nichts und machen die Prüfung möglich:
+       ohne sie liesse sich weder belegen, dass die Kamera wirklich geradeaus
+       fliegt, noch wo die Sternschnuppen tatsächlich entlanglaufen. */
+    view: function () {
+      return {
+        camY: camera.position.y, rotX: camera.rotation.x, rotY: camera.rotation.y,
+        fov: camera.fov, ride: ride,
+        sunX: sun.position.x, sunY: sun.position.y,
+        sunOpacity: sunMat.opacity, glowOpacity: glowMat.opacity,
+        starOpacity: starMat.opacity, lineOpacity: lineMat.opacity
+      };
+    },
+    meteors: function () {
+      var half = metHalf();
+      var live = [];
+      for (var i = 0; i < metPool.length; i++) {
+        var m = metPool[i];
+        if (!m.live) continue;
+        var u = m.t / m.dur;
+        var hx = m.x0 + m.dx * u, hy = m.y0 + m.dy * u;
+        var ang = Math.atan2(m.dy, m.dx);
+        live.push({
+          headX: hx / half.w, headY: hy / half.h,
+          tailX: (hx - Math.cos(ang) * m.len) / half.w,
+          tailY: (hy - Math.sin(ang) * m.len) / half.h,
+          opacity: m.mesh.material.opacity
+        });
+      }
+      return { live: live, wait: metWait };
+    },
     stats: function () {
       var r = renderer.info.render;
       return { calls: r.calls, triangles: r.triangles, lines: r.lines, points: r.points,
