@@ -53,11 +53,20 @@ im Code auf einem Canvas, es gibt keine einzige Bilddatei.
 - **Tiefe** kommt aus Nebel in Richtung Horizont, sodass entfernte Linien weich
   verschwinden statt hart abzureißen, und aus einem Sternenfeld im oberen
   Bereich, das der Nebel nicht anfasst.
-- **Die Fahrt** läuft dauerhaft langsam und beschleunigt beim Scrollen, gedämpft
-  in beide Richtungen. Beim Verlassen des Hero hebt sich die Kamera an und nickt
-  nach unten: Sonne, Berge und Horizont wandern über den oberen Rand, unter dem
-  Text läuft nur noch der Rasterboden — und der wird dabei leiser, damit der
-  Text ihn nicht erst überstrahlen muss.
+- **Die Fahrt** geht immer geradeaus. Die Kamera behält Höhe und Blickwinkel
+  bei; beim Scrollen wird sie ausschließlich schneller, gedämpft in beide
+  Richtungen. Der Horizont bleibt dadurch auf gleicher Höhe und die Sonne über
+  die ganze Seite sichtbar.
+- **Damit die Sonne nicht hinter dem Fließtext steht**, wandert sie beim
+  Scrollen langsam zur Seite aus der Mitte — gemessen am sichtbaren Ausschnitt,
+  nicht in festen Welteinheiten, sonst wäre sie im Hochformat aus dem Bild
+  geschoben worden. Gleichzeitig nehmen Sonne, Schein, Sterne und Rasterlinien
+  so weit zurück, dass ein ruhiger Schein bleibt. Abgedunkelt wird die Szene,
+  nie der Text aufgehellt.
+- **Sternschnuppen** fallen alle acht bis fünfzehn Sekunden durch den oberen
+  Himmel, drei wiederverwendete Objekte, nie zwei am selben Ort. Sie bleiben
+  über der Oberkante der Sonnenscheibe und starten nur, solange der Hero im
+  Bild ist — darunter wäre der obere Himmel von Text überdeckt.
 - **Die Maus** kippt die Kamera um höchstens rund drei Grad, und nur auf
   Geräten mit feinem Zeiger. Es gibt keine Steuerung, keine Controls.
 
@@ -136,6 +145,29 @@ vorgelesen wird. Sie erscheint nur, wenn genug Platz da ist (ab 860 × 720 px).
 Feine Scanlines und eine Vignette liegen über der Szene, aber **unter** dem
 Inhalt — kein Text muss durch eine Scanline gelesen werden. Beide bewegen sich
 nicht und bleiben auch bei `prefers-reduced-motion` sichtbar.
+
+### Das Terminal
+
+Ein bedienbares Terminal zwischen „Was ich mache" und „Ehrlich gesagt": echtes
+Eingabefeld, Ausgabe als zurückhaltende Live-Region, Verlauf über die
+Pfeiltasten, Vervollständigung mit Tabulator, Strg+L leert. Befehle: `help`,
+`about`, `skills`, `next`, `contact`, `ls`, `cat <name>`, `whoami`, `neofetch`,
+`clear`, `sudo`, `exit`.
+
+Es ist der **einzige Kasten** auf der Seite — ein Terminal ohne Rand wäre
+keins. Alle anderen Abschnitte bleiben ohne Kastenoptik.
+
+Zwei Regeln stehen darüber. Erstens: nichts ist ausschließlich hier
+erreichbar. Jeder Inhalt, den das Terminal ausgibt, steht ohnehin als Text auf
+der Seite; `neofetch` zeigt nur nachprüfbare Angaben zur Seite selbst, keine
+erfundenen Werte. Zweitens: Eingaben werden ausschließlich als Text gesetzt,
+nie als Markup — auch nicht in der Rückmeldung auf einen unbekannten Befehl.
+Links baut das Skript aus Elementen, nie aus einer Zeichenkette.
+
+Beim Laden zieht es den Fokus **nicht** an sich, das würde das Scrollen
+zerstören. Ohne JavaScript wird es ausgeblendet und ein kurzer Hinweis
+eingeblendet; bei `prefers-reduced-motion` erscheint die Ausgabe sofort
+vollständig und der Cursor blinkt nicht.
 
 ### Abschnitte ohne Kästen
 

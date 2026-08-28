@@ -287,6 +287,356 @@
   }
 
   /* --------------------------------------------------------------------------
+     Terminal
+
+     Ein echtes Eingabefeld, eine Ausgabe als Live-Region, ein Verlauf im
+     Speicher. Nichts davon ist die einzige Quelle für einen Inhalt: alles, was
+     hier ausgegeben wird, steht ohnehin als Text auf der Seite.
+
+     Eingaben werden ausschliesslich als Text gesetzt, nie als Markup — auch
+     nicht in der Rückmeldung auf einen unbekannten Befehl. Links in der Ausgabe
+     baut das Skript selbst aus Elementen, nie aus einer Zeichenkette.
+     ------------------------------------------------------------------------ */
+  (function terminal() {
+    var box = $("#term");
+    if (!box) return;
+    var out = $("#termOut"), form = $("#termForm"), input = $("#termIn"), chips = $("#termChips");
+    if (!out || !form || !input || !chips) return;
+
+    var MAX_LEN = 120;
+    var instant = reduceMotion;
+
+    var caret = document.createElement("span");
+    caret.className = "term-caret";
+    caret.setAttribute("aria-hidden", "true");
+
+    var queue = [];
+    var typing = null;
+    var timer = 0;
+    var history = [];
+    var histAt = 0;
+
+    /* ---- Inhalte, wortgleich mit den Abschnitten der Seite ---------------- */
+    var ABOUT = [
+      ["head", "Wie es anfing"],
+      ["", "Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft."],
+      ["", "Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben."],
+      ["", ""],
+      ["head", "Warum es geblieben ist"],
+      ["", "Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem."],
+      ["", "Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert."]
+    ];
+
+    var SKILLS = [
+      "01  Linux und Docker im Alltag",
+      "02  Homelab mit Raspberry Pi und Home Assistant",
+      "03  Netzwerk und Fernzugriff",
+      "04  Automatisierung statt Handarbeit",
+      "05  Kleine Tools in Python und PHP, wenn mich etwas nervt"
+    ];
+
+    var NEXT = ["Monitoring", "mehr Automatisierung", "Security tiefer verstehen"];
+
+    /* Reines ASCII: die Schriftschnitte sind auf Latin beschnitten, ein
+       Blockzeichen wuerde in eine Ersatzschrift fallen und die Spalten
+       verschieben. */
+    var ART = [
+      "      .-~~~~~-.",
+      "    .'  =====  '.",
+      "   /  =========  \\",
+      "  |  ===========  |",
+      "   \\  =========  /",
+      "    '.  =====  .'",
+      "      '-.....-'",
+      "  --+-----+-----+--",
+      "     -+---+---+-"
+    ];
+
+    /* ---- Ausgabe ---------------------------------------------------------- */
+    function makeLine(job) {
+      var el = document.createElement("p");
+      el.className = "term-line" + (job.cls ? " term-line--" + job.cls : "");
+      if (job.kind === "link") {
+        el.appendChild(document.createTextNode(job.before || ""));
+        var a = document.createElement("a");
+        a.href = job.href;
+        a.textContent = job.label;
+        if (job.external) a.rel = "noopener";
+        el.appendChild(a);
+        if (job.after) el.appendChild(document.createTextNode(job.after));
+      } else {
+        el.textContent = job.text;
+      }
+      return el;
+    }
+
+    function down() { out.scrollTop = out.scrollHeight; }
+    function hideCaret() { if (caret.parentNode) caret.parentNode.removeChild(caret); }
+    function showCaret() { out.appendChild(caret); down(); }
+
+    function pump() {
+      timer = 0;
+      if (!queue.length) { showCaret(); return; }
+      hideCaret();
+      var job = queue.shift();
+      var el = makeLine(job);
+      out.appendChild(el);
+      down();
+      if (instant || job.kind === "link" || !job.text) {
+        timer = window.setTimeout(pump, 0);
+        return;
+      }
+      /* Waehrend eine Zeile tippt, ist sie vor der Vorlesehilfe verborgen; erst
+         die fertige Zeile taucht in der Live-Region auf. Zeichen fuer Zeichen
+         vorlesen zu lassen waere unbrauchbar. */
+      el.setAttribute("aria-hidden", "true");
+      el.textContent = "";
+      typing = { el: el, text: job.text, at: 0, t0: now() };
+      step();
+    }
+
+    /* Getippt wird nach der Uhr, nicht nach Zeitgebern. Ein setTimeout wartet
+       auf den Hauptfaden; auf einem langsamen Geraet käme sonst je Bild nur ein
+       Zeichen heraus und der Effekt würde zur Geduldsprobe. */
+    function now() {
+      return (window.performance && performance.now) ? performance.now() : Date.now();
+    }
+    var CPS = 320;
+
+    function step() {
+      timer = 0;
+      if (!typing) return;
+      var want = Math.ceil(((now() - typing.t0) / 1000) * CPS);
+      typing.at = Math.min(typing.text.length, Math.max(typing.at + 1, want));
+      typing.el.textContent = typing.text.slice(0, typing.at);
+      down();
+      if (typing.at >= typing.text.length) {
+        typing.el.removeAttribute("aria-hidden");
+        typing = null;
+        timer = window.setTimeout(pump, 16);
+        return;
+      }
+      timer = window.setTimeout(step, 9);
+    }
+
+    function skip() {
+      if (!typing && !queue.length) return false;
+      window.clearTimeout(timer);
+      timer = 0;
+      if (typing) {
+        typing.el.textContent = typing.text;
+        typing.el.removeAttribute("aria-hidden");
+        typing = null;
+      }
+      hideCaret();
+      while (queue.length) out.appendChild(makeLine(queue.shift()));
+      showCaret();
+      return true;
+    }
+
+    function push(job) {
+      queue.push(job);
+      if (!timer && !typing) pump();
+    }
+    function print(text, cls) { push({ kind: "text", text: String(text), cls: cls || "" }); }
+    function link(before, label, href, external) {
+      push({ kind: "link", before: before, label: label, href: href, external: !!external });
+    }
+    function blank() { print(""); }
+
+    /* ---- Befehle ---------------------------------------------------------- */
+    function pad(t, n) { while (t.length < n) t += " "; return t; }
+
+    function facts() {
+      var scene = root.classList.contains("has-3d") ? "three.js, WebGL 2" : "CSS-Szene";
+      return [
+        "tr1stan@web",
+        "-------------------",
+        "Seite ......... tr1stan.de",
+        "Aufbau ........ statische Seite, kein Framework",
+        "Abschnitte .... " + document.querySelectorAll("main .block").length,
+        "Schriften ..... Inter Variable, JetBrains Mono Variable",
+        "Szene ......... " + scene,
+        "Cookies ....... keine",
+        "Tracker ....... keine",
+        "Fremde Hosts .. keine",
+        "Fenster ....... " + window.innerWidth + " x " + window.innerHeight,
+        "Sprache ....... " + (root.getAttribute("lang") || "de")
+      ];
+    }
+
+    var TOPICS = {
+      about: function () { ABOUT.forEach(function (r) { print(r[1], r[0]); }); },
+      skills: function () { SKILLS.forEach(function (r) { print(r); }); },
+      next: function () { NEXT.forEach(function (r) { print(r); }); },
+      contact: function () {
+        link("Mail ...... ", "chef@tr1stan.de", "mailto:chef@tr1stan.de", false);
+        link("GitHub .... ", "github.com/tr1stannnnnn", "https://github.com/tr1stannnnnn", true);
+      }
+    };
+
+    var CMDS = {
+      help: function () {
+        print("Verfügbare Befehle:", "head");
+        [["help", "diese Liste"],
+         ["about", "wie es anfing und warum es geblieben ist"],
+         ["skills", "was ich mache"],
+         ["next", "was als Nächstes kommt"],
+         ["contact", "Mailadresse und GitHub"],
+         ["ls", "verfügbare Themen"],
+         ["cat <name>", "ein Thema ausgeben"],
+         ["whoami", "kurze Antwort"],
+         ["neofetch", "Angaben zu dieser Seite"],
+         ["clear", "Ausgabe leeren"],
+         ["sudo", "besser nicht"],
+         ["exit", "Versuch macht klug"]].forEach(function (r) {
+          print("  " + pad(r[0], 12) + r[1]);
+        });
+        blank();
+        print("Pfeiltasten blättern durch den Verlauf, Tabulator vervollständigt, Strg+L leert.", "note");
+      },
+      about: function () { TOPICS.about(); },
+      skills: function () { TOPICS.skills(); },
+      next: function () { TOPICS.next(); },
+      contact: function () { TOPICS.contact(); },
+      ls: function () {
+        print("about   skills   next   contact", "head");
+        print("cat <name> gibt ein Thema aus.", "note");
+      },
+      cat: function (arg) {
+        var name = String(arg || "").trim().toLowerCase();
+        if (!name) { print("cat: kein Thema angegeben. ls zeigt die Liste.", "note"); return; }
+        if (Object.prototype.hasOwnProperty.call(TOPICS, name)) { TOPICS[name](); return; }
+        print("cat: " + name + ": kein solches Thema. ls zeigt die Liste.", "note");
+      },
+      whoami: function () {
+        print("tr1stan — private Seite über Technik, Basteleien und Automatisierung.");
+      },
+      neofetch: function () {
+        var info = facts();
+        var rows = Math.max(ART.length, info.length);
+        var width = 0;
+        ART.forEach(function (l) { if (l.length > width) width = l.length; });
+        for (var i = 0; i < rows; i++) {
+          print(pad(ART[i] || "", width + 3) + (info[i] || ""), "art");
+        }
+      },
+      clear: function () {
+        queue.length = 0;
+        window.clearTimeout(timer);
+        timer = 0;
+        typing = null;
+        out.textContent = "";
+        showCaret();
+      },
+      sudo: function () {
+        print("sudo: tr1stan steht nicht in der sudoers-Datei. Dieser Vorfall wird nicht gemeldet.", "note");
+      },
+      exit: function () {
+        print("Von hier kommt man nicht raus. Einfach weiterscrollen.", "note");
+      }
+    };
+
+    function run(raw) {
+      var line = String(raw).replace(/\s+/g, " ").trim();
+      if (line.length > MAX_LEN) line = line.slice(0, MAX_LEN);
+      print("> " + line, "cmd");
+      if (!line) return;
+      history.push(line);
+      if (history.length > 40) history.shift();
+      histAt = history.length;
+      var sp = line.indexOf(" ");
+      var cmd = (sp === -1 ? line : line.slice(0, sp)).toLowerCase();
+      var arg = sp === -1 ? "" : line.slice(sp + 1);
+      if (Object.prototype.hasOwnProperty.call(CMDS, cmd)) CMDS[cmd](arg);
+      else print("Unbekannter Befehl: " + line + ". help zeigt alle Befehle.", "note");
+    }
+
+    /* ---- Vervollstaendigung ------------------------------------------------ */
+    function complete() {
+      var v = input.value.replace(/^\s+/, "");
+      var sp = v.indexOf(" ");
+      var pool, prefix, base;
+      if (sp === -1) {
+        pool = Object.keys(CMDS); prefix = v.toLowerCase(); base = "";
+      } else if (v.slice(0, sp).toLowerCase() === "cat") {
+        pool = Object.keys(TOPICS); prefix = v.slice(sp + 1).trim().toLowerCase(); base = "cat ";
+      } else { return; }
+
+      var hits = pool.filter(function (k) { return k.indexOf(prefix) === 0; });
+      if (!hits.length) return;
+      if (hits.length === 1) {
+        input.value = base + hits[0] + (!base && hits[0] === "cat" ? " " : "");
+        return;
+      }
+      var common = hits[0];
+      hits.forEach(function (h) { while (h.indexOf(common) !== 0) common = common.slice(0, -1); });
+      input.value = base + common;
+      print(hits.join("   "), "note");
+    }
+
+    /* ---- Bedienung -------------------------------------------------------- */
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = input.value;
+      input.value = "";
+      skip();
+      run(v);
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!history.length) return;
+        histAt = Math.max(0, histAt - 1);
+        input.value = history[histAt];
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (!history.length) return;
+        histAt = Math.min(history.length, histAt + 1);
+        input.value = histAt === history.length ? "" : history[histAt];
+        return;
+      }
+      if (e.key === "Tab") { e.preventDefault(); skip(); complete(); return; }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "l" || e.key === "L")) {
+        e.preventDefault();
+        CMDS.clear();
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
+      /* jeder weitere Tastendruck ueberspringt die Tippanimation sofort */
+      skip();
+    });
+
+    /* Klick ins Terminal setzt den Fokus in die Eingabe, ohne die Seite zu
+       verschieben. Beim Laden passiert das ausdruecklich nicht. */
+    box.addEventListener("mouseup", function (e) {
+      if (e.target.closest("a, button, input")) return;
+      if (window.getSelection && String(window.getSelection()) !== "") return;
+      try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
+    });
+
+    ["help", "about", "skills", "next", "contact", "neofetch", "clear"].forEach(function (name) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "term-chip";
+      b.textContent = name;
+      b.addEventListener("click", function () {
+        skip();
+        run(name);
+        try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
+      });
+      chips.appendChild(b);
+    });
+
+    print("tr1stan.de — Terminal. Alles hier steht auch als Text auf dieser Seite.", "head");
+    print("help zeigt alle Befehle.", "note");
+  })();
+
+  /* --------------------------------------------------------------------------
      Die dreidimensionale Bühne
 
      Sie ersetzt die CSS-Szene, aber nur wenn wirklich alles dafür spricht. Der

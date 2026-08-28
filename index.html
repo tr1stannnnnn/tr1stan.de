@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tristan Witt — tr1stan.de</title>
-  <meta name="description" content="Private Seite von Tristan Witt über Technik, Basteleien und Automatisierung." />
+  <title>tr1stan — tr1stan.de</title>
+  <meta name="description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung." />
   <meta name="theme-color" content="#06020C" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://tr1stan.de/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tr1stan.de" />
-  <meta property="og:title" content="Tristan Witt — tr1stan.de" />
-  <meta property="og:description" content="Private Seite von Tristan Witt über Technik, Basteleien und Automatisierung." />
+  <meta property="og:title" content="tr1stan — tr1stan.de" />
+  <meta property="og:description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung." />
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=16" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=17" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=16" />
+  <link rel="stylesheet" href="/style.css?v=17" />
 
   <script>document.documentElement.classList.add('has-js');</script>
 </head>
@@ -87,8 +87,8 @@
       <div class="hero-inner shell">
         <div class="hero-copy">
           <div class="hero-title">
-            <h1 class="hero-name">Tristan Witt</h1>
-            <div class="hero-mirror" aria-hidden="true"><span>Tristan Witt</span></div>
+            <h1 class="hero-name">tr1stan</h1>
+            <div class="hero-mirror" aria-hidden="true"><span>tr1stan</span></div>
           </div>
           <p class="hero-line">Private Seite über Technik, Basteleien und Automatisierung.</p>
         </div>
@@ -138,6 +138,40 @@
             <li><span class="rows-no">05</span>
                 <span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
           </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TERMINAL — der einzige Abschnitt mit einem Rand ===== -->
+    <section class="block sp-l" id="terminal" aria-labelledby="terminalTitle">
+      <div class="shell">
+        <div class="pane at-left w-lg" data-group>
+          <h2 class="sec-title" id="terminalTitle" data-reveal>Terminal</h2>
+
+          <div class="term js-only" id="term" data-reveal data-delay="100">
+            <div class="term-bar">
+              <span class="term-lamp" aria-hidden="true"></span>
+              <span class="term-name">tr1stan@web</span>
+              <span class="term-tip">help zeigt alle Befehle</span>
+            </div>
+
+            <div class="term-out" id="termOut" role="log" aria-live="polite"
+                 aria-relevant="additions" aria-atomic="false" tabindex="0"
+                 aria-label="Ausgabe des Terminals"></div>
+
+            <div class="term-chips" id="termChips" role="group" aria-label="Befehle einsetzen"></div>
+
+            <form class="term-form" id="termForm" autocomplete="off">
+              <label class="sr-only" for="termIn">Befehl eingeben</label>
+              <span class="term-ps1" aria-hidden="true">&gt;</span>
+              <input class="term-in" id="termIn" type="text" name="cmd" maxlength="120"
+                     autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                     enterkeyhint="send" />
+            </form>
+          </div>
+
+          <p class="term-nojs">Das Terminal braucht JavaScript. Alle Inhalte, die es ausgibt,
+             stehen ohnehin als Text auf dieser Seite.</p>
         </div>
       </div>
     </section>
@@ -203,6 +237,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=16" defer></script>
+  <script src="/script.js?v=17" defer></script>
 </body>
 </html>
