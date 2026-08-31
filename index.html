@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>tr1stan — tr1stan.de</title>
-  <meta name="description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung." />
+  <meta name="description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung. Die Inhalte gibt es über ein Terminal auf der Startseite." />
   <meta name="theme-color" content="#06020C" />
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://tr1stan.de/" />
@@ -12,17 +12,38 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tr1stan.de" />
   <meta property="og:title" content="tr1stan — tr1stan.de" />
-  <meta property="og:description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung." />
+  <meta property="og:description" content="Private Seite von tr1stan über Technik, Basteleien und Automatisierung. Die Inhalte gibt es über ein Terminal auf der Startseite." />
   <meta property="og:url" content="https://tr1stan.de/" />
   <meta property="og:locale" content="de_DE" />
 
-  <link rel="icon" href="/favicon.svg?v=17" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
 
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=17" />
+  <link rel="stylesheet" href="/style.css?v=18" />
 
-  <script>document.documentElement.classList.add('has-js');</script>
+  <script>
+    document.documentElement.classList.add('has-js');
+    /* Sollte das Skript nicht durchkommen, stünde hier ein totes Terminal und
+       sonst nichts. Dann wird die Klasse wieder abgenommen: die Inhalte
+       erscheinen als normaler Text, so wie ganz ohne JavaScript. */
+    window.addEventListener('load', function () {
+      var h = document.documentElement;
+      if (!h.classList.contains('term-ready')) h.classList.remove('has-js');
+    });
+  </script>
+
+  <noscript>
+    <style>
+      /* Ohne JavaScript gibt es kein Terminal. Dann werden genau die Inhalte,
+         die es sonst ausliest, ganz normal angezeigt — es gibt sie nur einmal
+         im Dokument. */
+      .store {
+        position: static; width: auto; height: auto; margin: 0;
+        overflow: visible; clip: auto; clip-path: none; white-space: normal;
+      }
+    </style>
+  </noscript>
 </head>
 <body>
   <a class="skip" href="#content">Zum Inhalt springen</a>
@@ -95,58 +116,18 @@
       </div>
     </section>
 
-    <!-- ===== WIE ES ANFING — links im Raster, mittlere Spalte ===== -->
-    <section class="block" id="anfang" aria-labelledby="anfangTitle">
+    <!-- ===================== TERMINAL =====================
+         Der Hauptteil der Seite. Im Klartext steht hier nichts mehr; was es
+         über mich zu lesen gibt, kommt über Befehle. -->
+    <section class="block console" id="terminal" aria-labelledby="terminalTitle">
       <div class="shell">
-        <div class="pane split at-left w-md" data-group>
-          <h2 class="sec-title" id="anfangTitle" data-reveal>Wie es anfing</h2>
-          <div class="split-body" data-reveal data-delay="100">
-            <p>Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
-            <p>Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== WARUM ES GEBLIEBEN IST — nach rechts eingerückt, breiter ===== -->
-    <section class="block sp-l" id="warum" aria-labelledby="warumTitle">
-      <div class="shell">
-        <div class="pane at-inset w-lg" data-group>
-          <h2 class="sec-title" id="warumTitle" data-reveal>Warum es geblieben ist</h2>
-          <div class="leadblock" data-reveal data-delay="100">
-            <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
-            <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== WAS ICH MACHE — deutlich breiter als die Textabschnitte ===== -->
-    <section class="block sp-xl" id="machen" aria-labelledby="machenTitle">
-      <div class="shell shell--wide">
-        <div class="pane at-wide w-full" data-group>
-          <h2 class="sec-title" id="machenTitle" data-reveal>Was ich mache</h2>
-          <ol class="rows" data-reveal data-delay="100" data-stagger>
-            <li><span class="rows-no">01</span>
-                <span class="rows-txt">Linux und Docker im Alltag</span></li>
-            <li><span class="rows-no">02</span>
-                <span class="rows-txt">Homelab mit Raspberry Pi und Home Assistant</span></li>
-            <li><span class="rows-no">03</span>
-                <span class="rows-txt">Netzwerk und Fernzugriff</span></li>
-            <li><span class="rows-no">04</span>
-                <span class="rows-txt">Automatisierung statt Handarbeit</span></li>
-            <li><span class="rows-no">05</span>
-                <span class="rows-txt">Kleine Tools in Python und PHP, wenn mich etwas nervt</span></li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== TERMINAL — der einzige Abschnitt mit einem Rand ===== -->
-    <section class="block sp-l" id="terminal" aria-labelledby="terminalTitle">
-      <div class="shell">
-        <div class="pane at-left w-lg" data-group>
+        <div class="pane at-centre w-lg" data-group>
           <h2 class="sec-title" id="terminalTitle" data-reveal>Terminal</h2>
+
+          <p class="console-lead" data-reveal data-delay="100">
+            Die Inhalte dieser Seite stehen im Terminal. <strong>help</strong> zeigt alle
+            Befehle, <strong>all</strong> gibt alles auf einmal aus.
+          </p>
 
           <div class="term js-only" id="term" data-reveal data-delay="100">
             <div class="term-bar">
@@ -170,58 +151,64 @@
             </form>
           </div>
 
-          <p class="term-nojs">Das Terminal braucht JavaScript. Alle Inhalte, die es ausgibt,
-             stehen ohnehin als Text auf dieser Seite.</p>
+          <p class="term-nojs">Ohne JavaScript gibt es kein Terminal. Alle Inhalte stehen
+             deshalb unten als normaler Text.</p>
         </div>
       </div>
     </section>
 
-    <!-- ===== EHRLICH GESAGT — zentriert, schmal, viel Luft ===== -->
-    <section class="block sp-l" id="ehrlich" aria-labelledby="ehrlichTitle">
-      <div class="shell">
-        <div class="pane at-centre w-sm" data-group>
-          <h2 class="sec-title" id="ehrlichTitle" data-reveal>Ehrlich gesagt</h2>
-          <div class="statement" data-reveal data-delay="100">
-            <p class="statement-text">Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
-            <p class="statement-text">Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- ===================== DIE INHALTE =====================
+         Sie stehen genau einmal im Dokument, als echter Text, damit
+         Suchmaschinen und Vorlesehilfen sie finden. Zu sehen sind sie nicht:
+         das Terminal liest sie von hier und gibt sie auf Befehl aus. Ohne
+         JavaScript werden sie stattdessen ganz normal angezeigt. -->
+    <div class="shell">
+      <div class="store" id="store">
+        <h2 class="sec-title store-title">Inhalte</h2>
+        <p class="store-note">Diese Texte gibt das Terminal auf Befehl aus.</p>
 
-    <!-- ===== WAS ALS NÄCHSTES KOMMT — breit, drei Begriffe nebeneinander ===== -->
-    <section class="block sp-s" id="naechstes" aria-labelledby="naechstesTitle">
-      <div class="shell">
-        <div class="pane at-wide w-lg" data-group>
-          <h2 class="sec-title" id="naechstesTitle" data-reveal>Was als Nächstes kommt</h2>
-          <ul class="triple" data-reveal data-delay="100" data-stagger>
+        <section class="store-topic" data-topic="about" data-label="Wie es anfing, warum es geblieben ist">
+          <h3>Wie es anfing</h3>
+          <p>Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft.</p>
+          <p>Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben.</p>
+          <h3>Warum es geblieben ist</h3>
+          <p>Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem.</p>
+          <p>Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert.</p>
+        </section>
+
+        <section class="store-topic" data-topic="skills" data-label="Was ich mache">
+          <h3>Was ich mache</h3>
+          <ol class="store-rows">
+            <li>Linux und Docker im Alltag</li>
+            <li>Homelab mit Raspberry Pi und Home Assistant</li>
+            <li>Netzwerk und Fernzugriff</li>
+            <li>Automatisierung statt Handarbeit</li>
+            <li>Kleine Tools in Python und PHP, wenn mich etwas nervt</li>
+          </ol>
+        </section>
+
+        <section class="store-topic" data-topic="honest" data-label="Ehrlich gesagt">
+          <h3>Ehrlich gesagt</h3>
+          <p>Ich baue lieber drei Abende an einem Skript, das mir zwanzig Minuten spart.</p>
+          <p>Nicht jedes Wochenende ist ein Projekt. Man muss auch mal leben.</p>
+        </section>
+
+        <section class="store-topic" data-topic="next" data-label="Was als Nächstes kommt">
+          <h3>Was als Nächstes kommt</h3>
+          <ul class="store-list">
             <li>Monitoring</li>
             <li>mehr Automatisierung</li>
             <li>Security tiefer verstehen</li>
           </ul>
-        </div>
+        </section>
+
+        <section class="store-topic" data-topic="contact" data-label="Kontakt">
+          <h3>Kontakt</h3>
+          <p>Mail: <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a></p>
+          <p>GitHub: <a href="https://github.com/tr1stannnnnn" rel="me noopener">github.com/tr1stannnnnn</a></p>
+        </section>
       </div>
-    </section>
-
-    <!-- ===== KONTAKT — wieder links, schmal ===== -->
-    <section class="block sp-xl" id="kontakt" aria-labelledby="kontaktTitle">
-      <div class="shell">
-        <div class="pane contact at-left w-sm" data-group>
-          <h2 class="sec-title" id="kontaktTitle" data-reveal>Kontakt</h2>
-
-          <div class="contact-body" data-reveal data-delay="100">
-            <a class="mail" href="mailto:chef@tr1stan.de">chef@tr1stan.de</a>
-
-            <div class="contact-row">
-              <button class="btn copy js-only" type="button" data-copy="chef@tr1stan.de" data-label="Adresse kopieren">
-                <span data-copy-text>Adresse kopieren</span>
-              </button>
-              <a class="btn" href="https://github.com/tr1stannnnnn" rel="me noopener">GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
 
   </main>
 
@@ -237,6 +224,6 @@
 
   <span class="sr-only" id="liveStatus" role="status" aria-live="polite"></span>
 
-  <script src="/script.js?v=17" defer></script>
+  <script src="/script.js?v=18" defer></script>
 </body>
 </html>

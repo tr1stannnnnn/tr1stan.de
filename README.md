@@ -146,28 +146,42 @@ Feine Scanlines und eine Vignette liegen über der Szene, aber **unter** dem
 Inhalt — kein Text muss durch eine Scanline gelesen werden. Beide bewegen sich
 nicht und bleiben auch bei `prefers-reduced-motion` sichtbar.
 
-### Das Terminal
+### Die Startseite ist das Terminal
 
-Ein bedienbares Terminal zwischen „Was ich mache" und „Ehrlich gesagt": echtes
-Eingabefeld, Ausgabe als zurückhaltende Live-Region, Verlauf über die
-Pfeiltasten, Vervollständigung mit Tabulator, Strg+L leert. Befehle: `help`,
-`about`, `skills`, `next`, `contact`, `ls`, `cat <name>`, `whoami`, `neofetch`,
-`clear`, `sudo`, `exit`.
+Seit v15 besteht die Startseite aus drei Dingen: Hero, Terminal, Footer. Im
+Klartext steht dort nichts mehr über mich — wer etwas wissen will, tippt einen
+Befehl. Befehle: `help`, `all`, `about`, `skills`, `honest`, `next`, `contact`,
+`ls`, `cat <name>`, `whoami`, `neofetch`, `clear`, `sudo`, `exit`. Dazu
+antippbare Chips, auch auf dem Desktop, damit niemand ratlos davorsitzt.
 
-Es ist der **einzige Kasten** auf der Seite — ein Terminal ohne Rand wäre
-keins. Alle anderen Abschnitte bleiben ohne Kastenoptik.
+Das Terminal ist der **einzige Kasten** auf der Seite — ein Terminal ohne Rand
+wäre keins.
 
-Zwei Regeln stehen darüber. Erstens: nichts ist ausschließlich hier
-erreichbar. Jeder Inhalt, den das Terminal ausgibt, steht ohnehin als Text auf
-der Seite; `neofetch` zeigt nur nachprüfbare Angaben zur Seite selbst, keine
-erfundenen Werte. Zweitens: Eingaben werden ausschließlich als Text gesetzt,
-nie als Markup — auch nicht in der Rückmeldung auf einen unbekannten Befehl.
-Links baut das Skript aus Elementen, nie aus einer Zeichenkette.
+### Wo die Texte wirklich stehen
 
-Beim Laden zieht es den Fokus **nicht** an sich, das würde das Scrollen
-zerstören. Ohne JavaScript wird es ausgeblendet und ein kurzer Hinweis
-eingeblendet; bei `prefers-reduced-motion` erscheint die Ausgabe sofort
-vollständig und der Cursor blinkt nicht.
+Nicht im Skript. Sie stehen **genau einmal** im Dokument, in `#store`, als
+echter Text mit Überschriften, ein `<section data-topic="…">` je Thema. Das
+Terminal liest von dort und setzt die Zeilen als Text, nie als Markup; Links
+baut es aus Elementen. Es gibt also keine zweite Stelle, die gepflegt werden
+müsste, und Suchmaschinen und Vorlesehilfen finden den vollständigen Inhalt.
+
+Versteckt wird ausschließlich über die Zuschneide-Eigenschaften — 1 × 1 Pixel,
+`overflow: hidden`, `clip-path: inset(50%)`. Kein `display: none`, kein
+`visibility: hidden`, kein `hidden`-Attribut: alle drei nehmen den Text aus dem
+Zugänglichkeitsbaum, und dann wäre der Zweck verfehlt. Gemalt wird davon nichts,
+auch nicht kurz beim Laden.
+
+Zwei Wege holen den Text zurück an die Oberfläche:
+
+- `<noscript>` im Kopf der Seite mit einer Regel, die den Zuschnitt aufhebt.
+  Ohne JavaScript steht dort eine ganz normale, vollständig lesbare Textseite.
+- Zusätzlich `html:not(.has-js)`. Kommt das Skript nicht durch — geladen, aber
+  gescheitert —, nimmt ein Zweizeiler im Kopf die Klasse `has-js` wieder ab und
+  es passiert dasselbe. Niemand landet auf einer Seite ohne Information.
+
+Beim Laden zieht das Terminal den Fokus **nicht** an sich. Bei
+`prefers-reduced-motion` erscheint die Ausgabe sofort vollständig und der Cursor
+blinkt nicht. `neofetch` zeigt nur nachprüfbare Angaben zur Seite selbst.
 
 ### Abschnitte ohne Kästen
 
@@ -179,12 +193,9 @@ Ellipse mit der Größe `50% 50%`, die ihre Null exakt an ihren eigenen Rändern
 erreicht und deshalb kein Rechteck zeichnen kann. Buttons behalten ihren
 Neonrahmen, Abschnitte nicht.
 
-Jeder Block nutzt ein eigenes Muster und eine eigene Bahn: Überschrift links
-neben dem Text, nach rechts eingerückter breiter Block mit groß gesetzter erster
-Zeile, deutlich breiter laufende nummerierte Positionen, zentrierte Aussage,
-drei Begriffe nebeneinander, Kontakt wieder links und schmal. Ausrichtung,
-Spaltenbreite und vertikaler Abstand wechseln von Abschnitt zu Abschnitt; der
-größte Abstand bleibt weit unter einem Bildschirm.
+Die fünf Abschnittsmuster aus v12 sind mit den Abschnitten gegangen: auf der
+Startseite steht nur noch ein Block, und das ist das Terminal. Ausrichtung,
+Spaltenbreite und Rhythmus stehen weiter im Layout, weil sie allgemein sind.
 
 ### Bewegung: die Seite als Fahrt
 
@@ -216,7 +227,7 @@ leicht von unten, dann klaren sie auf — nur `transform` und `opacity`. Die
 
 ```text
 tr1stan.de/
-├── index.html          # Hero mit Szene, Rasterboden, sechs Abschnitte
+├── index.html          # Hero, Terminal, versteckter Inhaltsspeicher
 ├── scene3d.js          # die 3D-Szene, nur bei Bedarf geladen
 ├── vendor/             # three.js r185, MIT, unverändert übernommen
 ├── impressum.html      # Impressum nach § 5 DDG

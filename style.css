@@ -11,7 +11,7 @@
      2. BASE        resets, element defaults, typography
      3. LAYOUT      shell, veils, rhythm, alignment
      4. SCENE       hero sky, stars, halo, sun, ridge, horizon — and the floor
-     5. COMPONENTS  header, hero, the six section patterns, contact, legal, 404
+     5. COMPONENTS  header, hero, terminal, the hidden store, legal, 404
      6. MOTION      reveal states — armed from JS, never hidden by CSS alone
      7. UTILITIES   helpers, motion preferences, print
 
@@ -606,8 +606,28 @@ html.has-3d .stage { opacity: 1; }
 html.has-3d .scene,
 html.has-3d .floor { display: none; }
 
-/* The rendered scene is brighter than the drawn one, so the page veil has to
-   take more off it below the hero. The scene gets darker, never the text. */
+/* Die gerenderte Szene ist heller als die gezeichnete, und seit v15 ist die
+   Seite so kurz, dass die Sonne noch nicht weit heruntergenommen ist, wenn das
+   Terminal ins Bild kommt. Also nehmen die Schleier unter dem Hero mehr weg.
+   Abgedunkelt wird die Szene, nie der Text aufgehellt. */
+html.has-3d .pane::before {
+  background: linear-gradient(to bottom,
+              rgba(var(--ink), 0) 0%,
+              rgba(var(--ink), 0.38) 15%,
+              rgba(var(--ink), 0.62) 36%,
+              rgba(var(--ink), 0.62) 64%,
+              rgba(var(--ink), 0.38) 85%,
+              rgba(var(--ink), 0) 100%);
+}
+html.has-3d .pane::after {
+  background: radial-gradient(50% 50% at 50% 50%,
+              rgba(var(--ink), 0.76) 0%,
+              rgba(var(--ink), 0.70) 40%,
+              rgba(var(--ink), 0.44) 66%,
+              rgba(var(--ink), 0.14) 86%,
+              rgba(var(--ink), 0) 100%);
+}
+
 html.has-3d .veil {
   background: linear-gradient(to bottom,
               rgba(var(--ink), 0) 0,
@@ -821,115 +841,10 @@ html.has-3d .veil {
   text-wrap: pretty;
 }
 
-/* --- pattern A: heading left, text right ---------------------------------- */
-.split { grid-template-columns: 1fr; }
-.split-body { display: grid; gap: var(--sp-sm); color: var(--text-2); }
-.split-body p { max-width: 62ch; }
-
-/* --- pattern B: wide block, first line set larger -------------------------- */
-.leadblock { display: grid; gap: var(--sp-sm); }
-.leadblock p { color: var(--text-2); max-width: 78ch; }
-.leadblock p:first-child::first-line {
-  font-size: var(--fs-first);
-  color: var(--text-1);
-  font-weight: 420;
-  letter-spacing: -0.015em;
-}
-
-/* --- pattern C: numbered rows — the number is the graphic ------------------
-   No rules between the rows, no zebra, no frame: the gap alone holds a row
-   together, so nothing here can be read as a table. The number and the text
-   are separate elements with real whitespace between them, so copying a row
-   and reading it out both give "01 Linux und Docker im Alltag". */
-.rows { display: grid; gap: clamp(0.35rem, 1.4vh, 1rem); }
-.rows li {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(0.6rem, 1.5vh, 1rem) clamp(1.4rem, 3.4vw, 3.4rem);
-  padding-block: clamp(0.3rem, 1.1vh, 0.85rem);
-  padding-inline: clamp(0.5rem, 1.4vw, 1.25rem);
-}
-
-/* hover lightens the row — a soft pool, with no edge of its own */
-.rows li::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0;
-  pointer-events: none;
-  background: radial-gradient(50% 50% at 30% 50%,
-              rgba(232, 121, 249, 0.17) 0%,
-              rgba(232, 121, 249, 0.10) 44%,
-              rgba(232, 121, 249, 0) 100%);
-  transition: opacity var(--dur-mid) var(--ease);
-}
-.rows li:hover::before { opacity: 1; }
-
-.rows-no {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num);
-  font-weight: 200;
-  letter-spacing: -0.04em;
-  text-shadow: 0 0 24px rgba(232, 121, 249, 0.35);
-  line-height: 0.88;
-  color: var(--neon-grid);
-  font-variant-numeric: tabular-nums;
-  transition: color var(--dur-mid) var(--ease),
-              text-shadow var(--dur-mid) var(--ease);
-}
-.rows li:hover .rows-no {
-  color: var(--horizon-line);
-  text-shadow: 0 0 12px rgba(251, 228, 255, 0.6),
-               0 0 38px rgba(232, 121, 249, 0.55);
-}
-.rows-txt {
-  font-size: var(--fs-item);
-  color: var(--text-2);
-  transition: color var(--dur-mid) var(--ease);
-}
-.rows li:hover .rows-txt { color: var(--text-1); }
-
-/* --- pattern D: centred statement with air --------------------------------- */
-.statement {
-  display: grid;
-  gap: var(--sp-md);
-  justify-items: center;
-  padding-block: clamp(0.5rem, 2vh, 1.5rem);
-}
-.statement-text {
-  font-size: var(--fs-statement);
-  font-weight: 300;
-  line-height: 1.32;
-  letter-spacing: -0.018em;
-  color: var(--text-1);
-  max-width: 34ch;
-  text-wrap: pretty;
-}
-
-/* --- pattern E: three terms side by side -----------------------------------
-   A neon dot marks each term. It replaces the rule that used to sit above
-   them, which was one line too many for a page with no dividers left. */
-.triple { display: grid; grid-template-columns: 1fr; gap: var(--sp-md) var(--sp-lg); }
-.triple li { position: relative; padding-left: 1.5rem; }
-.triple li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.62em;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--neon-grid);
-  box-shadow: 0 0 12px 1px rgba(232, 121, 249, 0.55);
-}
-.triple li {
-  font-size: var(--fs-item);
-  color: var(--text-1);
-  padding-block: var(--sp-2xs);
-}
+/* Die fünf Abschnittsmuster aus v12 sind mit den Abschnitten gegangen: auf der
+   Startseite steht kein Fließtext mehr, ihre Regeln hätten nichts mehr zu
+   gestalten gehabt. Was davon noch gebraucht wird — Ausrichtung, Spaltenbreite,
+   Rhythmus — steht weiter oben im Layout. */
 
 /* --- das Terminal ---------------------------------------------------------
    Der einzige Kasten auf der Seite, und der einzige, der einen haben darf:
@@ -968,10 +883,30 @@ html.has-3d .veil {
 .term-name { color: var(--text-1); }
 .term-tip { margin-left: auto; color: var(--label); }
 
+/* Der Abschnitt ist jetzt der Hauptteil der Seite: mittig, mit Luft. Die
+   Ausrichtung des Panels darf nicht auf das Terminal durchschlagen — eine
+   zentrierte Kommandozeile wäre keine. */
+.console { margin-block: calc(var(--gap-block) * 1.5); }
+.console-lead {
+  color: var(--text-2);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+.console-lead strong {
+  color: var(--neon-grid);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.pane.at-centre > .term {
+  justify-self: stretch;
+  width: 100%;
+  text-align: left;
+}
+
 /* eigener Scrollbereich mit fester Höhe: die Seite darf beim Ausgeben nicht
    springen */
 .term-out {
-  height: clamp(14rem, 38vh, 23rem);
+  height: clamp(17rem, 44vh, 28rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0.9rem;
@@ -1066,33 +1001,58 @@ html.has-js .term-nojs { display: none; }
   .term-in { padding-block: 0.7rem; }
 }
 
-/* --- contact --------------------------------------------------------------- */
-.contact-body { display: grid; gap: var(--sp-md); justify-items: start; }
-.mail {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  justify-self: start;
+/* --- der Speicher ---------------------------------------------------------
+   Hier stehen die Inhalte der Seite, genau einmal, als echter Text — damit
+   Suchmaschinen und Vorlesehilfen sie finden. Sichtbar sind sie nicht; das
+   Terminal liest sie von hier. Versteckt wird ausschliesslich über die
+   Zuschneide-Eigenschaften unten, damit der Text im Baum bleibt. Nimmt eine
+   der beiden Ausnahmen sie zurück — kein JavaScript, oder das Skript ist nicht
+   durchgekommen —, steht hier eine ganz normale Textseite. */
+.store {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+html:not(.has-js) .store {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+}
+
+.store-title { margin-bottom: var(--sp-2xs); }
+.store-note { color: var(--label); font-size: var(--fs-small); margin-bottom: var(--sp-xl); }
+.store-topic {
+  display: grid;
+  gap: var(--sp-sm);
+  max-width: 70ch;
+  margin-bottom: var(--sp-xl);
+}
+.store-topic h3 {
   font-family: var(--font-mono);
-  font-size: clamp(1.1rem, 0.7rem + 2.2vw, 2rem);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--text-1);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--rule-strong);
-  text-underline-offset: 0.32em;
-  word-break: break-word;
-  transition: color var(--dur-fast) var(--ease),
-              text-decoration-color var(--dur-fast) var(--ease);
-}
-.mail:hover,
-.mail:focus-visible {
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--label);
-  border-bottom-color: var(--neon-grid);
-  text-shadow: 0 0 16px rgba(232, 121, 249, 0.35);
 }
-.contact-row { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-md); }
+.store-topic p { color: var(--text-2); }
+.store-rows,
+.store-list { display: grid; gap: var(--sp-2xs); }
+.store-rows { list-style: decimal-leading-zero; }
+.store-list { list-style: disc; }
+.store-rows li,
+.store-list li { color: var(--text-2); margin-left: 1.4rem; }
+.store a { color: var(--text-1); }
 
 /* --- buttons --------------------------------------------------------------- */
 .btn {
@@ -1312,8 +1272,8 @@ html:not(.has-js) .js-only { display: none !important; }
    ========================================================================== */
 
 @media (min-width: 700px) {
-  .split { grid-template-columns: minmax(9rem, 26%) minmax(0, 1fr); gap: var(--sp-lg) var(--sp-lg); align-items: start; }
-  .triple { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-lg); }
+  .store-rows,
+  .store-list { padding-left: 1.2rem; }
 }
 
 @media (max-width: 760px) {
@@ -1347,8 +1307,9 @@ html:not(.has-js) .js-only { display: none !important; }
 }
 
 @media (max-width: 700px) {
-  .term-out { height: clamp(11rem, 32vh, 16rem); font-size: 0.84rem; }
+  .term-out { height: clamp(15rem, 46vh, 21rem); font-size: 0.84rem; }
   .term-tip { display: none; }
+  .console { margin-block: calc(var(--gap-block) * 1.15); }
   :root {
     --horizon: min(56svh, calc(100svh - 17rem));
     --sun-size: clamp(150px, 46vw, 260px);
@@ -1419,10 +1380,16 @@ html:not(.has-js) .js-only { display: none !important; }
 @media print {
   body { background: #fff; color: #000; }
   .scene, .floor, .stage, .veil, .crt, .hdr, .skip, .nav-toggle, .term { display: none !important; }
-  .pane::before, .pane::after, .rows li::before { display: none !important; }
+  .pane::before, .pane::after { display: none !important; }
   .pane { max-width: none; margin-inline: 0; }
   .hero { min-height: 0; padding-block: 1cm; }
-  .hero-name, h1, h2, .statement-text, .mail, .rows-txt, .triple li { color: #000; }
+  .hero-name, h1, h2, h3, .store p, .store li { color: #000; }
+  /* gedruckt wird gelesen, nicht getippt: die Inhalte kommen aus dem Versteck */
+  .store {
+    position: static !important; width: auto !important; height: auto !important;
+    margin: 0 !important; overflow: visible !important; clip: auto !important;
+    clip-path: none !important; white-space: normal !important;
+  }
   .hero-copy::before { display: none; }
   a { text-decoration: underline; }
 }
