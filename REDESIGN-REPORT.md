@@ -1,9 +1,9 @@
 # Redesign-Report — tr1stan.de
 
-**Stand:** 2026-08-27
-**Aktuelle Fassung:** v14 — kurzer Hero-Name, Kamera nur noch vorwärts, Sternschnuppen, Terminal
-**Arbeitsbranch:** `redesign/v14`
-**Backup-Branch:** `backup/pre-v14-2026-08-27`
+**Stand:** 2026-08-31
+**Aktuelle Fassung:** v15 — die Inhalte stehen hinter dem Terminal
+**Arbeitsbranch:** `redesign/v15`
+**Backup-Branch:** `backup/pre-v15-2026-08-31`
 
 ---
 
@@ -11,189 +11,169 @@
 
 | | |
 |---|---|
-| Backup-Branch | `backup/pre-v14-2026-08-27` |
-| Commit darin | `4be5f98` (Live-Stand v13) |
-| Zurückrollen | `git checkout main && git reset --hard backup/pre-v14-2026-08-27 && git push --force-with-lease origin main` |
+| Backup-Branch | `backup/pre-v15-2026-08-31` |
+| Commit darin | `9231703` (Live-Stand v14) |
+| Zurückrollen | `git checkout main && git reset --hard backup/pre-v15-2026-08-31 && git push --force-with-lease origin main` |
 
 `CNAME`, `robots.txt` und `favicon.svg` sind Byte für Byte dieselben wie dort.
 An `impressum.html`, `datenschutz.html` und `404.html` hat sich ausschließlich
-die Versionsnummer der Assets geändert, sonst nichts.
+die Versionsnummer der Assets geändert.
 
 ---
 
 ## 2. Was neu ist
 
-**Der Name im Hero** lautet nur noch `tr1stan`. Der bürgerliche Name ist von der
-Startseite verschwunden, auch aus Titel und og-Angaben. Er steht jetzt nur noch
-dort, wo er Pflichtangabe ist: in `impressum.html` und `datenschutz.html`, beide
-unangetastet. Nachgeprüft über alle Dateien des Repos.
+Die Startseite besteht aus Hero, Terminal und Footer. Die sechs Abschnitte —
+Wie es anfing, Warum es geblieben ist, Was ich mache, Ehrlich gesagt, Was als
+Nächstes kommt, Kontakt — sind als sichtbare Blöcke verschwunden. Was sie
+gesagt haben, gibt es über Befehle.
 
-**Die Kamera fliegt nur noch geradeaus.** Kein Anheben, kein Nicken. Höhe und
-Blickwinkel sind Konstanten; beim Scrollen wird sie ausschließlich schneller,
-gedämpft in beide Richtungen.
+Neue Befehle: **`all`** gibt alle Themen nacheinander aus, **`honest`** das,
+was vorher unter „Ehrlich gesagt" stand. Alle bisherigen Befehle bleiben.
+Die antippbaren Chips sind jetzt auch auf dem Desktop zu sehen.
 
-**Sternschnuppen** fallen durch den oberen Himmel: drei wiederverwendete
-Objekte, unregelmäßige Abstände, nie zwei am selben Ort, Textur im Code
-gezeichnet.
-
-**Ein bedienbares Terminal** zwischen „Was ich mache" und „Ehrlich gesagt", mit
-fünfzehn Befehlen, Verlauf, Vervollständigung und Tippeffekt. Es ist der einzige
-Kasten auf der Seite.
+Die Szene und der Hero sind unverändert geblieben — bis auf eine notwendige
+Anpassung, siehe unten.
 
 ---
 
-## 3. Selbst getroffene Entscheidungen
+## 3. Die eine Entscheidung, die vom Vorschlag abweicht
 
-- **Der Preis für die geradeaus fliegende Kamera.** Wenn der Blickwinkel fest
-  steht, bleibt der Horizont auf gleicher Bildschirmhöhe — und die Sonne stünde
-  hinter dem Fließtext. Genau das war der Fehler aus v11. Zwei Dinge halten das
-  auseinander: die Sonne wandert langsam zur Seite, und Sonne, Schein, Sterne
-  und Rasterlinien nehmen unter dem Hero so weit zurück, dass ein ruhiger Schein
-  bleibt. Abgedunkelt wird die Szene, nie der Text aufgehellt.
-- **Die Sterne mussten mit gedämpft werden.** In v13 nickte die Kamera weg, der
-  Himmel verschwand und die Sterne mit ihm. Jetzt stehen sie die ganze Seite
-  über im Bild — als helle Punkte hinter Buchstaben, gemessen bis auf 1,5:1
-  herunter. Sie gehen deshalb von 90 auf 10 Prozent Deckkraft zurück.
-- **Die seitliche Drift wird am sichtbaren Ausschnitt gemessen**, nicht in
-  festen Welteinheiten. Siehe Fehler 1 unten.
-- **Sternschnuppen starten nur, solange der Hero im Bild ist.** Die Vorgabe
-  verlangt, dass sie nie über Textbereichen laufen. Unter dem Hero ist der obere
-  Himmel aber genau der Bereich, in dem Text steht. Die Bahnen liegen zusätzlich
-  immer über der Oberkante der Sonnenscheibe und weit über dem Terrain.
-- **Der blinkende Cursor sitzt am Ende der Ausgabe**, nicht in der Eingabezeile.
-  Dort blinkt die Schreibmarke des Browsers ohnehin, und ein zweiter Block am
-  rechten Rand einer breiten Eingabe sähe nach Fehler aus.
-- **Während eine Zeile tippt, ist sie vor der Vorlesehilfe verborgen**; erst die
-  fertige Zeile taucht in der Live-Region auf. Zeichen für Zeichen vorlesen zu
-  lassen wäre unbrauchbar.
-- **`neofetch` zeigt nur Nachprüfbares:** Seitenname, Aufbau, Anzahl der
-  Abschnitte (live gezählt), Schriften, welche Szene gerade läuft, Cookies,
-  Tracker, fremde Hosts, Fenstergröße, Sprache. Keine Laufzeiten, keine
-  erfundenen Systemwerte.
-- **Zur Regel „nichts nur im Terminal":** Ich lese sie als Inhalte. `about`,
-  `skills`, `next` und `contact` geben wortgleich das aus, was in den
-  Abschnitten steht — geprüft gegen den Seitentext ohne den Terminal-Abschnitt.
-  `whoami` gibt die Hero-Zeile aus. `neofetch`, `ls` und `help` beschreiben das
-  Terminal selbst und tragen keinen Inhalt, der sonst fehlen würde.
+Die Vorgabe schlägt vor, die Inhalte „zum Beispiel [in] einem Container mit dem
+hidden-Attribut" abzulegen — mit der Begründung, dass Suchmaschinen und
+Vorlesehilfen sonst nichts mehr finden.
+
+**Genau das würde `hidden` verhindern.** Ein Element mit `hidden` ist nicht nur
+unsichtbar, es ist aus dem Zugänglichkeitsbaum genommen: eine Vorlesehilfe
+findet den Text dann nicht mehr. Dasselbe gilt für `display: none` und
+`visibility: hidden`.
+
+Ich habe deshalb die Begründung ernster genommen als das Beispiel. Versteckt
+wird ausschließlich über die Zuschneide-Eigenschaften: ein Pixel Kantenlänge,
+`overflow: hidden`, `clip-path: inset(50%)`. Der Text bleibt im Baum, wird aber
+nirgends gemalt. Belegt mit einem Bildvergleich: färbt man den ganzen Speicher
+knallrot ein, ändert sich am gerenderten Bild **kein einziges Pixel**.
+
+Weitere selbst getroffene Entscheidungen:
+
+- **Der Speicher ist die einzige Quelle.** Das Terminal liest die Themen über
+  `data-topic` aus dem Dokument und setzt sie als Text. Es gibt die Texte nicht
+  ein zweites Mal im Skript — nachgewiesen, siehe Prüfergebnisse.
+- **Zwei Wege zurück an die Oberfläche.** `<noscript>` im Kopf hebt den
+  Zuschnitt auf, wie verlangt. Zusätzlich `html:not(.has-js)`: kommt das Skript
+  zwar an, scheitert aber, nimmt ein Zweizeiler im Kopf die Klasse `has-js`
+  wieder ab, und es passiert dasselbe. Ohne diesen zweiten Weg hätte ein
+  fehlgeschlagenes Skript ein totes Terminal und sonst nichts hinterlassen.
+- **Ein sichtbarer Hinweis über dem Terminal.** Ohne ihn säße man vor einer
+  Kommandozeile ohne zu wissen, dass dort etwas zu holen ist. Er nennt `help`
+  und `all` und steht als echter Text auf der Seite, nicht nur in der Ausgabe.
+- **Die Szene musste angepasst werden.** Die Seite ist nur noch halb so lang.
+  Die Dämpfung von Sonne, Sternen und Raster hing am Scrollweg und war deshalb
+  noch kaum wirksam, wenn das Terminal ins Bild kam. Sie greift jetzt nach drei
+  Vierteln eines Bildschirms statt nach 1,1, und die Abschnittsschleier nehmen
+  unter dem Hero mehr weg. Abgedunkelt wird die Szene, nie der Text aufgehellt.
+- **Die fünf Abschnittsmuster aus v12 sind aus dem Stylesheet geflogen.** Ihre
+  Abschnitte gibt es nicht mehr; sie hätten nichts mehr zu gestalten gehabt.
+  138 Zeilen weniger.
+- **`neofetch` zählt jetzt Themen statt Abschnitte.** „Abschnitte: 1" wäre zwar
+  richtig, aber nichtssagend gewesen.
 
 ---
 
 ## 4. Prüfergebnisse
 
-**104 Browserprüfungen, 193 statische Prüfungen — alle bestanden.**
+**91 Browserprüfungen, 207 statische Prüfungen — alle bestanden.**
 
-### Die Kamera
-
-| | |
-|---|---|
-| Kamerahöhe über fünf Scrollstände | konstant 9,5 |
-| Nicken (rotX) | 0,000 an jedem Stand |
-| Gieren (rotY) | 0,000 an jedem Stand |
-| Blickwinkel | konstant 62 Grad |
-| Drift der Sonne | 0 → 481 → 497 Einheiten, nur in eine Richtung |
-| Deckkraft der Sonne | 1,00 → 0,158 → 0,130 |
-| Deckkraft der Sterne | 0,90 → 0,125 → 0,100 |
-
-### Die Sonne bleibt sichtbar
-
-Gemessen mit ausgeblendetem Inhalt, an vier Scrollständen je Breite:
-
-| Breite | im Hero | unter dem Hero | Helligkeit Sonne / Himmel |
-|---|---|---|---|
-| 390 px | 56 793 Pixel | 1 361 Pixel | 0,020 gegen 0,005 |
-| 1280 px | 50 896 Pixel | 1 071 – 1 163 Pixel | 0,020 gegen 0,003 |
-| 1920 px | 93 291 Pixel | 1 949 – 2 262 Pixel | 0,020 gegen 0,002 |
-
-Die Scheibe ist unten also rund viermal so hell wie der Himmel daneben — ein
-Schein, der da ist, ohne zu drücken.
-
-### Lesbarkeit
-
-| Breite | Fließtext mindestens | Bedienelemente mindestens |
-|---|---|---|
-| 390 px | 12,17:1 | 5,67:1 |
-| 768 px | 10,50:1 | 6,47:1 |
-| 1280 px | 9,75:1 | 6,35:1 |
-| 1920 px | 11,58:1 | 6,02:1 |
-
-Gemessen über fünf Scrollstände je Breite, gegen die tatsächlich gerenderte
-Szene, auf den echten Zeilenkästen des Textes. **Positivprobe:** mit hellem
-Grund fällt derselbe Wert auf 1,00:1 — die Messung schlägt also an.
-
-### Sternschnuppen
-
-Über 100 Sekunden beobachtet: **acht Stück**, Abstände 13,8 / 11,6 / 11,8 / 9,4 /
-9,5 / 10,8 / 14,0 Sekunden — unregelmäßig und innerhalb der Vorgabe von acht bis
-fünfzehn. Der niedrigste Punkt einer Bahn lag bei 0,600 der halben Bildhöhe;
-die Oberkante der Sonnenscheibe liegt bei etwa 0,57. Keine Bahn kam ihr näher,
-keine berührte das Terrain.
-
-### Das Terminal
-
-Alle fünfzehn Befehle wurden tatsächlich ausgeführt und ihre Ausgabe geprüft:
-`help`, `about`, `skills`, `next`, `contact`, `clear`, `whoami`, `ls`,
-`cat about|skills|next|contact`, `neofetch`, `sudo`, `exit`.
+### Kein Klartext mehr, aber alles im Dokument
 
 | Prüfung | Ergebnis |
 |---|---|
-| Fokus beim Laden | liegt auf `body`, nicht im Terminal |
-| HTML- und Skript-Eingabe | bleibt Text, kein `img`, kein `script`, nichts ausgeführt |
-| Rückmeldung auf unbekannten Befehl | gibt die Eingabe wortwörtlich als Text aus |
-| Eingabelänge | auf 120 Zeichen begrenzt |
-| Verlauf | Pfeil hoch holt zurück, Pfeil runter geht auf leer |
-| Vervollständigung | `neo` → `neofetch`, `cat sk` → `cat skills` |
-| Strg+L | leert |
-| Klick ins Terminal | setzt den Fokus, Seite springt um 0 px |
-| Seitenhöhe beim Ausgeben | 3 580 px vorher wie nachher |
-| Eingabe | 16 px, iOS zoomt nicht |
-| Chips | sieben, auf Fingergeräten mindestens 44 × 44 px |
-| Inhalte auch außerhalb | alle 13 Textbausteine stehen im normalen Seitentext |
+| Blöcke im Inhalt | genau einer, und das ist das Terminal |
+| Alte Abschnitts-IDs | keine mehr im Markup |
+| Speicher | 1 × 1 px, `overflow: hidden`, `clip-path: inset(50%)` |
+| Nicht `display:none`, nicht `visibility:hidden` | bestätigt — der Text bleibt im Baum |
+| Bildvergleich mit knallrot gefärbtem Speicher | kein Pixel Unterschied |
+| 16 Textbausteine im ausgelieferten HTML | alle vorhanden |
+| Dieselben Bausteine im Skript | **keiner** — sie stehen genau einmal |
+| Ausserhalb des Speichers im Markup | keiner |
 
-### Rückfall und Barrierefreiheit
+### Das Terminal
+
+Alle 18 Befehlsformen wurden ausgeführt und ihre Ausgabe gegen die Texte im
+Dokument geprüft: `help`, `all`, `about`, `skills`, `honest`, `next`,
+`contact`, `whoami`, `ls`, `cat` für alle fünf Themen, `neofetch`, `sudo`,
+`exit`, `clear`.
 
 | | |
 |---|---|
-| Ohne WebGL | CSS-Szene aus v12 übernimmt, three.js wird nicht geladen, Terminal läuft |
-| `prefers-reduced-motion` | keine 3D-Szene, keine Sternschnuppen, kein Download, Cursor blinkt nicht, Ausgabe sofort vollständig |
-| Ohne JavaScript | Terminal ausgeblendet, Hinweis sichtbar, alle übrigen Abschnitte unberührt |
-| Fokusring | `solid 2px rgb(251,228,255)` auch auf der Terminaleingabe |
-| Überschriften | eine H1, danach sieben H2 |
-| Live-Region | `role="log"`, `aria-live="polite"`, `aria-relevant="additions"` |
-| Externe Requests | keine, auf allen vier Seiten |
-| Waagerechtes Scrollen | keins bei 320 / 360 / 390 / 430 / 768 / 1280 / 1920 |
+| `all` | gibt alle 16 Textbausteine aus |
+| Fokus beim Laden | auf `body`, nicht im Terminal |
+| HTML- und Skript-Eingabe | bleibt Text, kein `img`, kein `script`, nichts ausgeführt |
+| Links | `mailto:` und GitHub anklickbar, aus Elementen gebaut |
+| Chips | neun, auf dem Desktop sichtbar, auf dem Finger 61 × 44 px |
+| Mittig | 480 px links wie rechts bei 1280 px |
+| Ausgabebereich | 448 px hoch, eigener Scrollbereich |
+| Seitenhöhe beim Ausgeben | unverändert |
+
+### Ohne JavaScript, ohne WebGL, mit reduzierter Bewegung
+
+| | |
+|---|---|
+| Ohne JavaScript | Speicher 1216 × 1174 px sichtbar, Terminal ausgeblendet, Hinweis da, alle 16 Inhalte lesbar |
+| Ohne WebGL | CSS-Szene aus v12 übernimmt, Terminal läuft, Speicher bleibt versteckt |
+| Reduzierte Bewegung | keine 3D-Szene, kein Blinken, Ausgabe sofort vollständig |
+
+### Lesbarkeit gegen die gerenderte Szene
+
+| Breite | Fließtext mindestens | Bedienelemente mindestens |
+|---|---|---|
+| 390 px | 7,17:1 | 7,33:1 |
+| 768 px | 11,91:1 | 7,06:1 |
+| 1280 px | 12,19:1 | 5,55:1 |
+| 1920 px | 12,91:1 | 7,83:1 |
+
+### Mobil
+
+Kein waagerechtes Scrollen bei 320, 360, 390 und 430 px. Eingabe 16 px. Chips
+61 × 44 px. Beim Fokussieren der Eingabe springt die Seite um **0 px**.
+
+### Rechtsseiten
+
+Beide unverändert, alle Abschnitte normal sichtbar, kein Speicher eingebaut,
+die Pflichtangabe steht im Klartext auf der Seite.
 
 ### Gefundene und behobene Fehler
 
-1. **Die Sonne war im Hochformat aus dem Bild geschoben.** Die seitliche Drift
-   war ein fester Wert in Welteinheiten. Bei 390 × 844 sieht die Kamera auf
-   Sonnenentfernung aber nur ein Drittel der Breite, die sie bei 1280 sieht —
-   die Sonne stand weit außerhalb des Bildes. Die Drift wird jetzt am sichtbaren
-   Ausschnitt gemessen und nach oben begrenzt, damit sie nicht über den Rand des
-   Terrains hinauswandert.
-2. **Der Tippeffekt verhungerte auf langsamen Geräten.** Er zählte Zeichen je
-   Zeitgeber, und ein Zeitgeber wartet auf den Hauptfaden: bei zehn Bildern je
-   Sekunde kamen drei Zeichen alle hundert Millisekunden heraus. Getippt wird
-   jetzt nach der Uhr — die Begrüßung steht damit auch dort in 0,3 Sekunden.
-3. **Die Sterne blieben hell.** Solange die Kamera in v13 wegnickte, verschwand
-   der Himmel; jetzt steht er die ganze Seite über im Bild. Einzelne Sterne
-   hinter Buchstaben drückten den Kontrast auf 1,5:1. Sie nehmen jetzt mit
-   zurück.
+1. **Die Szene stand noch fast ungedämpft hinter dem Terminal.** Die Dämpfung
+   hing am Scrollweg, und die Seite ist seit v15 nur noch halb so lang. Der
+   Hinweistext über dem Terminal kam dadurch auf 6,54:1, die Überschrift auf
+   4,06:1. Behoben über die frühere Dämpfung und stärkere Schleier.
 
-Vier weitere Meldungen kamen aus meinen eigenen Prüfskripten, nicht von der
-Seite: die Prüfung „ohne JavaScript ist alles sichtbar" zählte das Terminal mit,
-das dort ausdrücklich ausgeblendet sein soll; die Textbaustein-Liste erwartete
-noch den alten Hero-Namen; die Regel „keine fremde URL im Skript" schlug auf den
-GitHub-Link an, den das Terminal als anklickbares Element ausgibt — jetzt wird
-zusätzlich geprüft, dass diese URL wirklich nur ein `href` ist und nirgends
-geladen wird; und eine Zusicherung nannte noch den alten Namen der
-Drift-Konstante.
+Drei weitere Meldungen kamen aus meinen eigenen Prüfskripten:
+
+- Die Kontrastmessung liess Textzeilen gelten, die im Scrollbereich des
+  Terminals längst nach oben herausgelaufen waren. Die Sichtbarkeitsprüfung
+  akzeptierte jeden getroffenen Vorfahren, also auch `main`. Gemessen wurde
+  dann der Hintergrund einer ganz anderen Stelle — daher Werte bis herunter auf
+  1,00:1. Jetzt zählt nur der Treffer selbst oder etwas darin.
+- Die Chip-Größe wurde am Rechteck gemessen. Unter der Mobil-Emulation ist das
+  mit dem Seitenmaßstab multipliziert und fiel dadurch auf 42,6 px, obwohl die
+  CSS-Größe 44 px beträgt. Jetzt wird `offsetHeight` genommen.
+- Der „Sprung beim Fokussieren" von 977 px war das Hinscrollen des
+  Testwerkzeugs zum Terminal, nicht das Fokussieren. Gemessen wird jetzt erst
+  nach dem Hinscrollen — Ergebnis 0 px.
+
+Dazu fünf veraltete Zusicherungen aus v12 und v14, die Abschnitte prüften, die
+v15 absichtlich entfernt: wechselnde Ausrichtungen, wechselnde Spaltenbreiten,
+die breitere Bahn, die Abstufungen und die Stelle des Terminals zwischen zwei
+Abschnitten.
 
 ### Sichtprüfung
 
-Je vier Aufnahmen bei 390, 768, 1280 und 1920 px über die volle Seitenhöhe,
-dazu das Terminal im Betrieb. Die Fahrt geht sichtbar geradeaus, ohne Kippen.
-Die Sonne steht durchgehend im Bild, nach unten hin als ruhiger Schein rechts
-außerhalb der Textspalte. Kein Text steht auf einer hellen Fläche.
+Je vier Aufnahmen bei 390, 768, 1280 und 1920 px, dazu das Terminal im Betrieb
+und die Seite ohne JavaScript. Ausser Hero, Terminal und Footer ist kein
+Inhaltstext zu sehen. Die Seite wirkt nicht leer: der Hero füllt den ersten
+Bildschirm, das Terminal den zweiten.
 
 ---
 
@@ -201,8 +181,8 @@ außerhalb der Textspalte. Kein Text steht auf einer hellen Fläche.
 
 | | |
 |---|---|
-| Merge-Commit | `990d0a1` |
-| Inhalts-Commit | `95d9459` |
+| Merge-Commit | `85b896d` |
+| Inhalts-Commit | `00ac48a` |
 | Workflow | `pages build and deployment` |
 
 Die Seite selbst kann ich aus dieser Umgebung nicht abrufen — der Egress-Proxy
@@ -213,46 +193,38 @@ von GitHub Pages, bestätigt wird der Deploy über die Actions-API.
 
 ## 6. Offene Punkte und Risiken
 
-- **Die Bildrate auf echter Hardware bleibt ungeprüft**, wie schon in v13: die
-  Prüfumgebung rastert in Software. Sternschnuppen und Terminal ändern daran
-  wenig — die Sternschnuppen sind drei Flächen, das Terminal rendert nur beim
-  Tippen. Die dreistufige Notbremse aus v13 ist unverändert aktiv.
-- **Die Sonne steht auf schmalen Viewports zwangsläufig hinter Text.** Bei
-  390 px füllt die Textspalte die Breite; ausweichen geht dort nicht. Deshalb
-  greift die Dämpfung, und deshalb ist der Kontrast dort mit 12,17:1 gemessen
-  der höchste der vier Breiten.
-- **Die Sternschnuppen sind im Hero zu sehen, darunter nicht.** Das ist die
-  Folge der Vorgabe, sie nie über Textbereichen laufen zu lassen.
-- **Die Prüfung der Szene benutzt zwei lesende Auskünfte** (`view()` und
-  `meteors()`), die das Modul nach außen gibt. Ohne sie liesse sich weder
-  belegen, dass die Kamera wirklich geradeaus fliegt, noch wo die Bahnen
-  verlaufen. Sie ändern nichts und kosten nichts.
+- **Suchmaschinen bewerten zugeschnittenen Text zurückhaltender** als normal
+  sichtbaren. Der Text ist im HTML, wird ausgeliefert und ist im
+  Zugänglichkeitsbaum — mehr lässt sich nicht tun, wenn er gleichzeitig
+  unsichtbar sein soll. Das ist der Preis der Vorgabe, nicht ein Fehler.
+- **Vorlesehilfen bekommen alles auf einmal**, weil der Speicher im Baum steht.
+  Für sie ist die Seite also keine Kommandozeile, sondern eine Textseite. Das
+  halte ich für richtig, es ist aber eine Entscheidung.
+- **Die Bildrate auf echter Hardware bleibt ungeprüft**, wie in v13 und v14.
+- **Wer JavaScript hat, sieht ohne Tippen nichts** ausser Hero und Hinweis.
+  Genau so gewollt — aber es ist eine bewusste Hürde.
 
 ---
 
 ## 7. Was du manuell prüfen solltest
 
-1. Scrollen: kippt wirklich nichts mehr, geht es nur noch vorwärts?
-2. Ein bis zwei Minuten im Hero stehen bleiben: kommen Sternschnuppen, und
-   wirken die Abstände zufällig?
-3. Im Terminal `help`, dann ein paar Befehle. Beim Tippen während einer Ausgabe:
-   springt sie sofort komplett um?
-4. Auf dem Telefon: zoomt die Seite beim Antippen der Eingabe? Springt sie weg?
-   Sind die Chips gut zu treffen?
-5. Ganz nach unten scrollen: ist die Sonne noch als Schein zu erkennen, ohne den
-   Text zu stören?
-6. Mit der Tastatur durch das Terminal: Fokusring sichtbar, Pfeiltasten,
-   Tabulator, Strg+L?
+1. `help`, dann `all` — kommt wirklich alles?
+2. `cat honest` und `cat quatsch` — der eine gibt aus, der andere weist freundlich ab.
+3. JavaScript im Browser abschalten und neu laden: steht die ganze Seite als Text da?
+4. Mit dem Vorleseprogramm über die Seite gehen: sind die Inhalte auffindbar?
+5. Auf dem Telefon: Chips gut zu treffen, springt beim Antippen der Eingabe nichts?
+6. Impressum und Datenschutz aufrufen: unverändert und normal lesbar?
 
 ---
 
 ## 8. Bestehende Branches
 
-Keiner wurde gelöscht: `backup/pre-v14-2026-08-27`, `backup/pre-v13-2026-08-27`,
-`backup/pre-v12-2026-08-20`, `backup/pre-v11-2026-08-17`,
-`backup/pre-v10-2026-08-14`, `backup/pre-v9-2026-08-14`,
-`backup/pre-v9-2026-08-10` (gleicher Commit), `backup/pre-v7-2026-08-10`,
-`backup/pre-v6-2026-08-10`, `backup/pre-redesign-2026-08-09`, `redesign/v14`,
+Keiner wurde gelöscht: `backup/pre-v15-2026-08-31`, `backup/pre-v14-2026-08-27`,
+`backup/pre-v13-2026-08-27`, `backup/pre-v12-2026-08-20`,
+`backup/pre-v11-2026-08-17`, `backup/pre-v10-2026-08-14`,
+`backup/pre-v9-2026-08-14`, `backup/pre-v9-2026-08-10` (gleicher Commit),
+`backup/pre-v7-2026-08-10`, `backup/pre-v6-2026-08-10`,
+`backup/pre-redesign-2026-08-09`, `redesign/v15`, `redesign/v14`,
 `redesign/v13`, `redesign/v12`, `redesign/v11`, `redesign/v10`, `redesign/v9`,
 `redesign/v7`, `redesign/v6`, `redesign/v4`, `claude/visual-redesign-v5-yhc4qp`.
 
@@ -260,6 +232,8 @@ Keiner wurde gelöscht: `backup/pre-v14-2026-08-27`, `backup/pre-v13-2026-08-27`
 
 ## Anhang: frühere Fassungen
 
+- **v14** (`backup/pre-v15-2026-08-31`, `9231703`): kurzer Hero-Name, Kamera nur
+  noch vorwärts, Sternschnuppen, erstes Terminal.
 - **v13** (`backup/pre-v14-2026-08-27`, `4be5f98`): gerenderte 3D-Szene mit
   three.js r185 aus `/vendor/`, CSS-Szene als Rückfall.
 - **v12** (`backup/pre-v13-2026-08-27`, `8082679`): Abschnitte ohne Kästen,
