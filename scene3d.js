@@ -557,7 +557,10 @@ export function start(canvas, options) {
        Bewegung ankommt und nicht als Schnitt. */
     /* Wie weit die Seite verlassen ist. Treibt nur noch die Dämpfung der Szene
        und die seitliche Drift der Sonne — nicht mehr die Kamera. */
-    var prog = Math.min(1, y / (window.innerHeight * 1.1));
+    /* Die Seite ist seit v15 deutlich kürzer — Hero, Terminal, Footer. Die
+       Dämpfung muss deshalb früher greifen, sonst steht die Sonne noch fast
+       ungedämpft hinter dem Terminal. */
+    var prog = Math.min(1, y / (window.innerHeight * 0.75));
     ride = damp(ride, prog, 0.05, dt);
     var e = ride * ride * (3 - 2 * ride);
 

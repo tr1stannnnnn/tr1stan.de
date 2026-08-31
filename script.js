@@ -316,26 +316,69 @@
     var history = [];
     var histAt = 0;
 
-    /* ---- Inhalte, wortgleich mit den Abschnitten der Seite ---------------- */
-    var ABOUT = [
-      ["head", "Wie es anfing"],
-      ["", "Über das Zocken. Erst kamen die Spiele, dann die Frage, warum die Kiste dahinter so läuft, wie sie läuft."],
-      ["", "Irgendwann war ich der, den man ruft, wenn etwas nicht geht. Dabei ist es geblieben."],
-      ["", ""],
-      ["head", "Warum es geblieben ist"],
-      ["", "Weil sich Technik auseinandernehmen lässt. Eigene Konfiguration zusammenstellen. Kaputtes selbst reparieren, statt es wegzuwerfen. Und verstehen, was darunter wirklich passiert, bis runter zum Binärsystem."],
-      ["", "Was ich lerne, will ich auch selbst benutzen. Deshalb die privaten Projekte: nicht für ein Zeugnis, sondern weil ich wissen will, ob es funktioniert."]
-    ];
+    /* ---- Inhalte -----------------------------------------------------------
+       Sie stehen nicht hier, sondern genau einmal im Dokument. Das Terminal
+       liest sie von dort und setzt sie als Text — nie als Markup. So gibt es
+       keine zweite Stelle, die gepflegt werden müsste, und ohne JavaScript
+       bleibt genau derselbe Text als lesbare Seite stehen. */
+    var store = $("#store");
 
-    var SKILLS = [
-      "01  Linux und Docker im Alltag",
-      "02  Homelab mit Raspberry Pi und Home Assistant",
-      "03  Netzwerk und Fernzugriff",
-      "04  Automatisierung statt Handarbeit",
-      "05  Kleine Tools in Python und PHP, wenn mich etwas nervt"
-    ];
+    function clean(t) { return String(t).replace(/\s+/g, " ").trim(); }
 
-    var NEXT = ["Monitoring", "mehr Automatisierung", "Security tiefer verstehen"];
+    function readTopic(name) {
+      var node = store && store.querySelector('[data-topic="' + name + '"]');
+      var jobs = [];
+      if (!node) return jobs;
+
+      Array.prototype.forEach.call(node.children, function (el) {
+        var tag = el.tagName.toLowerCase();
+
+        if (tag === "h2" || tag === "h3" || tag === "h4") {
+          jobs.push({ kind: "text", cls: "head", text: clean(el.textContent) });
+          return;
+        }
+
+        if (tag === "ol" || tag === "ul") {
+          Array.prototype.forEach.call(el.children, function (li, i) {
+            var lead = tag === "ol" ? ("0" + (i + 1)).slice(-2) + "  " : "-  ";
+            jobs.push({ kind: "text", cls: "", text: lead + clean(li.textContent) });
+          });
+          return;
+        }
+
+        var a = el.querySelector("a[href]");
+        if (a) {
+          var label = clean(a.textContent);
+          var whole = clean(el.textContent);
+          var at = whole.indexOf(label);
+          var href = a.getAttribute("href");
+          jobs.push({
+            kind: "link",
+            before: at > 0 ? whole.slice(0, at) : "",
+            label: label,
+            href: href,
+            external: /^https?:/i.test(href)
+          });
+          return;
+        }
+
+        jobs.push({ kind: "text", cls: "", text: clean(el.textContent) });
+      });
+      return jobs;
+    }
+
+    function emit(name) {
+      var jobs = readTopic(name);
+      if (!jobs.length) { print("Zu " + name + " steht nichts im Dokument.", "note"); return; }
+      jobs.forEach(function (j) { push(j); });
+    }
+
+    var TOPIC_ORDER = ["about", "skills", "honest", "next", "contact"];
+
+    var TOPICS = {};
+    TOPIC_ORDER.forEach(function (name) {
+      TOPICS[name] = function () { emit(name); };
+    });
 
     /* Reines ASCII: die Schriftschnitte sind auf Latin beschnitten, ein
        Blockzeichen wuerde in eine Ersatzschrift fallen und die Spalten
@@ -454,7 +497,7 @@
         "-------------------",
         "Seite ......... tr1stan.de",
         "Aufbau ........ statische Seite, kein Framework",
-        "Abschnitte .... " + document.querySelectorAll("main .block").length,
+        "Themen ........ " + document.querySelectorAll(".store-topic").length,
         "Schriften ..... Inter Variable, JetBrains Mono Variable",
         "Szene ......... " + scene,
         "Cookies ....... keine",
@@ -465,22 +508,14 @@
       ];
     }
 
-    var TOPICS = {
-      about: function () { ABOUT.forEach(function (r) { print(r[1], r[0]); }); },
-      skills: function () { SKILLS.forEach(function (r) { print(r); }); },
-      next: function () { NEXT.forEach(function (r) { print(r); }); },
-      contact: function () {
-        link("Mail ...... ", "chef@tr1stan.de", "mailto:chef@tr1stan.de", false);
-        link("GitHub .... ", "github.com/tr1stannnnnn", "https://github.com/tr1stannnnnn", true);
-      }
-    };
-
     var CMDS = {
       help: function () {
         print("Verfügbare Befehle:", "head");
         [["help", "diese Liste"],
+         ["all", "alle Themen nacheinander"],
          ["about", "wie es anfing und warum es geblieben ist"],
          ["skills", "was ich mache"],
+         ["honest", "ehrlich gesagt"],
          ["next", "was als Nächstes kommt"],
          ["contact", "Mailadresse und GitHub"],
          ["ls", "verfügbare Themen"],
@@ -495,13 +530,20 @@
         blank();
         print("Pfeiltasten blättern durch den Verlauf, Tabulator vervollständigt, Strg+L leert.", "note");
       },
+      all: function () {
+        TOPIC_ORDER.forEach(function (name, i) {
+          if (i) blank();
+          TOPICS[name]();
+        });
+      },
       about: function () { TOPICS.about(); },
       skills: function () { TOPICS.skills(); },
+      honest: function () { TOPICS.honest(); },
       next: function () { TOPICS.next(); },
       contact: function () { TOPICS.contact(); },
       ls: function () {
-        print("about   skills   next   contact", "head");
-        print("cat <name> gibt ein Thema aus.", "note");
+        print(TOPIC_ORDER.join("   "), "head");
+        print("cat <name> gibt ein Thema aus, all gibt alle aus.", "note");
       },
       cat: function (arg) {
         var name = String(arg || "").trim().toLowerCase();
@@ -619,7 +661,7 @@
       try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
     });
 
-    ["help", "about", "skills", "next", "contact", "neofetch", "clear"].forEach(function (name) {
+    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear"].forEach(function (name) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "term-chip";
@@ -632,8 +674,13 @@
       chips.appendChild(b);
     });
 
-    print("tr1stan.de — Terminal. Alles hier steht auch als Text auf dieser Seite.", "head");
-    print("help zeigt alle Befehle.", "note");
+    print("tr1stan.de — hier stehen die Inhalte dieser Seite.", "head");
+    print("Es gibt sie über Befehle: help zeigt alle, all gibt alles aus.", "note");
+
+    /* Erst jetzt gilt das Terminal als bereit. Bleibt die Klasse aus, nimmt
+       der Schnipsel im Kopf der Seite has-js wieder ab und die Inhalte
+       erscheinen als normaler Text. */
+    root.classList.add("term-ready");
   })();
 
   /* --------------------------------------------------------------------------
