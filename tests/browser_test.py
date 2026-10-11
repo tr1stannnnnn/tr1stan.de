@@ -260,7 +260,9 @@ class BrowserTests(unittest.TestCase):
             for box in self.page.locator(selector).evaluate_all('els=>els.map(el=>el.getBoundingClientRect().toJSON())'):
                 self.assertLessEqual(box['right'], term['x'] + term['width'] + .5, selector)
         self.page.screenshot(path=str(ARTIFACTS/'home-mobile.png'), full_page=True)
-        self.page.locator('a[href="/game.html"]').first.click(); self.page.go_back(); self.page.go_forward()
+        self.assertEqual(self.page.locator('a[href*="game.html"]').count(), 0)
+        self.page.locator('#termIn').fill('play'); self.page.locator('#termIn').press('Enter'); self.page.wait_for_url(BASE + '/game.html')
+        self.page.go_back(); self.page.go_forward()
         self.assertEqual(self.state(), 'ready')
         ctx = self.browser.new_context(java_script_enabled=False)
         page = ctx.new_page(); page.goto(BASE + '/')

@@ -220,8 +220,6 @@ code {
 
 main { position: relative; }
 
-.home-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: 1rem; font: .7rem var(--font-mono); }
-.home-actions a { min-height: 44px; display: inline-flex; align-items: center; color: var(--label); }
 .term-send { flex: 0 0 auto; min-width: 44px; min-height: 44px; padding: .5rem; border: 1px solid var(--rule-strong); border-radius: 3px; background: transparent; color: var(--label); font: .65rem var(--font-mono); cursor: pointer; }
 
 /* The page veil sits above the floor and below the content. It is anchored to
@@ -697,6 +695,8 @@ html.has-3d .veil {
   background: var(--sky-top);
   border-bottom: 1px solid var(--rule);
 }
+.home-page { --header-h: 50px; }
+.home-page .hdr { background: rgba(6, 2, 12, .58); backdrop-filter: blur(12px); border-bottom-color: rgba(192, 132, 252, .12); }
 .hdr-inner { display: flex; align-items: center; gap: var(--sp-md); min-height: var(--header-h); }
 
 .brand {
@@ -765,9 +765,9 @@ html.has-3d .veil {
   min-height: calc(100svh - var(--header-h));
   display: flex;
   align-items: flex-end;
-  /* the copy's scrim reaches 50vw past both edges on purpose; clip it here
-     so it darkens the full width without widening the document */
-  overflow: hidden;
+  /* The fading scrim may cross into the next section without a clipped edge. */
+  overflow-x: clip;
+  overflow-y: visible;
   padding-bottom: clamp(2.5rem, 7vh, 5rem);
 }
 .hero-inner { position: relative; z-index: 1; width: 100%; max-width: min(1400px, 100%); }
@@ -777,14 +777,14 @@ html.has-3d .veil {
 .hero-copy::before {
   content: "";
   position: absolute;
-  inset: -4rem -50vw -8rem -50vw;
+  inset: -5rem -50vw -9rem -50vw;
   z-index: -1;
   background: linear-gradient(to bottom,
               rgba(6, 2, 12, 0) 0%,
-              rgba(6, 2, 12, 0.62) 22%,
-              rgba(6, 2, 12, 0.90) 48%,
-              rgba(6, 2, 12, 0.96) 72%,
-              rgba(6, 2, 12, 0.96) 100%);
+              rgba(6, 2, 12, 0.38) 24%,
+              rgba(6, 2, 12, 0.66) 48%,
+              rgba(6, 2, 12, 0.46) 72%,
+              rgba(6, 2, 12, 0) 100%);
 }
 
 .hero-title { margin-bottom: var(--sp-md); }
