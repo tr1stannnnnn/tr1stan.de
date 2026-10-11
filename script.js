@@ -687,7 +687,7 @@
       try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
     });
 
-    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear", "play", "leaderboard"].forEach(function (name) {
+    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear"].forEach(function (name) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "term-chip";

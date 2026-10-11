@@ -5,6 +5,8 @@ import { RULES as R, VERSION, dailySeed, utcDay, validateAlias, rank, minimumAct
 import { Records, STORAGE_KEY } from '../game/storage.mjs';
 import { LeaderboardAPI } from '../game/api.mjs';
 import { Sound } from '../game/audio.mjs';
+import { Effects, EFFECT_LIMITS } from '../game/effects.mjs';
+import { Renderer } from '../game/render.mjs';
 
 const memory = () => { const data = new Map(); return { getItem: k => data.get(k) || null, setItem: (k, v) => data.set(k, v) }; };
 test('Daily deterministic, versioned and changes at UTC midnight', () => {
@@ -114,4 +116,71 @@ test('Leaderboard projections: rank/time/own position and malformed API dates', 
   for (const positionAsOf of ['date', -1, 8640000000000001]) {
     answer = { ...receipt, positionAsOf }; await assert.rejects(api.submit(payload), /Ungültige/);
   }
+});
+
+const canvasStub = () => {
+  const gradient = { addColorStop() {} };
+  const ctx = new Proxy({}, { get: (_, key) => ['createLinearGradient', 'createRadialGradient'].includes(key) ? () => gradient : () => {}, set: () => true });
+  return { getContext: () => ctx, getBoundingClientRect: () => ({ width: R.width }) };
+};
+test('Daily physics/sequence, hitboxes and score unchanged by rendering, skins or cosmetic RNG', () => {
+  const simulate = (hz, skin, reduced, decorated) => {
+    const f = new Flight(dailySeed('2026-10-11')), clock = new FixedClock(), fx = new Effects(12345), renderer = new Renderer(canvasStub());
+    let flapTick = -1;
+    for (let frame = 0; frame < hz * 12; frame++) {
+      const oldScore = f.score;
+      clock.advance(1 / hz, () => {
+        const next = f.gates.find(g => g.x + R.gateWidth >= R.playerX - R.halfWidth);
+        if (f.y > (next?.center || 360) + 18 && f.vy > 0) { f.flap(); flapTick = f.ticks; if (decorated) fx.flap(f, skin, reduced); }
+        f.step();
+      });
+      if (decorated) {
+        fx.advance(1 / hz, f, { running: true, reduced, skin });
+        if (f.score !== oldScore) fx.point(f.gates.filter(g => g.passed).at(-1), f.y, skin, reduced);
+        renderer.draw(f, { effects: fx, skin, reduced });
+      }
+    }
+    return { y: f.y, vy: f.vy, ticks: f.ticks, score: f.score, gates: f.gates, flapTick, nextRandom: f.random() };
+  };
+  const baseline = simulate(60, 'packet', false, false);
+  assert(baseline.score > 0);
+  for (const skin of ['packet', 'router', 'admin', 'root']) for (const hz of [60, 240]) for (const reduced of [false, true]) {
+    assert.deepEqual(simulate(hz, skin, reduced, true), baseline);
+  }
+  assert.deepEqual([R.halfWidth, R.halfHeight, R.gateWidth], [11, 9, 64]);
+});
+test('Effects are bounded, expire and restart without accumulated particles or clocks', () => {
+  const fx = new Effects(), f = new Flight(1);
+  for (let run = 0; run < 100; run++) {
+    fx.reset();
+    assert.equal(fx.time, 0); assert.equal(fx.active, false); assert.equal(fx.broken, false);
+    for (let i = 0; i < 100; i++) { fx.flap(f, 'router'); fx.point(f.gates[0], f.y, 'router'); }
+    for (const [name, cap] of Object.entries(EFFECT_LIMITS)) assert(fx[name].length <= cap, name);
+    for (let i = 0; i < 40; i++) fx.advance(.016, f, { running: true, skin: 'router' });
+    assert(fx.trail.length <= EFFECT_LIMITS.trail);
+    for (let i = 0; i < 8; i++) fx.advance(.1, f, { settling: true });
+    assert.equal(fx.active, false); for (const name of Object.keys(EFFECT_LIMITS)) assert.equal(fx[name].length, 0);
+  }
+});
+test('Pause freezes effects; Reduced Motion prunes trail, rings and particle count', () => {
+  const fx = new Effects(), f = new Flight(1); fx.flap(f, 'admin'); fx.point(f.gates[0], f.y, 'admin');
+  fx.advance(.06, f, { running: true, skin: 'admin' });
+  const snapshot = JSON.stringify(fx); fx.advance(100, f); assert.equal(JSON.stringify(fx), snapshot);
+  fx.advance(.016, f, { running: true, reduced: true });
+  assert.equal(fx.trail.length, 0); assert.equal(fx.rings.length, 0); assert(fx.particles.length <= 2);
+  fx.reset(); fx.flap(f, 'root', true); assert.equal(fx.rings.length, 0); assert.equal(fx.particles.length, 1);
+  for (let i = 0; i < 20; i++) fx.flap(f, 'root', true);
+  assert.equal(fx.particles.length, 2, 'Rapid input still respects Reduced Motion');
+  f.end('PACKET LOSS'); fx.collide(f, 'root', true); assert.equal(fx.particles.length, 2);
+  for (let i = 0; i < 2; i++) fx.advance(.075, f, { settling: true, reduced: true });
+  assert.equal(fx.active, false, 'Reduced breakup ends before its dialog');
+});
+test('Collision breaks the packet once, settles, and dead-flight flap produces no new effect', () => {
+  const fx = new Effects(), f = new Flight(1); f.end('PACKET LOSS'); fx.collide(f, 'packet');
+  assert.equal(fx.particles.length, 18);
+  const snapshot = JSON.stringify(fx);
+  for (let i = 0; i < 20; i++) { fx.collide(f, 'packet'); fx.flap(f, 'packet'); }
+  assert.equal(JSON.stringify(fx), snapshot);
+  for (let i = 0; i < 6; i++) fx.advance(.1, f, { settling: true });
+  assert.equal(fx.active, false); assert.equal(fx.broken, true);
 });

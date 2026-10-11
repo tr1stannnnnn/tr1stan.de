@@ -2,7 +2,8 @@ import { VERSION, RULES, SKINS, rank, utcDay, dailySeed, validateAlias } from '.
 import { Flight, FixedClock } from './physics.mjs';
 import { Records } from './storage.mjs';
 import { Sound } from './audio.mjs';
-import { Renderer } from './render.mjs';
+import { Renderer } from './render.mjs?v=2';
+import { Effects } from './effects.mjs';
 import { LeaderboardAPI } from './api.mjs';
 import { API_URL } from './config.mjs';
 
@@ -15,7 +16,7 @@ const records = new Records(localStorageAccess, message => {
   $('storageNotice').hidden = false; $('storageNotice').textContent = message;
 }, sessionStorageAccess);
 const sound = new Sound(records.data.muted), api = new LeaderboardAPI(API_URL);
-const clock = new FixedClock();
+const clock = new FixedClock(), effects = new Effects();
 let mode = new URLSearchParams(location.search).get('mode') === 'daily' ? 'daily' : 'normal';
 let state = 'ready', flight = new Flight(dailySeed(utcDay())), run = null, result = null;
 let countdownUntil = 0, lastFrame = 0, generation = 0, pendingPause = false, currentDay = utcDay();
@@ -49,12 +50,13 @@ function muteLabel() {
 function setState(next) {
   redraw = true;
   state = next; document.body.dataset.gameState = state;
+  $('stateBadge').textContent = { ready: 'BEREIT', starting: 'VERBINDEN', countdown: 'COUNTDOWN', running: 'LÄUFT', paused: 'PAUSIERT', gameover: 'BEENDET', entry: 'EINTRAGUNG' }[state];
   const active = ['starting', 'countdown', 'running', 'paused'].includes(state);
   document.querySelectorAll('[name="mode"]').forEach(el => { el.disabled = active; });
   $('start').disabled = active && state !== 'paused';
   $('start').textContent = state === 'paused' ? 'FORTSETZEN' : 'START';
   $('pause').disabled = !['countdown', 'running'].includes(state);
-  $('surfaceOverlay').hidden = state === 'running';
+  $('surfaceOverlay').hidden = state === 'running' || state === 'gameover';
   const labels = { ready: ['BEREIT', 'Tap oder START zum Verbinden'], starting: ['COUNTDOWN', 'Route vorbereiten …'], countdown: ['3', 'Gleich geht es los'], paused: ['PAUSIERT', 'Bewusst fortsetzen · danach Countdown'], gameover: [flight.reason, 'Run beendet'], entry: ['EINTRAGUNG', 'Dein Score bleibt bis zum Absenden lokal'] };
   if (labels[state]) { $('overlayLabel').textContent = labels[state][0]; $('overlayHint').textContent = labels[state][1]; }
 }
@@ -82,7 +84,7 @@ async function start() {
   }
   if (attempt !== generation) return;
   run = { mode, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason };
-  flight = new Flight(run.seed); $('score').textContent = '0'; best(); dayInfo();
+  flight = new Flight(run.seed); effects.reset(); $('score').textContent = '0'; best(); dayInfo();
   if (pendingPause || document.hidden) { setState('paused'); announce('PAUSIERT — zum Start bewusst fortsetzen.'); }
   else beginCountdown();
 }
@@ -111,9 +113,9 @@ function showResultActions() {
 }
 function finish() {
   if (state !== 'running') return;
-  sound.play('end'); clock.reset();
+  sound.play('end'); clock.reset(); effects.collide(flight, records.data.skin, reduceMotion.matches);
   const local = records.record(run.mode, run.day, flight.score);
-  result = { run, score: flight.score, activeMs: flight.activeMs, ...local, submitted: false };
+  result = { run, score: flight.score, activeMs: flight.activeMs, ...local, submitted: false, dialogShown: false, revealAt: effects.time + (reduceMotion.matches ? .15 : .5) };
   best(); skins(); setState('gameover');
   $('resultTitle').textContent = flight.reason;
   $('resultScore').textContent = String(result.score);
@@ -121,13 +123,13 @@ function finish() {
   $('resultSummary').textContent = `${run.mode === 'daily' ? `Daily ${run.day} UTC` : 'Normal'} · Rekord ${local.best}${local.newRecord ? ' · Neuer Rekord!' : ''}${local.unlocked.length ? ` · Skin freigeschaltet: ${local.unlocked.join(', ')}` : ''}`;
   $('publishQuestion').textContent = canSubmit() ? 'Möchtest du diesen Score öffentlich mit einem Alias veröffentlichen? Erst SCORE EINTRAGEN öffnet die Eingabe.' : `${run.online ? 'Server-Run abgelaufen; Score bleibt lokal.' : run.offlineReason} Keine öffentliche Eintragung möglich.`;
   $('submitStatus').textContent = ''; $('copyFallback').hidden = true; $('copyLabel').hidden = true;
-  showResultActions(); $('resultDialog').showModal(); $('again').focus();
+  showResultActions();
   announce(`GAME OVER — ${result.score} Punkte, ${rank(result.score)}.`);
 }
 function action() {
   if (state === 'ready' || state === 'paused') { start(); return; }
   if (state !== 'running') return;
-  flight.flap(); sound.play('flap');
+  flight.flap(); effects.flap(flight, records.data.skin, reduceMotion.matches); redraw = true; sound.play('flap');
 }
 canvas.addEventListener('pointerdown', event => {
   if (event.button !== 0 || !event.isPrimary) return;
@@ -143,11 +145,12 @@ $('pause').addEventListener('click', pause);
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 window.addEventListener('pagehide', pause);
 window.addEventListener('resize', () => { renderer.resize(); redraw = true; });
+reduceMotion.addEventListener('change', () => { if (reduceMotion.matches) { effects.trail = []; effects.rings = []; effects.particles = effects.particles.slice(-2); } redraw = true; });
 document.querySelectorAll('[name="mode"]').forEach(el => {
   el.checked = el.value === mode;
   el.addEventListener('change', () => {
     if (!el.checked) return;
-    mode = el.value; run = null; result = null; flight = new Flight(dailySeed(utcDay()));
+    mode = el.value; run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset();
     setState('ready'); best(); dayInfo();
     const url = new URL(location.href);
     if (mode === 'daily') url.searchParams.set('mode', 'daily'); else url.searchParams.delete('mode');
@@ -162,7 +165,7 @@ $('skin').addEventListener('change', () => { records.selectSkin($('skin').value)
 $('again').addEventListener('click', () => { $('resultDialog').close(); start(); });
 function skip() {
   if (submitting) return;
-  $('resultDialog').close(); showResultActions(); run = null; setState('ready'); dayInfo(); best();
+  $('resultDialog').close(); showResultActions(); run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset(); setState('ready'); dayInfo(); best();
   announce(pendingSubmission ? 'Keine weitere Anfrage. Eine zuvor gesendete Eintragung kann bereits verarbeitet worden sein.' : 'Score bleibt lokal. Bereit für einen neuen Run.');
   $('start').focus();
 }
@@ -264,11 +267,21 @@ function frame(time) {
   } else if (state === 'running') {
     const oldScore = flight.score;
     alpha = clock.advance(delta, () => flight.step()).alpha;
-    if (flight.score !== oldScore) { $('score').textContent = String(flight.score); sound.play('point'); }
+    effects.advance(delta, flight, { running: true, skin: records.data.skin, reduced: reduceMotion.matches });
+    if (flight.score !== oldScore) {
+      $('score').textContent = String(flight.score); sound.play('point');
+      effects.point(flight.gates.filter(gate => gate.passed).at(-1), flight.y, records.data.skin, reduceMotion.matches);
+    }
     if (flight.dead) finish();
+  } else if (state === 'gameover' || state === 'entry') {
+    redraw ||= effects.active;
+    effects.advance(delta, flight, { settling: effects.active || !!(result && !result.dialogShown), reduced: reduceMotion.matches });
   }
-  if (redraw || state === 'running') {
-    renderer.draw(flight, { alpha, skin: records.data.skin, motion: !reduceMotion.matches && state === 'running' });
+  if (state === 'gameover' && result && !result.dialogShown && effects.time >= result.revealAt) {
+    result.dialogShown = true; $('resultDialog').showModal(); $('again').focus();
+  }
+  if (redraw || state === 'running' || ((state === 'gameover' || state === 'entry') && effects.active)) {
+    renderer.draw(flight, { alpha, skin: records.data.skin, reduced: reduceMotion.matches, effects, mode });
     redraw = false;
   }
   requestAnimationFrame(frame);

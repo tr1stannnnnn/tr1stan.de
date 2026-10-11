@@ -46,7 +46,7 @@ class SiteTests(unittest.TestCase):
     def test_modules_css_fonts_social_and_hosting(self):
         for path in (ROOT/'game').glob('*.mjs'):
             for value in re.findall(r"from ['\"]([^'\"]+)['\"]",path.read_text()):
-                self.assertTrue((path.parent/value).is_file(),value)
+                self.assertTrue((path.parent/urlparse(value).path).is_file(),value)
         for value in re.findall(r'url\(["\']?([^"\')]+)',(ROOT/'style.css').read_text()):
             if value.startswith('data:'): continue
             self.assertTrue((ROOT/value.split('?')[0].lstrip('/')).is_file(),value)

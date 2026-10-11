@@ -26,8 +26,8 @@
   <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=19" />
-  <link rel="stylesheet" href="/game/game.css" />
+  <link rel="stylesheet" href="/style.css?v=20" />
+  <link rel="stylesheet" href="/game/game.css?v=2" />
 </head>
 <body class="arcade-page">
   <a class="skip" href="#content">Zum Spiel springen</a>
@@ -37,23 +37,26 @@
   </header>
   <main id="content" tabindex="-1" class="arcade-shell">
     <div class="arcade-intro">
-      <p class="arcade-kicker">ARCADE / ROUTE 001</p>
+      <p class="arcade-kicker">NETWORK ARCADE / ROUTE 001</p>
       <h1>PACKET<span>//</span>FLIGHT</h1>
       <p>Ein Paket. Eine Route. Keine zweite Chance für die Firewall.</p>
     </div>
     <noscript><p class="arcade-notice">Das Spiel benötigt JavaScript. Alle übrigen Inhalte bleiben auf der <a href="/index.html">Startseite</a> lesbar.</p></noscript>
     <div class="arcade-layout" id="gameUI" hidden>
       <section class="flight-panel" aria-label="Spiel">
-        <fieldset class="mode-picker">
-          <legend class="sr-only">Spielmodus</legend>
-          <label><input type="radio" name="mode" value="normal" checked />NORMAL</label>
-          <label><input type="radio" name="mode" value="daily" />DAILY</label>
-        </fieldset>
+        <div class="flight-toolbar">
+          <fieldset class="mode-picker">
+            <legend class="sr-only">Spielmodus</legend>
+            <label><input type="radio" name="mode" value="normal" checked />NORMAL</label>
+            <label><input type="radio" name="mode" value="daily" />DAILY</label>
+          </fieldset>
+          <button class="arcade-button quiet" type="button" id="mute" aria-pressed="false">SOUND AN</button>
+        </div>
         <p class="daily-label" id="dailyInfo"></p>
         <div class="flight-hud">
-          <span>SCORE <strong id="score">0</strong></span>
-          <span>REKORD <strong id="best">0</strong></span>
-          <button class="arcade-button quiet" type="button" id="mute" aria-pressed="false">SOUND AN</button>
+          <span class="score-display"><span>SCORE</span><strong id="score">0</strong></span>
+          <span class="best-display"><span>REKORD</span><strong id="best">0</strong></span>
+          <span class="state-display"><span class="link-light" aria-hidden="true"></span><span id="stateBadge">BEREIT</span></span>
         </div>
         <div class="flight-surface">
           <!-- Canvas is the interactive surface; native Start/Pause buttons are also provided. -->
@@ -62,7 +65,7 @@
             PACKET//FLIGHT benötigt Canvas. Das visuelle Echtzeitspiel wird nicht als vollständig barrierefrei angeboten.
           </canvas>
           <!-- [html-validate-enable prefer-native-element] -->
-          <div id="surfaceOverlay" class="surface-overlay" aria-hidden="true"><span id="overlayLabel">BEREIT</span><small id="overlayHint">START zum Verbinden</small></div>
+          <div id="surfaceOverlay" class="surface-overlay" aria-hidden="true"><div class="overlay-emblem">◇</div><span id="overlayLabel">BEREIT</span><small id="overlayHint">START zum Verbinden</small></div>
         </div>
         <div class="flight-actions">
           <button type="button" class="arcade-button primary" id="start">START</button>
@@ -125,7 +128,7 @@
     <textarea id="copyFallback" readonly hidden></textarea>
   </dialog>
   <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-1</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
-  <script src="/script.js?v=19" defer></script>
-  <script type="module" src="/game/app.mjs"></script>
+  <script src="/script.js?v=20" defer></script>
+  <script type="module" src="/game/app.mjs?v=2"></script>
 </body>
 </html>

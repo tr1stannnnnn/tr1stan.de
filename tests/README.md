@@ -11,6 +11,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 node --test tests/game.test.mjs
 python3 tests/site_test.py
 python3 tests/browser_test.py
+python3 tests/visual_browser_test.py
 npm_config_cache=/tmp/packet-flight-npm npm exec --yes --package=html-validate@10.5.0 -- html-validate --config tests/html-validate.json index.html game.html datenschutz.html impressum.html 404.html
 cd cloudflare-worker
 npm_config_cache=/tmp/packet-flight-npm npm ci --no-audit --no-fund
@@ -40,6 +41,37 @@ Android or every browser's zoom implementation. Real-device checks remain a
 review step. The populated Top 20 is separately checked at 320×568, 390×844,
 430×932, 844×390 and 200% reflow, including rank/time text and own position 22.
 Canvas action games are not claimed to be fully accessible.
+
+## Visual revision regression coverage
+
+`visual_browser_test.py` additionally plays Normal and Daily with real keyboard
+inputs in isolated profiles, checks the separate records after reload, observes
+flap/point/collision effects, freezes their clocks and canvas during pause, and
+restarts twelve times without growing effect arrays or extra RAF loops. It
+checks live Reduced Motion changes, the removed home links/chips, preserved
+typed commands, desktop/mobile/landscape/200% reflow and actual offline reload
+with the new cached assets and removal of the previous shell cache.
+
+`game.test.mjs` compares decorated/undecorated Daily runs across all four skins,
+60/240 Hz and Reduced Motion, including the next physics RNG value, hitboxes,
+gates, motion and scoring. Existing cadence tests also cover 120/144 Hz. Effects
+are exercised through 100 resets and expire within their bounded buffers.
+
+Review PNGs and a real-time video are intentionally committed under
+`docs/packet-flight-visuals/`. `tools/capture-packet-flight.py` reproduces the
+**after** images and records an input-driven three-point Daily run with Chromium
+and the cloud's `/usr/bin/ffmpeg`. In this cloud Playwright 1.62 expects its
+encoder at `ffmpeg-1011`; the provided encoder was exposed using:
+
+```sh
+mkdir -p /tmp/packet-flight-playwright/ffmpeg-1011
+ln -sf /usr/bin/ffmpeg /tmp/packet-flight-playwright/ffmpeg-1011/ffmpeg-linux
+PLAYWRIGHT_BROWSERS_PATH=/tmp/packet-flight-playwright python3 tools/capture-packet-flight.py
+```
+
+This is a cloud review helper, not a visitor dependency or a private-computer
+setup step. Video is real wall-clock playback; test-only observers read state
+and count events without changing physics, scores, seeds or production modules.
 
 Before a later backend activation, run the same suite again and verify health,
 CORS and a voluntary test submission against an authorized staging Worker.
