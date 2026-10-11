@@ -220,6 +220,10 @@ code {
 
 main { position: relative; }
 
+.home-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: 1rem; font: .7rem var(--font-mono); }
+.home-actions a { min-height: 44px; display: inline-flex; align-items: center; color: var(--label); }
+.term-send { flex: 0 0 auto; min-width: 44px; min-height: 44px; padding: .5rem; border: 1px solid var(--rule-strong); border-radius: 3px; background: transparent; color: var(--label); font: .65rem var(--font-mono); cursor: pointer; }
+
 /* The page veil sits above the floor and below the content. It is anchored to
    the document rather than to the viewport, so the floor grows darker and
    calmer the further down you read — and it needs no script to do it. */
@@ -853,6 +857,7 @@ html.has-3d .veil {
 .term {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
   border: 1px solid var(--rule-strong);
   background: rgba(var(--ink), 0.90);

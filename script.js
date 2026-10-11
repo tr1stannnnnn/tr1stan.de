@@ -16,6 +16,16 @@
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $$(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 
+  // Anchor scrolling alone does not consistently move keyboard focus.
+  $$(".skip[href^='#']").forEach(function (link) {
+    link.addEventListener("click", function () {
+      var target = document.getElementById(link.getAttribute("href").slice(1));
+      if (!target) return;
+      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
+    });
+  });
+
   /* --------------------------------------------------------------------------
      Footer year
      ------------------------------------------------------------------------ */
@@ -518,6 +528,9 @@
          ["honest", "ehrlich gesagt"],
          ["next", "was als Nächstes kommt"],
          ["contact", "Mailadresse und GitHub"],
+         ["play", "PACKET//FLIGHT starten"],
+         ["play --daily", "heutige Daily-Route spielen"],
+         ["leaderboard", "Rangliste öffnen"],
          ["ls", "verfügbare Themen"],
          ["cat <name>", "ein Thema ausgeben"],
          ["whoami", "kurze Antwort"],
@@ -525,7 +538,7 @@
          ["clear", "Ausgabe leeren"],
          ["sudo", "besser nicht"],
          ["exit", "Versuch macht klug"]].forEach(function (r) {
-          print("  " + pad(r[0], 12) + r[1]);
+          print("  " + pad(r[0], 18) + r[1]);
         });
         blank();
         print("Pfeiltasten blättern durch den Verlauf, Tabulator vervollständigt, Strg+L leert.", "note");
@@ -541,9 +554,15 @@
       honest: function () { TOPICS.honest(); },
       next: function () { TOPICS.next(); },
       contact: function () { TOPICS.contact(); },
+      play: function (arg) {
+        if (arg && arg !== "--daily") { print("play: nutze play oder play --daily.", "note"); return; }
+        window.location.assign(arg === "--daily" ? "/game.html?mode=daily" : "/game.html");
+      },
+      leaderboard: function () { window.location.assign("/game.html#leaderboard"); },
       ls: function () {
         print(TOPIC_ORDER.join("   "), "head");
         print("cat <name> gibt ein Thema aus, all gibt alle aus.", "note");
+        print("Arcade: play, play --daily, leaderboard. help zeigt alle Befehle.", "note");
       },
       cat: function (arg) {
         var name = String(arg || "").trim().toLowerCase();
@@ -603,18 +622,22 @@
         pool = Object.keys(CMDS); prefix = v.toLowerCase(); base = "";
       } else if (v.slice(0, sp).toLowerCase() === "cat") {
         pool = Object.keys(TOPICS); prefix = v.slice(sp + 1).trim().toLowerCase(); base = "cat ";
-      } else { return; }
+      } else if (v.slice(0, sp).toLowerCase() === "play") {
+        pool = ["--daily"]; prefix = v.slice(sp + 1).trim().toLowerCase(); base = "play ";
+      } else { return false; }
 
       var hits = pool.filter(function (k) { return k.indexOf(prefix) === 0; });
-      if (!hits.length) return;
+      if (!hits.length || (hits.length === 1 && hits[0] === prefix)) return false;
       if (hits.length === 1) {
         input.value = base + hits[0] + (!base && hits[0] === "cat" ? " " : "");
-        return;
+        return true;
       }
       var common = hits[0];
       hits.forEach(function (h) { while (h.indexOf(common) !== 0) common = common.slice(0, -1); });
+      if (common === prefix) return false;
       input.value = base + common;
       print(hits.join("   "), "note");
+      return true;
     }
 
     /* ---- Bedienung -------------------------------------------------------- */
@@ -641,7 +664,10 @@
         input.value = histAt === history.length ? "" : history[histAt];
         return;
       }
-      if (e.key === "Tab") { e.preventDefault(); skip(); complete(); return; }
+      if (e.key === "Tab") {
+        if (!e.shiftKey && input.value.trim() && complete()) { e.preventDefault(); skip(); }
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && (e.key === "l" || e.key === "L")) {
         e.preventDefault();
         CMDS.clear();
@@ -661,7 +687,7 @@
       try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
     });
 
-    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear"].forEach(function (name) {
+    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear", "play", "leaderboard"].forEach(function (name) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "term-chip";

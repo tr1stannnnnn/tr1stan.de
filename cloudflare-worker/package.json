@@ -1,0 +1,14 @@
+{
+  "name": "packet-flight-leaderboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "build": "wrangler deploy --dry-run --env= --outdir .test-build",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "migrate:local": "wrangler d1 migrations apply packet-flight --local"
+  },
+  "devDependencies": { "miniflare": "4.20260611.0", "wrangler": "4.100.0" },
+  "engines": { "node": ">=22" }
+}
