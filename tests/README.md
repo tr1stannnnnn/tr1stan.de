@@ -37,8 +37,23 @@ Browser screenshots/checks include 320×568, 390×844, 430×932, 768×1024,
 1440×900, 844×390, Reduced Motion, 200% CSS reflow and 200% Chromium page/pinch
 scale. Device emulation and headless Chromium do not certify physical iOS/Safari,
 Android or every browser's zoom implementation. Real-device checks remain a
-review step. Canvas action games are not claimed to be fully accessible.
+review step. The populated Top 20 is separately checked at 320×568, 390×844,
+430×932, 844×390 and 200% reflow, including rank/time text and own position 22.
+Canvas action games are not claimed to be fully accessible.
 
 Before a later backend activation, run the same suite again and verify health,
 CORS and a voluntary test submission against an authorized staging Worker.
 Observe the actual Free CPU/DB quotas. No production load/abuse tests are needed.
+
+## PR #2 regression coverage
+
+- An alias dialog with an expired token disables fresh publication; a new valid
+  run and reopening reset disabled/read-only/validation/form states.
+- A lost reply keeps an immutable manually retryable payload. Expiry and editing
+  the DOM do not change it. No timer sends it; a new run clears it.
+- D1 confirms an identical processed request after expiry, rejects changed fields
+  and expired unused runs, and preserves the original position receipt on retry.
+- Top 20 includes ranks and server timestamps; own position 22 is shown separately.
+  Equal scores/timestamps sort by stable entry ID, even with reverse insertion.
+  Lower scores preserve best-value rank/time; Daily receipts keep the start day.
+- Responses contain only public entry fields, never other players’ IDs/hashes.

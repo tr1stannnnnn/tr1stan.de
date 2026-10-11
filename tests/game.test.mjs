@@ -92,3 +92,26 @@ test('Audio failure never blocks play', async () => {
   try { const sound = new Sound(); await sound.unlock(); assert(sound.failed); assert.doesNotThrow(() => sound.play('flap')); }
   finally { globalThis.AudioContext = before; }
 });
+
+test('Leaderboard projections: rank/time/own position and malformed API dates', async () => {
+  const at = Date.parse('2026-10-11T12:00:00Z');
+  const ownEntry = { position: 22, alias: 'Tester', score: 10, rank: 'PACKET ROUTER', achievedAt: at, own: true };
+  let answer = { version: VERSION, mode: 'alltime', day: '', entries: [], ownEntry };
+  const bodies = [];
+  const api = new LeaderboardAPI('https://example.invalid', async (_, options) => {
+    if (options.body) bodies.push(options.body);
+    return new Response(JSON.stringify(answer));
+  });
+  assert.equal((await api.list('alltime', 'id')).ownEntry.position, 22);
+  for (const invalid of [{ position: 0 }, { rank: '<script>' }, { achievedAt: 'date' }, { achievedAt: 8640000000000001 }, { own: false }]) {
+    answer = { version: VERSION, mode: 'alltime', day: '', entries: [], ownEntry: { ...ownEntry, ...invalid } };
+    await assert.rejects(api.list('alltime', 'id'), /Ungültige/);
+  }
+  const payload = Object.freeze({ token: 'test-token', playerId: 'id', alias: 'Tester', score: 10, activeMs: 100000 });
+  const receipt = { accepted: true, score: 10, version: VERSION, mode: 'normal', day: '', ownEntry, positionAsOf: at };
+  answer = receipt;
+  await api.submit(payload); await api.submit(payload); assert.equal(bodies[0], bodies[1]);
+  for (const positionAsOf of ['date', -1, 8640000000000001]) {
+    answer = { ...receipt, positionAsOf }; await assert.rejects(api.submit(payload), /Ungültige/);
+  }
+});

@@ -114,8 +114,8 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#copyScore').click(); self.page.wait_for_selector('#copyFallback:not([hidden])')
         self.assertIn('PACKET//FLIGHT', self.page.locator('#copyFallback').input_value())
         self.assertEqual(self.page.evaluate('document.activeElement.id'), 'copyFallback')
-    def online(self, score_failure=False, start_failure=False):
-        self.scores = []; self.starts = []; self.failed_once = False
+    def online(self, score_failure=False, start_failure=False, populated=False):
+        self.scores = []; self.starts = []; self.failed_once = False; self.own_entry = None; self.receipt = None
         self.context.route('**/game/config.mjs', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
         def api(route):
             req = route.request; path = urlparse(req.url).path
@@ -124,14 +124,19 @@ class BrowserTests(unittest.TestCase):
             if path == '/api/run/start':
                 self.starts.append(req.post_data_json)
                 if start_failure: route.fulfill(status=503, headers=headers, body='{"message":"offline"}'); return
-                time = int(datetime(2026, 10, 11, 12, tzinfo=timezone.utc).timestamp()*1000)
-                data = {'token':'isolated-test-token','runId':'test','version':'pf-1','mode':'normal','day':'','seed':1,'startedAt':time,'expiresAt':time+1800000}
+                time = self.page.evaluate('Date.now()')
+                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-1','mode':'normal','day':'','seed':1,'startedAt':time,'expiresAt':time+1800000}
             elif path == '/api/score':
                 self.scores.append(req.post_data_json)
+                if self.receipt is None:
+                    self.own_entry = {'position':22 if populated else 1,'alias':req.post_data_json['alias'],'score':req.post_data_json['score'],'rank':'SCRIPT KIDDIE','achievedAt':self.page.evaluate('Date.now()'),'own':True}
+                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-1','mode':'normal','day':'','positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
                 if score_failure and not self.failed_once:
                     self.failed_once = True; route.fulfill(status=503, headers=headers, body='{"message":"Antwort verloren"}'); return
-                data = {'accepted':True,'score':req.post_data_json['score']}
-            else: data = {'version':'pf-1','mode':'alltime','day':'','entries':[]}
+                data = self.receipt
+            else:
+                entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':25,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
+                data = {'version':'pf-1','mode':'alltime','day':'','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
     def test_voluntary_submission_validation_cancel_and_identical_retry(self):
@@ -152,6 +157,67 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(len(self.scores), 2); self.assertEqual(self.scores[0], self.scores[1])
         self.assertEqual(self.scores[0]['alias'], 'Änne_42')
         self.assertTrue(self.page.locator('#enterScore').is_disabled())
+    def test_expired_form_is_reset_for_new_valid_run_and_reopening(self):
+        self.online(); self.clock(); self.game(); self.end_run()
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('Expired')
+        self.page.clock.set_system_time(datetime(2026, 10, 11, 12, 31, tzinfo=timezone.utc))
+        self.page.locator('#publish').click()
+        self.assertTrue(self.page.locator('#publish').is_disabled()); self.assertEqual(len(self.scores), 0)
+        self.page.locator('#cancelEntry').click(); self.assertTrue(self.page.locator('#enterScore').is_disabled())
+        self.page.locator('#again').click(); self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000); self.assertEqual(self.state(), 'gameover')
+        self.page.locator('#enterScore').click()
+        self.assertFalse(self.page.locator('#publish').is_disabled()); self.assertFalse(self.page.locator('#cancelEntry').is_disabled())
+        self.assertEqual(self.page.locator('#alias').input_value(), ''); self.assertFalse(self.page.locator('#alias').evaluate('el=>el.readOnly'))
+        self.page.locator('#alias').fill('<script>'); self.page.locator('#publish').click()
+        self.assertEqual(self.page.locator('#alias').get_attribute('aria-invalid'), 'true')
+        self.page.locator('#cancelEntry').click(); self.page.locator('#enterScore').click()
+        self.assertIsNone(self.page.locator('#alias').get_attribute('aria-invalid')); self.assertEqual(self.page.locator('#aliasError').inner_text(), '')
+        self.assertEqual(self.page.locator('#alias').input_value(), '')
+        self.page.locator('#alias').fill('Fresh'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'gameover'")
+        self.assertEqual(len(self.scores), 1); self.assertEqual(self.scores[0]['alias'], 'Fresh')
+    def test_manual_immutable_retry_after_expiry_and_new_run_reset(self):
+        self.online(score_failure=True); self.clock(); self.game(); self.end_run()
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('Änne_42'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.querySelector('#submitStatus').textContent.includes('Keine automatische')")
+        self.page.clock.set_system_time(datetime(2026, 10, 11, 12, 31, tzinfo=timezone.utc))
+        self.assertEqual(len(self.scores), 1, 'No automatic retry on expiry')
+        self.page.locator('#cancelEntry').click(); self.assertFalse(self.page.locator('#enterScore').is_disabled())
+        self.page.locator('#enterScore').click(); self.assertTrue(self.page.locator('#alias').evaluate('el=>el.readOnly'))
+        self.page.evaluate("document.querySelector('#alias').value='Changed'")
+        self.page.locator('#publish').click(); self.page.wait_for_function("document.body.dataset.gameState === 'gameover'")
+        self.assertEqual(self.scores[0], self.scores[1]); self.assertEqual(len(self.scores), 2)
+        self.assertIn('Platz 1', self.page.locator('#submitStatus').inner_text())
+        self.page.locator('#again').click(); self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000); self.page.locator('#enterScore').click()
+        self.assertEqual(self.page.locator('#alias').input_value(), ''); self.assertFalse(self.page.locator('#alias').evaluate('el=>el.readOnly'))
+        self.assertEqual(self.page.locator('#publish').inner_text(), 'ÖFFENTLICH EINTRAGEN'); self.assertFalse(self.page.locator('#publish').is_disabled())
+        self.assertEqual(len(self.scores), 2)
+    def test_populated_leaderboard_mobile_rank_time_and_own_position(self):
+        self.online(populated=True); self.clock(); self.game(); self.end_run()
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('My_Profile'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'gameover'")
+        self.assertIn('Platz 22', self.page.locator('#submitStatus').inner_text())
+        self.page.locator('#skipScore').click()
+        self.page.wait_for_function("document.querySelector('#ownPosition').textContent.includes('Platz 22')")
+        self.assertEqual(self.page.locator('#boardEntries li').count(), 20)
+        self.assertIn('außerhalb der Top 20', self.page.locator('#ownPosition').inner_text())
+        self.assertIn('SCRIPT KIDDIE', self.page.locator('#ownPosition').inner_text())
+        for width, height in [(320,568),(390,844),(430,932),(844,390)]:
+            self.page.set_viewport_size({'width':width,'height':height})
+            self.page.locator('#leaderboard').scroll_into_view_if_needed()
+            self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), width)
+            board = self.page.locator('#leaderboard').bounding_box()
+            for box in self.page.locator('.board-line, .board-details, #ownPosition').evaluate_all('els=>els.map(el=>el.getBoundingClientRect().toJSON())'):
+                self.assertLessEqual(box['right'], board['x']+board['width']+.5); self.assertGreaterEqual(box['left'], board['x']-.5)
+            self.assertIn('SYSADMIN', self.page.locator('#boardEntries li').first.inner_text())
+            self.assertIn('11.10.2026', self.page.locator('#boardEntries time').first.inner_text()); self.assertIn('UTC', self.page.locator('#boardEntries time').first.inner_text())
+            self.page.locator('#leaderboard').screenshot(path=str(ARTIFACTS/f'leaderboard-{width}x{height}.png'))
+        self.page.set_viewport_size({'width':320,'height':568})
+        self.page.evaluate("document.documentElement.style.zoom='2'")
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), self.page.evaluate('document.documentElement.clientWidth'))
+        self.page.locator('#leaderboard').screenshot(path=str(ARTIFACTS/'leaderboard-zoom-200.png'))
     def test_failed_start_stays_local(self):
         self.online(start_failure=True); self.clock(); self.game(); self.end_run()
         self.assertTrue(self.page.locator('#enterScore').is_disabled())

@@ -40,9 +40,11 @@
 .board-tabs { display: flex; flex-wrap: wrap; gap: .5rem; }
 .board-tabs button { flex: 1 1 110px; }
 .board-tabs [aria-pressed="true"] { border-color: #E879F9; background: #32123f; }
-.board-entries { list-style-position: inside; padding: 0; margin-block: 1rem; font: .75rem var(--font-mono); }
+.board-entries { list-style: none; padding: 0; margin-block: 1rem; font: .75rem var(--font-mono); }
 .board-entries li { padding-block: .8rem; border-bottom: 1px solid #C084FC33; overflow-wrap: anywhere; }
-.board-entries li strong { float: right; margin-left: 1rem; }
+.board-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; align-items: baseline; }
+.board-details { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin-top: .5rem; color: var(--text-2); font-size: .65rem; line-height: 1.6; }
+.board-details time { white-space: normal; }
 .board-entries .own { color: #F5D0FE; border-left: 2px solid #E879F9; padding-left: .5rem; }
 .arcade-footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 2rem max(2rem, env(safe-area-inset-bottom)); font: .65rem var(--font-mono); color: #C084FC; }
 .arcade-footer nav { display: flex; flex-wrap: wrap; gap: 1rem; }

@@ -99,9 +99,9 @@ No cookie authentication. Tokens and IDs never appear in URLs.
 | Endpoint | Input | Result |
 |---|---|---|
 | `POST /api/run/start` | `{mode:"normal"|"daily", version:"pf-1", playerId:UUIDv4}` | signed token, run ID, server start/expiry, day, seed, version, mode |
-| `POST /api/score` | `{token, playerId, alias, score, activeMs}` | stable `{accepted:true, receipt, score, mode, day, version}` |
-| `GET /api/leaderboard?mode=alltime` | optional `X-Player-ID` header | normal top 20, `own` marker |
-| `GET /api/leaderboard?mode=daily` | optional `X-Player-ID` header | current UTC day's Daily top 20 |
+| `POST /api/score` | `{token, playerId, alias, score, activeMs}` | stable `{accepted:true, receipt, score, mode, day, version, positionAsOf, ownEntry}` |
+| `GET /api/leaderboard?mode=alltime` | optional `X-Player-ID` header | normal top 20, rank/time, `own` marker and requesting browser’s `ownEntry` |
+| `GET /api/leaderboard?mode=daily` | optional `X-Player-ID` header | current UTC day's Daily top 20 and requesting browser’s `ownEntry` |
 | `GET /api/health` | none | version, enabled/configured status; no secrets |
 | `OPTIONS` | permitted Origin/method/headers | required CORS preflight |
 
@@ -146,10 +146,30 @@ crypto; Daily uses the same `pf-1`/`daily-1` generator as offline play.
 One transactional D1 `batch` conditionally consumes the run, inserts/upgrades
 its best score, and reads the stored confirmation. A concurrent different body
 cannot alter it. An identical retry receives that same confirmation, including
-after token expiry while the run is retained. There is no hidden upload queue.
+after token expiry while the run is retained (48 hours after expiry, subject to cleanup).
+All five submitted field values must remain unchanged; even changing alias
+whitespace is conflicting reuse. An expired unused run cannot make a new entry.
+The frontend retains an immutable payload only in the current result dialog,
+lets the user resend it explicitly, and discards it on a new run or page reload.
+There is no automatic retry or hidden upload queue.
 Best values are unique per player hash/version/mode/day; a worse or equal value
 does not change alias, score or achievement time. Ties sort by earlier server
-achievement time, then stable random entry ID.
+achievement time, then stable random entry ID. That ID never leaves the backend.
+
+Public entry fields are `position`, `alias`, `score`, `rank`, `achievedAt` (server
+Unix milliseconds) and `own`. Top 20 and own-position queries use the same
+ordering in a single read transaction; `ownEntry` is null without a matching
+requesting browser header. It includes the browser's best value even below the
+Top 20; it never lists extra entries or identifiers of other players.
+
+Submission receipts store that browser's best-value `ownEntry` and
+`positionAsOf` in the consumption/upsert transaction, retaining the original
+position on retries. It is a placement snapshot, not a promise that position
+will remain unchanged. For a lower run, it shows the preserved better value and
+its original achievement time. The receipt keeps the server's start-day scope
+over UTC midnight, while HEUTE subsequently shows only the current UTC day.
+The UI formats timestamps with an explicit UTC label and shows both confirmed
+placement and the requesting browser's current placement on the board.
 
 `minimumActiveMs` is derived from the fastest speed, first-gate distance,
 full-hitbox passage and minimum gate spacing in the shared physics rules.

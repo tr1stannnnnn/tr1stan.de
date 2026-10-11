@@ -89,6 +89,7 @@
           </div>
           <p id="boardStatus" class="arcade-notice" role="status">LEADERBOARD OFFLINE</p>
           <ol id="boardEntries" class="board-entries"></ol>
+          <p id="ownPosition" class="arcade-notice"></p>
           <button type="button" id="refreshBoard" class="arcade-button quiet" disabled>AKTUALISIEREN</button>
           <p class="arcade-small" id="boardExplanation">Das Backend ist noch nicht aktiviert. Spiel und lokale Rekorde funktionieren; öffentliche Eintragung ist deaktiviert. Keine Upload-Warteschlange.</p>
         </section>
@@ -111,7 +112,7 @@
       <button type="button" class="arcade-button quiet" id="skipScore">ÜBERSPRINGEN</button>
     </div>
     <form id="aliasForm" hidden novalidate>
-      <p>Freiwillige Veröffentlichung: Alias und Score werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
+      <p>Freiwillige Veröffentlichung: Alias, Score, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
       <label for="alias">Öffentlicher Alias (2–16 Zeichen)</label>
       <input id="alias" type="text" name="alias" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="aliasHint aliasError" />
       <p id="aliasHint" class="arcade-small">Buchstaben, Zahlen, einfache Leerzeichen, _ und -. Keine automatische Übernahme früherer Namen.</p>

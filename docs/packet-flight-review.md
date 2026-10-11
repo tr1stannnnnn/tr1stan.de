@@ -46,7 +46,7 @@ ist zur Codeprüfung bestimmt; Commit und PR-Adresse stehen im Abschlussbericht.
 
 ## Tatsächlich ausgeführte Prüfungen
 
-27 Tests bestanden: 8 Node-Spieltests, 8 Worker-/D1-Tests, 9 Chromium-Browsertests,
+33 Tests bestanden: 9 Node-Spiel-/API-Tests, 10 Worker-/D1-Tests, 12 Chromium-Browsertests,
 2 statische/HTTP-Integritätstests. Keine übersprungenen Tests. Zusätzlich:
 
 - HTML-Validate 10.5.0 auf allen fünf HTML-Seiten: bestanden. Bestehender
@@ -69,6 +69,47 @@ ist zur Codeprüfung bestimmt; Commit und PR-Adresse stehen im Abschlussbericht.
 
 Details und reproduzierbare Befehle: [Tests](../tests/README.md),
 [Backend](../cloudflare-worker/README.md).
+
+## Korrekturen in Draft-PR #2
+
+Vor Beginn wurde `codex/packet-flight` erneut von GitHub abgerufen und mit der
+sauberen Cloud-Arbeitskopie sowie dem Draft-PR verglichen: jeweils
+`747a2edd1d641a73c97d4bd6e5a6fa96580c0125`. Keine fremden Änderungen vorgefunden.
+
+- Neue Runs und erneut geöffnete Aliasformulare setzen Werte, Validierungsfehler,
+  Read-only-Status, Absende-/Abbruchbuttons und Beschriftungen vollständig zurück.
+  Ein im alten Dialog abgelaufener Run blockiert keinen folgenden gültigen Run.
+- Frische Eintragung und manueller Retry haben getrennte Voraussetzungen. Nur
+  eine bereits gesendete, unveränderliche Anfrage darf nach Tokenablauf erneut
+  gesendet werden. Backendbestätigung existiert nur, wenn sie bereits verarbeitet
+  wurde; abgelaufene unbenutzte Tokens bleiben abgewiesen. Kein automatischer
+  Retry, kein persistierter Pending-Upload. Neue Runs/Reload verwerfen den Retry.
+- Ranglisten zeigen Rangname und serverseitigen Bestwertzeitpunkt in UTC. Die
+  eigene aktuelle Position wird auch außerhalb der Top 20 geliefert. Die
+  Eintragungsbestätigung speichert ihre eigene Positionsaufnahme transaktional,
+  auch für den ursprünglichen Daily-Starttag über Mitternacht. Identische Retries
+  ändern diese Bestätigung nicht. Schlechtere Scores zeigen den bewahrten Bestwert.
+- Sortierung: Score absteigend, Bestwertzeit aufsteigend, stabile interne Entry-ID
+  aufsteigend. Fremde vollständige Kennungen/Hashes/Entry-IDs werden nicht ausgegeben.
+- API-Antworten werden auf Position, Rang und gültige Datumswerte geprüft. Der
+  Offline-Shellcache wurde aktualisiert; Spielregeln/Version bleiben unverändert.
+- Die separate Datenschutz-Prüffassung berücksichtigt öffentliche Zeitpunkte.
+  Aktive Datenschutzerklärung, Impressum und Backend-Deaktivierung bleiben bestehen.
+
+Für diesen Folgeauftrag wurden alle oben gezählten 33 Tests tatsächlich in der
+Cloud ausgeführt; zusätzlich HTML-Validate und das lokale Wrangler-Dry-run-Bundle.
+Sechs gezielte neue Tests decken Formularzustände, Retry nach Ablauf, unveränderte
+Request-Felder, Bestwert/Position 22, Rang/Zeit, deterministische Gleichstände und
+fehlerhafte API-Datumswerte ab. D1 bleibt eine isolierte Testdatenbank.
+Die gefüllte Rangliste wurde bei 320×568, 390×844, 430×932, 844×390 und 200% Reflow
+geprüft, mit Screenshot-Sichtprüfung und ohne horizontalen Überlauf. Die gesamte
+bisherige Browserprüfung einschließlich Terminal und Offline-Reload wurde erneut
+bestanden. Screenshots: `/tmp/packet-flight-review/leaderboard-*.png`.
+
+Geänderte Dateien dieses Folgeauftrags: `game/{app,api}.mjs`, `game/game.css`,
+`game.html`, `game-sw.js`, `cloudflare-worker/{src/index.mjs,tests/worker.test.mjs,README.md}`,
+`tests/{game.test.mjs,browser_test.py,README.md}`,
+`docs/{packet-flight-review,leaderboard-privacy-draft}.md`.
 
 ## Grenzen und spätere Schritte
 

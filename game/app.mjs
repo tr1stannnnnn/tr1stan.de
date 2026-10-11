@@ -67,11 +67,12 @@ function beginCountdown() {
 }
 async function start() {
   if (state === 'paused') { beginCountdown(); return; }
-  if (!['ready', 'gameover'].includes(state)) return;
+  if (submitting || !['ready', 'gameover'].includes(state)) return;
   if ($('resultDialog').open) $('resultDialog').close();
   const attempt = ++generation;
   sound.unlock(); pendingPause = document.hidden;
-  result = null; pendingSubmission = null; run = null;
+  result = null; pendingSubmission = null; run = null; resetEntryForm();
+  $('submitStatus').textContent = ''; $('publishQuestion').textContent = '';
   setState('starting'); announce('COUNTDOWN — Route wird vorbereitet.');
   const day = utcDay();
   let online = null, offlineReason = api.enabled ? 'Dieser Run ist nur lokal.' : 'Backend deaktiviert — nur lokaler Run.';
@@ -90,7 +91,20 @@ function pause() {
   if (!['countdown', 'running'].includes(state)) return;
   clock.reset(); setState('paused'); announce('PAUSIERT — Rückkehr startet nicht automatisch. Fortsetzen beginnt mit Countdown.');
 }
-function canSubmit() { return !!(result?.run.online && !result.submitted && Date.now() < result.run.online.expiresAt); }
+function canSubmitNew() { return !!(result?.run.online && !result.submitted && Date.now() < result.run.online.expiresAt); }
+function canSubmit() { return !!(result && !result.submitted && (pendingSubmission || canSubmitNew())); }
+function resetEntryForm() {
+  $('aliasForm').reset(); $('aliasForm').hidden = true; $('resultActions').hidden = false;
+  $('alias').value = pendingSubmission?.alias || ''; $('alias').readOnly = !!pendingSubmission;
+  $('alias').removeAttribute('aria-invalid'); $('aliasError').textContent = '';
+  $('publish').disabled = false; $('cancelEntry').disabled = false; $('enterScore').disabled = !canSubmit();
+  if (!pendingSubmission) $('submitStatus').textContent = '';
+  $('publish').textContent = pendingSubmission ? 'GLEICHE EINTRAGUNG ERNEUT SENDEN' : 'ÖFFENTLICH EINTRAGEN';
+}
+function timestamp(ms) {
+  return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(ms) + ' UTC';
+}
+function placement(entry) { return `Platz ${entry.position} · ${entry.score} Punkte · ${entry.rank}`; }
 function showResultActions() {
   $('aliasForm').hidden = true; $('resultActions').hidden = false;
   $('enterScore').disabled = !canSubmit();
@@ -156,9 +170,8 @@ $('skipScore').addEventListener('click', skip);
 $('resultDialog').addEventListener('cancel', event => { event.preventDefault(); if (state === 'entry') cancelEntry(); else skip(); });
 $('enterScore').addEventListener('click', () => {
   if (!canSubmit()) { $('submitStatus').textContent = 'Run abgelaufen oder nicht öffentlich einreichbar.'; $('enterScore').disabled = true; return; }
-  setState('entry'); $('resultActions').hidden = true; $('aliasForm').hidden = false;
-  $('alias').value = pendingSubmission?.alias || ''; $('alias').readOnly = !!pendingSubmission; $('aliasError').textContent = ''; $('alias').removeAttribute('aria-invalid');
-  $('publish').textContent = pendingSubmission ? 'GLEICHE EINTRAGUNG ERNEUT SENDEN' : 'ÖFFENTLICH EINTRAGEN'; $('alias').focus();
+  resetEntryForm(); setState('entry'); $('resultActions').hidden = true; $('aliasForm').hidden = false;
+  $('alias').focus();
 });
 function cancelEntry() {
   if (submitting) return;
@@ -168,21 +181,23 @@ function cancelEntry() {
 $('cancelEntry').addEventListener('click', cancelEntry);
 $('aliasForm').addEventListener('submit', async event => {
   event.preventDefault(); if (submitting) return;
-  if (!canSubmit()) { $('aliasError').textContent = 'Run abgelaufen. Score bleibt lokal; keine Eintragung möglich.'; $('publish').disabled = true; return; }
-  const validation = validateAlias($('alias').value);
+  if (!pendingSubmission && !canSubmitNew()) { $('aliasError').textContent = 'Run abgelaufen. Score bleibt lokal; keine Eintragung möglich.'; $('publish').disabled = true; return; }
+  const validation = validateAlias(pendingSubmission?.alias ?? $('alias').value);
   if (!validation.ok) { $('aliasError').textContent = validation.error; $('alias').setAttribute('aria-invalid', 'true'); $('alias').focus(); return; }
   $('alias').removeAttribute('aria-invalid'); $('aliasError').textContent = '';
-  if (!pendingSubmission) pendingSubmission = { alias: validation.alias };
+  // A retry always uses these exact primitives, never current form/storage values.
+  // Kept only in this dialog/session; never persisted or automatically retried.
+  if (!pendingSubmission) pendingSubmission = Object.freeze({ token: result.run.online.token, playerId: records.data.playerId, alias: validation.alias, score: result.score, activeMs: result.activeMs });
   $('alias').value = pendingSubmission.alias; $('alias').readOnly = true;
   submitting = true; $('publish').disabled = true; $('cancelEntry').disabled = true; $('submitStatus').textContent = 'Eintragung wird gesendet …';
   try {
-    const response = await api.submit(result.run.online, records.data.playerId, pendingSubmission.alias, result.score, result.activeMs);
-    if (response.accepted !== true || response.score !== result.score) throw Error('Ungültige Bestätigung.');
+    const response = await api.submit(pendingSubmission);
+    if (response.mode !== result.run.mode || response.day !== (result.run.mode === 'daily' ? result.run.day : '')) throw Error('Ungültige Bestätigung.');
     result.submitted = true; pendingSubmission = null;
     setState('gameover'); showResultActions(); $('again').focus();
     $('publishQuestion').textContent = 'Freiwillige Eintragung bestätigt. Ein schlechterer Score ersetzt keinen besseren.';
-    $('submitStatus').textContent = 'Eintragung bestätigt.';
-    lastBoardAt = -Infinity; loadBoard();
+    $('submitStatus').textContent = `Eintragung bestätigt. Dein Bestwert: ${placement(response.ownEntry)} · ${response.mode === 'daily' ? `${response.day} UTC` : 'ALLZEIT'}. Position bei Bestätigung (${timestamp(response.positionAsOf)}); spätere Einträge können sie verändern.`;
+    boardMode = response.mode === 'daily' ? 'daily' : 'alltime'; boardGeneration++; lastBoardAt = -Infinity; loadBoard();
   } catch (error) {
     $('submitStatus').textContent = `${error.message} Keine automatische Wiederholung. Bei verlorener Antwort dieselbe Eintragung erneut senden.`;
     $('publish').textContent = 'GLEICHE EINTRAGUNG ERNEUT SENDEN';
@@ -206,7 +221,7 @@ async function loadBoard() {
   if (boardBusy || Date.now() - lastBoardAt < 5000) return;
   const request = ++boardGeneration, requestedMode = boardMode;
   boardBusy = true; lastBoardAt = Date.now(); $('refreshBoard').disabled = true;
-  $('boardStatus').textContent = 'Rangliste lädt …'; $('boardEntries').replaceChildren();
+  $('boardStatus').textContent = 'Rangliste lädt …'; $('boardEntries').replaceChildren(); $('ownPosition').textContent = '';
   try {
     const data = await api.list(requestedMode, records.data.playerId);
     if (request !== boardGeneration || requestedMode !== boardMode) return;
@@ -214,9 +229,15 @@ async function loadBoard() {
     for (const entry of data.entries) {
       const li = document.createElement('li');
       li.classList.toggle('own', entry.own === true);
-      const score = document.createElement('strong'); score.textContent = String(entry.score);
-      li.append(document.createTextNode(entry.alias + (entry.own ? ' · DU' : '')), score); $('boardEntries').appendChild(li);
+      const line = document.createElement('div'); line.className = 'board-line';
+      const alias = document.createElement('span'); alias.textContent = `${entry.position}. ${entry.alias}${entry.own ? ' · DU' : ''}`;
+      const score = document.createElement('strong'); score.textContent = String(entry.score); line.append(alias, score);
+      const details = document.createElement('div'); details.className = 'board-details';
+      const name = document.createElement('span'); name.textContent = entry.rank;
+      const time = document.createElement('time'); time.dateTime = new Date(entry.achievedAt).toISOString(); time.textContent = timestamp(entry.achievedAt);
+      details.append(name, time); li.append(line, details); $('boardEntries').appendChild(li);
     }
+    $('ownPosition').textContent = data.ownEntry ? `Dein Bestwert: ${placement(data.ownEntry)} · ${timestamp(data.ownEntry.achievedAt)}${data.ownEntry.position > 20 ? ' · außerhalb der Top 20' : ''}` : 'Noch kein eigener Bestwert in diesem Bereich.';
   } catch (error) { if (request === boardGeneration) $('boardStatus').textContent = `LEADERBOARD OFFLINE — ${error.message}`; }
   finally { boardBusy = false; $('refreshBoard').disabled = false; if (requestedMode !== boardMode) { lastBoardAt = -Infinity; loadBoard(); } }
 }
@@ -230,7 +251,7 @@ function frame(time) {
   const today = utcDay();
   if (today !== currentDay) {
     currentDay = today; dayInfo(); best();
-    if (boardMode === 'daily') { boardGeneration++; $('boardEntries').replaceChildren(); $('boardStatus').textContent = 'Neuer UTC-Tag — Rangliste bitte aktualisieren.'; }
+    if (boardMode === 'daily') { boardGeneration++; $('boardEntries').replaceChildren(); $('ownPosition').textContent = ''; $('boardStatus').textContent = 'Neuer UTC-Tag — Rangliste bitte aktualisieren.'; }
     if (state === 'ready') announce('Neuer UTC-Tag — der nächste Daily Run verwendet die neue Route.');
   }
   let alpha = 1;

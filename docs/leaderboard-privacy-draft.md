@@ -17,8 +17,10 @@ Ein lokaler Run ohne gültigen Serverstart ist später nicht öffentlich einreic
 **Veröffentlichung bleibt freiwillig:** Erst SCORE EINTRAGEN öffnet das Formular;
 ÖFFENTLICH EINTRAGEN sendet Alias, Score, behauptete aktive Spielzeit, Token und
 Browserkennung. Abbrechen vor Absenden sendet keine Eintragung. Der öffentliche
-Top-20-Eintrag zeigt Alias, Score, Position und gegebenenfalls Rang; eigene
-Einträge werden ohne Veröffentlichung vollständiger Kennungen markiert.
+Top-20-Eintrag zeigt Alias, Score, Position, Rang und den serverseitigen Zeitpunkt
+des Bestwerts (UTC). Eigene Einträge werden ohne Veröffentlichung vollständiger
+Kennungen markiert. Das anfragende Browserprofil erhält außerdem seine eigene
+Bestwertposition außerhalb der Top 20; keine zusätzlichen fremden Einträge.
 Es gibt weder Konto noch E-Mail-Abfrage noch Fingerprinting.
 
 Die Kennung ermöglicht einen Bestwert pro Browserprofil, nicht pro Mensch.

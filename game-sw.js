@@ -1,5 +1,5 @@
 // Cache only the game shell. No API requests, legal pages or home page are intercepted.
-const CACHE = 'tr1stan-packet-flight-pf-1-shell-1';
+const CACHE = 'tr1stan-packet-flight-pf-1-shell-2';
 const FILES = ['/game.html', '/game/game.css', '/game/app.mjs', '/game/rules.mjs', '/game/physics.mjs', '/game/storage.mjs', '/game/audio.mjs', '/game/render.mjs', '/game/api.mjs', '/game/config.mjs', '/style.css?v=19', '/script.js?v=19', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
 const PATHS = new Set(FILES.map(path => new URL(path, self.location.origin).pathname));
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES))); });

@@ -82,6 +82,20 @@ async function start(request, env, now) {
   await env.DB.prepare('INSERT INTO runs(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES(?,?,?,?,?,?,?,?)').bind(claims.runId, playerHash, VERSION, data.mode, day, claims.seed, now, claims.expiresAt).run();
   return { token, runId: claims.runId, version: VERSION, mode: data.mode, day, seed: claims.seed, startedAt: now, expiresAt: claims.expiresAt };
 }
+// Same strict ordering for Top 20 and the requesting browser's position.
+const OWN_ENTRY = `SELECT s.alias,s.score,s.achieved_at,
+  1+(SELECT COUNT(*) FROM scores ahead WHERE ahead.version=s.version AND ahead.mode=s.mode AND ahead.day=s.day
+    AND (ahead.score>s.score OR (ahead.score=s.score AND (ahead.achieved_at<s.achieved_at
+      OR (ahead.achieved_at=s.achieved_at AND ahead.entry_id<s.entry_id))))) AS position
+  FROM scores s WHERE s.player_hash=? AND s.version=? AND s.mode=? AND s.day=?`;
+function publicEntry(row, position, own) {
+  return { position, alias: row.alias, score: row.score, rank: rank(row.score), achievedAt: row.achieved_at, own };
+}
+function receipt(text) {
+  const data = JSON.parse(text);
+  if (data.ownEntry) data.ownEntry = { ...data.ownEntry, rank: rank(data.ownEntry.score), own: true };
+  return data;
+}
 async function submit(request, env, now) {
   const data = await body(request); keys(data, ['token', 'playerId', 'alias', 'score', 'activeMs']);
   if (!validPlayerId(data.playerId) || !integer(data.score, 0, RULES.maxScore) || !integer(data.activeMs, 0, RULES.maxActiveMs)) fail(400, 'Score, aktive Zeit oder Spielerkennung ungültig.');
@@ -91,16 +105,16 @@ async function submit(request, env, now) {
   if (claims.playerHash !== playerHash) fail(403, 'Run gehört nicht zu dieser Spielerkennung.');
   const stored = await env.DB.prepare('SELECT * FROM runs WHERE id=? AND player_hash=? AND version=? AND mode=? AND day=? AND started_at=? AND expires_at=? AND seed=?').bind(claims.runId, playerHash, VERSION, claims.mode, claims.day, claims.startedAt, claims.expiresAt, claims.seed).first();
   if (!stored) fail(410, 'Run nicht verfügbar.');
-  const submissionHash = await digest(JSON.stringify([validation.alias, data.score, data.activeMs]));
+  const submissionHash = await digest(JSON.stringify([data.token, data.playerId, data.alias, data.score, data.activeMs]));
   if (stored.consumed_at !== null) {
     if (stored.submission_hash !== submissionHash) fail(409, 'Run bereits anders eingereicht.');
-    return JSON.parse(stored.confirmation);
+    return receipt(stored.confirmation);
   }
   if (now > claims.expiresAt) fail(410, 'Run abgelaufen.');
   // activeMs is only a client claim, never proof of active play. Pauses are not
   // subtracted from wall time as if the server could independently verify them.
   if (data.activeMs + 50 < minimumActiveMs(data.score) || data.activeMs > now - claims.startedAt - RULES.countdownMs + 500 || now < claims.startedAt + RULES.countdownMs - 500) fail(422, 'Score und Spielzeit passen nicht zu den Spielregeln.');
-  const confirmation = JSON.stringify({ accepted: true, receipt: claims.runId, score: data.score, mode: claims.mode, day: claims.day, version: VERSION });
+  const confirmation = JSON.stringify({ accepted: true, receipt: claims.runId, score: data.score, mode: claims.mode, day: claims.day, version: VERSION, positionAsOf: now });
   // D1 batch is one transaction. The conditional write wins once; the INSERT
   // selects only that stored submission. A competing different body cannot upsert.
   const results = await env.DB.batch([
@@ -108,11 +122,18 @@ async function submit(request, env, now) {
     env.DB.prepare(`INSERT INTO scores(entry_id,player_hash,version,mode,day,alias,score,achieved_at)
       SELECT id,player_hash,version,mode,day,alias,score,consumed_at FROM runs WHERE id=? AND submission_hash=?
       ON CONFLICT(player_hash,version,mode,day) DO UPDATE SET alias=excluded.alias,score=excluded.score,achieved_at=excluded.achieved_at WHERE excluded.score>scores.score`).bind(claims.runId, submissionHash),
+    // Save the best-value placement in the same transaction, including outside
+    // Top 20. Do not recalculate an already stored receipt on an identical retry.
+    env.DB.prepare(`UPDATE runs SET confirmation=json_set(confirmation,'$.ownEntry',json((
+      SELECT json_object('position',position,'alias',alias,'score',score,'achievedAt',achieved_at)
+      FROM (${OWN_ENTRY})
+    ))) WHERE id=? AND submission_hash=? AND json_type(confirmation,'$.ownEntry') IS NULL`)
+      .bind(playerHash, VERSION, claims.mode, claims.day, claims.runId, submissionHash),
     env.DB.prepare('SELECT submission_hash,confirmation FROM runs WHERE id=?').bind(claims.runId),
   ]);
-  const consumed = results[2].results[0];
+  const consumed = results[3].results[0];
   if (consumed.submission_hash !== submissionHash) fail(409, 'Run bereits anders eingereicht.');
-  return JSON.parse(consumed.confirmation);
+  return receipt(consumed.confirmation);
 }
 async function leaderboard(url, request, env, now) {
   if ([...url.searchParams.keys()].some(key => key !== 'mode') || url.searchParams.getAll('mode').length !== 1 || !['daily', 'alltime'].includes(url.searchParams.get('mode'))) fail(400, 'Ranglistenbereich ungültig.');
@@ -120,8 +141,14 @@ async function leaderboard(url, request, env, now) {
   const playerId = request.headers.get('X-Player-ID');
   if (playerId && !validPlayerId(playerId)) fail(400, 'Spielerkennung ungültig.');
   const ownHash = playerId ? await hmac(env.PSEUDONYM_KEY, playerId.toLowerCase()) : null;
-  const { results } = await env.DB.prepare('SELECT alias,score,player_hash FROM scores WHERE version=? AND mode=? AND day=? ORDER BY score DESC,achieved_at ASC,entry_id ASC LIMIT 20').bind(VERSION, mode === 'daily' ? 'daily' : 'normal', day).all();
-  return { version: VERSION, mode, day, entries: results.map((row, i) => ({ position: i + 1, alias: row.alias, score: row.score, rank: rank(row.score), own: row.player_hash === ownHash })) };
+  const scope = mode === 'daily' ? 'daily' : 'normal';
+  const queries = [env.DB.prepare('SELECT alias,score,achieved_at,player_hash FROM scores WHERE version=? AND mode=? AND day=? ORDER BY score DESC,achieved_at ASC,entry_id ASC LIMIT 20').bind(VERSION, scope, day)];
+  if (ownHash) queries.push(env.DB.prepare(OWN_ENTRY).bind(ownHash, VERSION, scope, day));
+  const results = await env.DB.batch(queries);
+  const own = results[1]?.results[0];
+  return { version: VERSION, mode, day,
+    entries: results[0].results.map((row, i) => publicEntry(row, i + 1, row.player_hash === ownHash)),
+    ownEntry: own ? publicEntry(own, own.position, true) : null };
 }
 export async function cleanup(env, now = Date.now()) {
   if (!env.DB || env.ENABLED !== 'true') return;

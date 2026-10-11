@@ -117,6 +117,7 @@ test('Online Daily preserves server start day across UTC midnight', async () => 
   now = Date.parse('2026-10-12T00:00:06Z');
   const saved = await request('/api/score', { method: 'POST', body: { token: response.data.token, playerId: id, alias: 'Midnight', score: 0, activeMs: 3000 } });
   assert.equal(saved.status, 200); assert.equal(saved.data.day, '2026-10-11');
+  assert.equal(saved.data.ownEntry.position, 1); assert.equal(saved.data.ownEntry.achievedAt, now);
   assert.equal((await request('/api/leaderboard?mode=daily')).data.entries.length, 0);
   assert.equal((await DB.prepare("SELECT day FROM scores WHERE mode='daily'").first()).day, '2026-10-11');
 });
@@ -136,4 +137,50 @@ test('Retention cleans expired runs, rate buckets and Daily days after 30 days',
   assert.equal(await DB.prepare('SELECT id FROM runs WHERE id=?').bind(expired.runId).first(), null);
   assert(await DB.prepare('SELECT id FROM runs WHERE id=?').bind(valid.runId).first());
   assert.equal((await DB.prepare("SELECT COUNT(*) AS n FROM scores WHERE mode='daily'").first()).n, 0);
+});
+
+test('Lost confirmation: immutable retry after expiry, expired fresh write forbidden', async () => {
+  const run = await fixture(), data = submission(run, 10, '  Änne  ');
+  const saved = await request('/api/score', { method: 'POST', body: data });
+  assert.equal(saved.status, 200); assert.equal(saved.data.ownEntry.alias, 'Änne');
+  const unused = await fixture();
+  now = Math.max(run.expiresAt, unused.expiresAt) + 1;
+  const retry = await request('/api/score', { method: 'POST', body: data });
+  assert.equal(retry.status, 200); assert.deepEqual(retry.data, saved.data);
+  for (const change of [{ alias: 'Änne' }, { score: 11 }, { activeMs: 99999 }]) {
+    assert.equal((await request('/api/score', { method: 'POST', body: { ...data, ...change } })).status, 409);
+  }
+  assert.equal((await request('/api/score', { method: 'POST', body: submission(unused) })).status, 410);
+  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores').first()).n, 1);
+  assert.equal((await DB.prepare('SELECT consumed_at FROM runs WHERE id=?').bind(unused.runId).first()).consumed_at, null);
+});
+test('Rank, server timestamp and own placement outside Top 20; fully deterministic ties', async () => {
+  const achieved = now - 1000;
+  await DB.batch(Array.from({ length: 21 }, (_, i) => DB.prepare('INSERT INTO scores(entry_id,player_hash,version,mode,day,alias,score,achieved_at) VALUES(?,?,?,?,?,?,?,?)')
+    .bind(`tie-${String(i).padStart(2, '0')}`, `private-player-${i}`, VERSION, 'normal', '', `Ahead_${i}`, 25, achieved)).reverse());
+  const id = player(), run = await fixture(id), data = submission(run);
+  const saved = await request('/api/score', { method: 'POST', body: data });
+  assert.equal(saved.status, 200); assert.equal(saved.data.ownEntry.position, 22);
+  assert.equal(saved.data.ownEntry.rank, 'PACKET ROUTER'); assert.equal(saved.data.ownEntry.achievedAt, now);
+  let board = (await request('/api/leaderboard?mode=alltime', { headers: { 'X-Player-ID': id } })).data;
+  assert.equal(board.entries.length, 20); assert.deepEqual(board.entries.map(e => e.alias), Array.from({ length: 20 }, (_, i) => `Ahead_${i}`));
+  assert(board.entries.every((e, i) => e.rank === 'SYSADMIN' && e.achievedAt === achieved && e.position === i + 1 && !e.own));
+  assert.equal(board.ownEntry.position, 22); assert.deepEqual(board.ownEntry, saved.data.ownEntry);
+  assert(!JSON.stringify(board).includes('private-player')); assert(!JSON.stringify(board).includes(id));
+  for (const entry of [...board.entries, board.ownEntry]) assert.deepEqual(Object.keys(entry).sort(), ['position','alias','score','rank','achievedAt','own'].sort());
+  assert.equal((await request('/api/leaderboard?mode=alltime')).data.ownEntry, null);
+  assert.equal((await request('/api/leaderboard?mode=daily', { headers: { 'X-Player-ID': id } })).data.ownEntry, null);
+  now += 1000;
+  const improved = await fixture(id);
+  const better = await request('/api/score', { method: 'POST', body: submission(improved, 50, 'Root') });
+  assert.equal(better.data.ownEntry.position, 1); assert.equal(better.data.ownEntry.rank, 'ROOT');
+  const bestTime = better.data.ownEntry.achievedAt;
+  now += 1000;
+  const worse = await fixture(id);
+  const lower = await request('/api/score', { method: 'POST', body: submission(worse, 0, 'Lower') });
+  assert.equal(lower.data.score, 0); assert.equal(lower.data.ownEntry.score, 50); assert.equal(lower.data.ownEntry.achievedAt, bestTime);
+  board = (await request('/api/leaderboard?mode=alltime', { headers: { 'X-Player-ID': id } })).data;
+  assert.deepEqual(board.entries[0], board.ownEntry);
+  now = run.expiresAt + 1;
+  assert.deepEqual((await request('/api/score', { method: 'POST', body: data })).data, saved.data, 'retry keeps its original position snapshot after later best-value changes');
 });
