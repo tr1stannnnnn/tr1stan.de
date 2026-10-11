@@ -1,7 +1,8 @@
 # tr1stan.de
 
 Statische private Website für `tr1stan.de` — eine kurze persönliche Seite im
-Synthwave-Stil. Kein Framework, kein Build-Step, kein npm, keine externen Requests.
+Synthwave-Stil. Das Frontend braucht kein Framework, keinen Build-Step und kein npm.
+Im ausgelieferten Standardzustand gibt es keine externen Laufzeit-Requests.
 
 ---
 
@@ -267,3 +268,55 @@ python3 -m http.server 8000
 
 GitHub Pages liefert `main` aus dem Repository-Root aus. Kein Actions-Workflow,
 kein Build-Schritt: Push auf `main` genügt.
+
+## PACKET//FLIGHT
+
+`/game.html` ergänzt die Seite um ein eigenes Synthwave-Arcade-Spiel; Daily ist
+unter `/game.html?mode=daily` vorgewählt. Die Startseite verlinkt es sichtbar.
+Terminalbefehle: `play`, `play --daily`, `leaderboard`. Tab vervollständigt nur
+bei einer wirklichen Ergänzung, Shift+Tab und vollständige/unbekannte Befehle
+lassen den Fokus weiterziehen. Verlauf und Strg+L bleiben erhalten.
+
+Die Spielregeln sind `pf-1`, der Daily-Generator `daily-1`. Es gibt ein festes
+480×720-Feld, 120-Hz-Simulationsschritte mit begrenzter Aufholzeit, gleiche
+Hitboxen bei jeder Darstellung und eine eigene Hindernis-Zufallsfolge. Start
+und Fortsetzen haben drei Sekunden Countdown. Verborgene Tabs pausieren; eine
+Rückkehr setzt nicht automatisch fort. Pointer-Eingaben verwenden nur
+`pointerdown`, Tasteneingaben nur die fokussierte Spielfläche.
+
+Normale und tägliche Rekorde, Sound, Skin-Fortschritt (10/25/50 Punkte) und eine
+zufällige Browserkennung liegen unter dem versionierten localStorage-Schlüssel
+`tr1stan.packet-flight.pf-1.storage-1`. Bei Ausfall wird sessionStorage oder
+flüchtiger Sitzungsspeicher verwendet. Ein eng begrenzter Service Worker hält
+die Spielseite samt benötigten lokalen Dateien nach dem ersten Laden offline
+bereit. Er speichert keine API-Antworten oder anderen HTML-Seiten. Keine Cookies,
+Analytics, Werbung oder Konten. Neue Spielmodule werden nur auf game.html geladen.
+
+Dateiaufteilung: `game/rules.mjs` (geteilte Regeln/Validierung), `physics.mjs`,
+`render.mjs`, `storage.mjs`, `audio.mjs`, `api.mjs`, `config.mjs`, `app.mjs` und
+`game.css`. Die öffentliche API-Adresse ist zentral in `game/config.mjs` **leer**.
+Dadurch entstehen keinerlei Cloudflare-Anfragen; LEADERBOARD OFFLINE ist der
+ehrliche Standard. Ein lokaler Run kann später nicht öffentlich nachgereicht
+werden. Scores werden nur nach ausdrücklicher Formularbestätigung gesendet,
+wenn ein gültiger Server-Run existiert. Es gibt keine Upload-Warteschlange.
+
+Das vollständige, noch deaktivierte Worker-/D1-Backend mit Free-kompatibler
+Konfiguration, Migration, Lockfile und Tests steht in `cloudflare-worker/`.
+[Dortige Anleitung](cloudflare-worker/README.md) beschreibt die späteren,
+separat freizugebenden Cloud-Schritte. Die
+[Datenschutz-Prüffassung](docs/leaderboard-privacy-draft.md) ist keine aktive
+Rechtserklärung. Nur der tatsächliche lokale Spielspeicher wurde in der
+bestehenden Datenschutzseite sachlich ergänzt. Das Impressum bleibt unverändert.
+
+Die [Cloud-Testanleitung](tests/README.md) enthält die ausgeführten Testwege und
+Grenzen. Die Social Preview ist eigenes Artwork als `social-preview.png`,
+1200×630 mit lokalen Fonts; Open Graph/Twitter verwenden Produktions-URLs.
+
+GitHub Pages unterstützt in diesem Repository keine frei konfigurierbaren
+HTTP-Sicherheitsheader. Es wurden keine unwirksamen Header-Meta-Tags oder
+Cloudflare-/DNS-Umleitungen eingeführt. Der separate Worker setzt seine eigenen
+JSON-/Cache-/CORS-Header. Sein signierter Token und Plausibilitätscheck beweisen
+keinen ehrlich gespielten Run; pro Browserprofil ist keine Personenidentität.
+
+Dieser Entwurf wird nicht auf `main` gemergt und nicht veröffentlicht. GitHub
+Pages und die öffentliche Rangliste werden erst nach späterer Freigabe geändert.

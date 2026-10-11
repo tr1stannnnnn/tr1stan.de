@@ -1,0 +1,32 @@
+name = "packet-flight-leaderboard"
+main = "src/index.mjs"
+compatibility_date = "2026-06-11"
+workers_dev = true
+
+[vars]
+ENABLED = "false"
+ENVIRONMENT = "production"
+
+[limits]
+cpu_ms = 10
+
+[[d1_databases]]
+binding = "DB"
+database_name = "packet-flight"
+# Placeholder: replace with the ID returned by your own D1 creation. No account is configured.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["17 3 * * *"]
+
+[env.local.vars]
+ENABLED = "true"
+ENVIRONMENT = "development"
+DEV_ORIGINS = "http://127.0.0.1:8000,http://localhost:8000"
+
+[[env.local.d1_databases]]
+binding = "DB"
+database_name = "packet-flight"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

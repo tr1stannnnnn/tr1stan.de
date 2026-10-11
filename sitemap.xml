@@ -6,6 +6,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://tr1stan.de/game.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tr1stan.de/impressum.html</loc>
     <lastmod>2026-08-09</lastmod>
     <priority>0.3</priority>

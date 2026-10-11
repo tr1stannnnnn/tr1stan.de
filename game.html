@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PACKET//FLIGHT — tr1stan.de</title>
+  <meta name="description" content="Route dein Datenpaket durch Neon-Firewalls. PACKET//FLIGHT: ein lokales Arcade-Spiel mit Daily Challenge, Rekorden und Skins." />
+  <meta name="theme-color" content="#06020C" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="canonical" href="https://tr1stan.de/game.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="tr1stan.de" />
+  <meta property="og:title" content="PACKET//FLIGHT — tr1stan.de" />
+  <meta property="og:description" content="Ein Paket. Eine Route. Wie viele Firewalls schaffst du? Synthwave-Arcade mit Daily Challenge." />
+  <meta property="og:url" content="https://tr1stan.de/game.html" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:image" content="https://tr1stan.de/social-preview.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="PACKET//FLIGHT: ein leuchtendes Datenpaket vor violettem Neonraster und Synthwave-Sonne." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PACKET//FLIGHT — tr1stan.de" />
+  <meta name="twitter:description" content="Route dein Datenpaket durch Neon-Firewalls. Normal oder Daily — spielbar ohne Konto." />
+  <meta name="twitter:image" content="https://tr1stan.de/social-preview.png" />
+  <meta name="twitter:image:alt" content="Neon-Datenpaket über einem violetten Raster." />
+  <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
+  <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/style.css?v=19" />
+  <link rel="stylesheet" href="/game/game.css" />
+</head>
+<body class="arcade-page">
+  <a class="skip" href="#content">Zum Spiel springen</a>
+  <header class="arcade-header arcade-shell">
+    <a class="brand" href="/index.html">tr1stan.de</a>
+    <a class="arcade-back" href="/index.html">Zur Startseite</a>
+  </header>
+  <main id="content" tabindex="-1" class="arcade-shell">
+    <div class="arcade-intro">
+      <p class="arcade-kicker">ARCADE / ROUTE 001</p>
+      <h1>PACKET<span>//</span>FLIGHT</h1>
+      <p>Ein Paket. Eine Route. Keine zweite Chance für die Firewall.</p>
+    </div>
+    <noscript><p class="arcade-notice">Das Spiel benötigt JavaScript. Alle übrigen Inhalte bleiben auf der <a href="/index.html">Startseite</a> lesbar.</p></noscript>
+    <div class="arcade-layout" id="gameUI" hidden>
+      <section class="flight-panel" aria-label="Spiel">
+        <fieldset class="mode-picker">
+          <legend class="sr-only">Spielmodus</legend>
+          <label><input type="radio" name="mode" value="normal" checked />NORMAL</label>
+          <label><input type="radio" name="mode" value="daily" />DAILY</label>
+        </fieldset>
+        <p class="daily-label" id="dailyInfo"></p>
+        <div class="flight-hud">
+          <span>SCORE <strong id="score">0</strong></span>
+          <span>REKORD <strong id="best">0</strong></span>
+          <button class="arcade-button quiet" type="button" id="mute" aria-pressed="false">SOUND AN</button>
+        </div>
+        <div class="flight-surface">
+          <!-- Canvas is the interactive surface; native Start/Pause buttons are also provided. -->
+          <!-- [html-validate-disable prefer-native-element] -->
+          <canvas id="flightCanvas" width="480" height="720" tabindex="0" role="button" aria-label="Spielfläche: tippen oder Leertaste, Pfeil hoch, W. Startet mit Countdown." aria-describedby="controls">
+            PACKET//FLIGHT benötigt Canvas. Das visuelle Echtzeitspiel wird nicht als vollständig barrierefrei angeboten.
+          </canvas>
+          <!-- [html-validate-enable prefer-native-element] -->
+          <div id="surfaceOverlay" class="surface-overlay" aria-hidden="true"><span id="overlayLabel">BEREIT</span><small id="overlayHint">START zum Verbinden</small></div>
+        </div>
+        <div class="flight-actions">
+          <button type="button" class="arcade-button primary" id="start">START</button>
+          <button type="button" class="arcade-button" id="pause" disabled>PAUSE</button>
+        </div>
+        <p id="controls" class="arcade-small">Leertaste · ↑ · W · Tap auf das Spielfeld. Erst Countdown, dann fliegen. Tastatursteuerung bei Fokus im Spielfeld; Tab verlässt es. Scrollen und Zoom bleiben möglich.</p>
+        <p id="runStatus" class="arcade-notice" role="status">BEREIT — lokale Rekorde, kein Upload.</p>
+        <p id="storageNotice" class="arcade-small" hidden></p>
+        <p id="offlineReady" class="arcade-small"></p>
+      </section>
+      <aside class="arcade-side">
+        <section aria-labelledby="skinsTitle">
+          <p class="arcade-kicker">LOADOUT</p><h2 id="skinsTitle">Dein Paket</h2>
+          <label class="sr-only" for="skin">Skin auswählen</label>
+          <select id="skin"></select>
+          <p class="arcade-small">Skins bei 10, 25 und 50 Punkten — auch im Daily. Jede Hitbox bleibt gleich.</p>
+          <div class="rank-list"><span>10 / PACKET ROUTER</span><span>25 / SYSADMIN</span><span>50 / ROOT</span></div>
+        </section>
+        <section id="leaderboard" tabindex="-1" aria-labelledby="leaderboardTitle">
+          <p class="arcade-kicker">PUBLIC ROUTES</p><h2 id="leaderboardTitle">Top 20</h2>
+          <div class="board-tabs" role="group" aria-label="Ranglistenbereich">
+            <button class="arcade-button" type="button" id="todayBoard" aria-pressed="false">HEUTE</button>
+            <button class="arcade-button" type="button" id="alltimeBoard" aria-pressed="true">ALLZEIT</button>
+          </div>
+          <p id="boardStatus" class="arcade-notice" role="status">LEADERBOARD OFFLINE</p>
+          <ol id="boardEntries" class="board-entries"></ol>
+          <p id="ownPosition" class="arcade-notice"></p>
+          <button type="button" id="refreshBoard" class="arcade-button quiet" disabled>AKTUALISIEREN</button>
+          <p class="arcade-small" id="boardExplanation">Das Backend ist noch nicht aktiviert. Spiel und lokale Rekorde funktionieren; öffentliche Eintragung ist deaktiviert. Keine Upload-Warteschlange.</p>
+        </section>
+        <section aria-labelledby="dailyTitle"><h2 id="dailyTitle">Eine Route pro Tag</h2>
+          <p class="arcade-small">Daily wechselt um 00:00 UTC. Derselbe UTC-Tag und dieselbe Spielversion ergeben dieselben Gates. Ein Online-Run behält seinen Server-Starttag, auch über Mitternacht.</p>
+          <p class="arcade-small">Dieses visuelle Echtzeitspiel ist nicht vollständig barrierefrei. Reduzierte Bewegung beruhigt die Dekoration; die Spielbewegung bleibt für die Mechanik erforderlich.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <dialog id="resultDialog" aria-labelledby="resultTitle" aria-describedby="resultSummary">
+    <p class="arcade-kicker">RUN TERMINATED</p>
+    <h2 id="resultTitle">CONNECTION LOST</h2>
+    <p class="result-score" id="resultScore">0</p>
+    <p id="resultSummary"></p><p class="arcade-kicker" id="resultRank"></p>
+    <p id="publishQuestion">Dein Score bleibt lokal.</p>
+    <div id="resultActions" class="result-actions">
+      <button type="button" class="arcade-button primary" id="again">NOCHMAL</button>
+      <button type="button" class="arcade-button" id="enterScore" disabled>SCORE EINTRAGEN</button>
+      <button type="button" class="arcade-button quiet" id="skipScore">ÜBERSPRINGEN</button>
+    </div>
+    <form id="aliasForm" hidden novalidate>
+      <p>Freiwillige Veröffentlichung: Alias, Score, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
+      <label for="alias">Öffentlicher Alias (2–16 Zeichen)</label>
+      <input id="alias" type="text" name="alias" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="aliasHint aliasError" />
+      <p id="aliasHint" class="arcade-small">Buchstaben, Zahlen, einfache Leerzeichen, _ und -. Keine automatische Übernahme früherer Namen.</p>
+      <p id="aliasError" role="status"></p>
+      <div class="result-actions"><button type="submit" id="publish" class="arcade-button primary">ÖFFENTLICH EINTRAGEN</button><button type="button" id="cancelEntry" class="arcade-button">ABBRECHEN</button></div>
+    </form>
+    <p id="submitStatus" role="status"></p>
+    <div class="result-secondary"><button type="button" class="arcade-button quiet" id="copyScore">SCORE KOPIEREN</button><a href="/index.html">ZUR STARTSEITE</a></div>
+    <label for="copyFallback" id="copyLabel" hidden>Score auswählen und kopieren</label>
+    <textarea id="copyFallback" readonly hidden></textarea>
+  </dialog>
+  <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-1</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
+  <script src="/script.js?v=19" defer></script>
+  <script type="module" src="/game/app.mjs"></script>
+</body>
+</html>
