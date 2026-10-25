@@ -7,9 +7,6 @@ workers_dev = true
 ENABLED = "false"
 ENVIRONMENT = "production"
 
-[limits]
-cpu_ms = 10
-
 [[d1_databases]]
 binding = "DB"
 database_name = "packet-flight"
