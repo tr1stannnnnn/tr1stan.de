@@ -21,7 +21,7 @@ const clock = new FixedClock(), effects = new Effects();
 let mode = new URLSearchParams(location.search).get('mode') === 'daily' ? 'daily' : 'normal';
 let state = 'ready', flight = new Flight(dailySeed(utcDay())), run = null, result = null;
 let countdownUntil = 0, lastFrame = 0, generation = 0, pendingPause = false, currentDay = utcDay();
-let boardMode = mode === 'daily' ? 'daily' : 'alltime', boardGeneration = 0, boardBusy = false, lastBoardAt = -Infinity;
+let boardMode = mode === 'daily' ? 'daily' : 'alltime', boardGeneration = 0, boardBusy = false, boardPending = false, lastBoardAt = -Infinity;
 let submitting = false, pendingSubmission = null;
 let redraw = true;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -242,7 +242,8 @@ async function loadBoard() {
   $('todayBoard').setAttribute('aria-pressed', String(boardMode === 'daily'));
   $('alltimeBoard').setAttribute('aria-pressed', String(boardMode === 'alltime'));
   if (!api.enabled) { $('boardStatus').textContent = 'LEADERBOARD OFFLINE'; return; }
-  if (boardBusy || Date.now() - lastBoardAt < 5000) return;
+  if (boardBusy) { boardPending = true; return; }
+  if (Date.now() - lastBoardAt < 5000) return;
   const request = ++boardGeneration, requestedMode = boardMode;
   boardBusy = true; lastBoardAt = Date.now(); $('refreshBoard').disabled = true;
   $('boardStatus').textContent = 'Rangliste lädt …'; $('boardEntries').replaceChildren(); $('ownPosition').textContent = '';
@@ -263,7 +264,10 @@ async function loadBoard() {
     }
     $('ownPosition').textContent = data.ownEntry ? `Dein Bestwert: ${placement(data.ownEntry)} · ${timestamp(data.ownEntry.achievedAt)}${data.ownEntry.position > 20 ? ' · außerhalb der Top 20' : ''}` : 'Noch kein eigener Bestwert in diesem Bereich.';
   } catch (error) { if (request === boardGeneration) $('boardStatus').textContent = `LEADERBOARD OFFLINE — ${error.message}`; }
-  finally { boardBusy = false; $('refreshBoard').disabled = false; if (requestedMode !== boardMode) { lastBoardAt = -Infinity; loadBoard(); } }
+  finally {
+    boardBusy = false; $('refreshBoard').disabled = false;
+    if (boardPending) { boardPending = false; lastBoardAt = -Infinity; loadBoard(); }
+  }
 }
 for (const [id, value] of [['todayBoard', 'daily'], ['alltimeBoard', 'alltime']]) $(id).addEventListener('click', () => {
   if (boardMode === value) return;

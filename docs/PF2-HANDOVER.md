@@ -5,6 +5,8 @@ Die frühere Pause im unten unverändert erhaltenen Zwischenstandsbericht ist
 historisch. Weiterhin gesperrt: Merge, produktive Migrationen, Deployments und
 Umgebungseinstellungen. Isolierte Testdatenbank-Migrationen sind erlaubt.
 
+Konkreter Veröffentlichungs-/Rückkehrplan: [PF2-RELEASE.md](PF2-RELEASE.md).
+
 Aktueller Review-/Test-/Zugriffsstand, Aufnahmen und verbleibende Freigabeschritte:
 [PF2-REVIEW.md](PF2-REVIEW.md). Backendvertrag und Betrieb:
 [Worker-README](../cloudflare-worker/README.md). Die Cloudflare-Bindung funktioniert;

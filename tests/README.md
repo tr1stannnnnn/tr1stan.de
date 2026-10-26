@@ -122,3 +122,16 @@ the committed video metadata must show the completed current run.
 The enabled-API privacy regression verifies that local play/page load sends no
 backend requests until explicit online action. Physical iOS/Safari/Android, legal
 review, pf-2 production CPU and a voluntary production score remain release checks.
+
+## Release preparation regressions
+
+`python3 tests/release_metrics_test.py` exercises seven fail-closed CPU/quota
+gates without credentials or network I/O. The live read-only aggregate helper
+`python3 tools/pf2-release-metrics.py --gate` uses the network-bound Cloudflare
+secret only for api.cloudflare.com. CPU fields are microseconds, not milliseconds.
+Empty samples are unknown, not a successful zero-CPU test. No request logs are
+needed. Release commands and exact stop/rollback gates: docs/PF2-RELEASE.md.
+
+Additional application regressions retain the persisted pf-1 archive after the
+old storage key is removed and complete the final explicit board selection when
+Alltime → Daily → Alltime happens during an outstanding request.

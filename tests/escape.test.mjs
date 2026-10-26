@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Flight, FixedClock } from '../game/physics.mjs';
 import { RULES as R, dailySeed, scoreParts, maximumBonus } from '../game/rules.mjs';
 import { gateShape, securityKind, corridorAt } from '../game/world.mjs';
-import { Records, LEGACY_KEY } from '../game/storage.mjs';
+import { Records, LEGACY_KEY, STORAGE_KEY } from '../game/storage.mjs';
 import { shouldFlap } from './escape-controller.mjs';
 
 test('Moving and closing gates have bounded continuous edges; safety corridors suppress them', () => {
@@ -64,6 +64,22 @@ test('pf-1 archive, UUID, mute and unlocked skins survive without point-based ea
   assert.equal(storage.getItem(LEGACY_KEY),JSON.stringify(old));
   const fresh=new Records({getItem:()=>null,setItem:()=>{}}); fresh.record('normal','',180,9,9);
   assert(!fresh.selectSkin('router')); fresh.record('normal','',100,10,0); assert(fresh.selectSkin('router'));
+});
+test('Persisted pf-1 archive survives deletion of the separate legacy key and another reload', () => {
+  const values=new Map(), storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
+  const old={normal:25,daily:{'2026-10-11':50},highest:50,muted:true,skin:'root',playerId:'bdaf0344-596f-4a61-a150-754975ad492b'};
+  storage.setItem(LEGACY_KEY,JSON.stringify(old));
+  const first=new Records(storage); first.record('normal','',150,12,5);
+  values.delete(LEGACY_KEY);
+  const restored=new Records(storage);
+  assert.deepEqual(restored.data.legacy,first.data.legacy);
+  assert.equal(restored.data.playerId,first.data.playerId); assert.equal(restored.data.skin,'root');
+  assert.equal(restored.best('normal',''),150); assert.equal(restored.data.highest,50);
+  assert.deepEqual(new Records(storage).data.legacy,first.data.legacy);
+  const saved=JSON.parse(storage.getItem(STORAGE_KEY));
+  saved.legacy.daily.invalid=100; saved.legacy.daily['2026-10-12']=1001;
+  storage.setItem(STORAGE_KEY,JSON.stringify(saved));
+  assert.deepEqual(new Records(storage).data.legacy.daily,old.daily);
 });
 test('Fixed-step replay includes reactive enemies at all cadences; pause and reset own all clocks', () => {
   function simulate(hz) {

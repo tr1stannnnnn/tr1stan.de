@@ -17,6 +17,10 @@ migrations_dir = "migrations"
 [triggers]
 crons = ["17 3 * * *"]
 
+[observability]
+# Aggregate Workers/D1 analytics remain available; do not retain invocation logs.
+enabled = false
+
 [env.local.vars]
 ENABLED = "true"
 ENVIRONMENT = "development"

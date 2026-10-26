@@ -32,7 +32,7 @@ with sync_playwright() as pw:
     page.clock.install(time=datetime(2026,10,11,12,tzinfo=timezone.utc)); page.goto(BASE + '/game.html?mode=daily')
     page.evaluate('document.fonts.ready')
     page.clock.pause_at(datetime.fromtimestamp((page.evaluate('Date.now()') + 100) / 1000, timezone.utc))
-    page.locator('#start').click(); page.clock.run_for(3200)
+    page.locator('#start').click(); page.clock.run_for(1700)
     assert steer(page, goal=2)['score'] == 2
     page.locator('.flight-panel').screenshot(path=str(OUT / 'after-game-point.png'))
     page.locator('#flightCanvas').press('Space'); page.clock.run_for(35)

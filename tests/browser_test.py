@@ -150,6 +150,23 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#skipScore').click(); self.page.locator('#refreshBoard').click()
         self.page.wait_for_function("document.querySelector('#boardStatus').textContent.includes('Noch keine')")
         self.assertTrue(any('/api/leaderboard?' in url for url in self.requests))
+    def test_board_round_trip_while_loading_finishes_the_last_explicit_selection(self):
+        self.online(); self.clock(); self.game()
+        held=[]; loads=[]
+        def delayed(route):
+            if route.request.method != 'GET': route.fallback(); return
+            loads.append(route.request.url)
+            if len(loads)==1: held.append(route)
+            else: route.fallback()
+        self.context.route('https://packet-flight.test/api/leaderboard?*', delayed)
+        self.page.locator('#refreshBoard').click()
+        self.page.locator('#todayBoard').click(); self.page.locator('#alltimeBoard').click()
+        self.assertEqual(len(held),1)
+        held[0].fulfill(status=200,headers={'access-control-allow-origin':BASE,'content-type':'application/json'},
+            body=json.dumps({'version':'pf-2','mode':'alltime','day':'','entries':[],'ownEntry':None}))
+        self.page.wait_for_function("document.querySelector('#boardStatus').textContent.includes('Noch keine')",timeout=2000)
+        self.assertEqual(len(loads),2)
+        self.assertFalse(self.page.locator('#refreshBoard').is_disabled())
     def test_voluntary_submission_validation_cancel_and_identical_retry(self):
         self.online(score_failure=True); self.clock(); self.game(); self.end_run()
         self.assertEqual(len(self.scores), 0)

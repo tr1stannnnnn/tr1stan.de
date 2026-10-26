@@ -120,3 +120,28 @@ solange pf-2 nicht produktiv ausgerollt wird. Kein solcher Rollout ist hier erla
 
 Kein Merge, kein produktiver SQL-Schreibzugriff, keine produktive Migration,
 kein Deployment oder Scoreeintrag, keine Umgebungseinstellung geändert.
+
+## Ergänzung: konkrete Release-Vorbereitung
+
+Erneuter vollständiger PR-Review: persistiertes pf-1-Archiv beim Wiederladen
+verloren und schnelle Rückkehr zum gleichen Board während laufender Anfrage
+hängt im Ladezustand; beide Fehler vor Korrektur reproduziert und mit Regressionen
+behoben. Der ältere Capture-Helfer verwendete noch den 3-Sekunden-Countdown;
+an 1,5 Sekunden angepasst. Repository-Observability jetzt ausdrücklich false
+für den späteren Rollout, ohne produktive Einstellung zu ändern.
+
+Aktueller Teststand nach diesen Korrekturen: 23 Spiel-/Escape-, 14 Backend-,
+2 Website-, 14 Browser-, 8 Visual-, 2 Escape-Browser- und 7 Release-Metriktests
+(**70 Tests**) bestanden. HTML-Validierung und Diff-Prüfung bestanden.
+Deaktivierte und aktivierte CLI-Variante wurden ausschließlich lokal mit
+`wrangler deploy --dry-run --env= --keep-vars --var ENABLED:false/true` gebündelt;
+Wrangler maskiert CLI-Variablen in seiner Ausgabe. Kein Upload wurde ausgeführt.
+
+Lesender Neu-Befund: alle pf-1-Tabellen leer. Pages veröffentlicht main automatisch;
+ein früherer main-Push hat auch Workers Builds ausgeführt. Aktuelle Builds-Settings
+403, daher vor erstem main-Push deren konkrete No-op-Sperre bestätigen.
+GraphQL-Account-/D1-Metriken funktionieren; nur pf-1-Baseline, kein pf-2-Livebeweis.
+Region-/Backup-/Analysefristen sind anhand offizieller Quellen konkretisiert.
+
+[Ablauf, begrenzte Prüfungen, Abbruch und genauer Freigabeumfang](PF2-RELEASE.md).
+Die dortigen produktiven Schritte sind **noch nicht freigegeben oder ausgeführt**.

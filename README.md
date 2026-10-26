@@ -314,6 +314,7 @@ DNS und Mail bleiben unverändert.
 
 - [Testanleitung](tests/README.md)
 - [Prüfbericht und Spielaufnahmen](docs/PF2-REVIEW.md)
+- [Konkreter Veröffentlichungs- und Rückkehrplan](docs/PF2-RELEASE.md)
 - [Backendvertrag und spätere Freigabeschritte](cloudflare-worker/README.md)
 - [Datenschutzentwurf mit noch offenen Betreiberangaben](docs/leaderboard-privacy-draft.md)
 

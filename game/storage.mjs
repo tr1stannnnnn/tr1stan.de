@@ -12,6 +12,15 @@ function newId() {
   return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
 }
 const scoreValue = n => Number.isInteger(n) && n >= 0 && n <= RULES.maxScore ? n : 0;
+function legacyArchive(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const validScore = n => Number.isInteger(n) && n >= 0 && n <= 1000;
+  const daily = {};
+  if (value.daily && typeof value.daily === 'object') for (const [day, score] of Object.entries(value.daily)) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day) && validScore(score)) daily[day] = score;
+  }
+  return { version: 'pf-1', normal: validScore(value.normal) ? value.normal : 0, daily };
+}
 export class Records {
   constructor(storage, onWarning = () => {}, sessionStorage = null) {
     this.storage = storage; this.onWarning = onWarning; this.persistent = true;
@@ -28,12 +37,8 @@ export class Records {
       let old;
       try { old = JSON.parse(this.storage?.getItem(LEGACY_KEY) || 'null'); } catch {}
       if (old && typeof old === 'object' && !Array.isArray(old)) {
-        const daily = {};
-        if (old.daily && typeof old.daily === 'object') for (const [day, value] of Object.entries(old.daily)) {
-          if (/^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isInteger(value) && value >= 0 && value <= 1000) daily[day] = value;
-        }
-        this.data.legacy = { version: 'pf-1', normal: Math.min(1000, scoreValue(old.normal)), daily };
-        this.data.highest = Math.min(1000, Math.max(scoreValue(old.highest), this.data.legacy.normal, ...Object.values(daily)));
+        this.data.legacy = legacyArchive(old);
+        this.data.highest = Math.min(1000, Math.max(scoreValue(old.highest), this.data.legacy.normal, ...Object.values(this.data.legacy.daily)));
         this.data.muted = old.muted === true;
         if (validPlayerId(old.playerId)) this.data.playerId = old.playerId;
         if (SKINS.some(s => s.id === old.skin && this.data.highest >= s.at)) this.data.skin = old.skin;
@@ -41,11 +46,13 @@ export class Records {
       if (raw) {
         const data = JSON.parse(raw);
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw Error('Invalid storage');
+        this.data.legacy = legacyArchive(data.legacy) || this.data.legacy;
         this.data.normal = scoreValue(data.normal);
         if (data.daily && typeof data.daily === 'object') for (const [day, value] of Object.entries(data.daily)) {
           if (/^\d{4}-\d{2}-\d{2}$/.test(day)) this.data.daily[day] = scoreValue(value);
         }
-        this.data.highest = Math.max(this.data.highest, Math.min(RULES.maxGates, scoreValue(data.highest)));
+        this.data.highest = Math.max(this.data.highest, Math.min(RULES.maxGates, scoreValue(data.highest)),
+          this.data.legacy?.normal || 0, ...Object.values(this.data.legacy?.daily || {}));
         for (const key of Object.keys(this.data.stats)) if (Number.isSafeInteger(data.stats?.[key]) && data.stats[key] >= 0) this.data.stats[key] = data.stats[key];
         this.data.muted = data.muted === true;
         if (validPlayerId(data.playerId)) this.data.playerId = data.playerId;
