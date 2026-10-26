@@ -26,8 +26,8 @@
   <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=20" />
-  <link rel="stylesheet" href="/game/game.css?v=2" />
+  <link rel="stylesheet" href="/style.css?v=30" />
+  <link rel="stylesheet" href="/game/game.css?v=pf2" />
 </head>
 <body class="arcade-page">
   <a class="skip" href="#content">Zum Spiel springen</a>
@@ -39,7 +39,7 @@
     <div class="arcade-intro">
       <p class="arcade-kicker">NETWORK ARCADE / ROUTE 001</p>
       <h1>PACKET<span>//</span>FLIGHT</h1>
-      <p>Ein Paket. Eine Route. Keine zweite Chance für die Firewall.</p>
+      <p>Gestohlenes Paket. Alarmierte Systeme. Entkomme durch die Lücken.</p>
     </div>
     <noscript><p class="arcade-notice">Das Spiel benötigt JavaScript. Alle übrigen Inhalte bleiben auf der <a href="/index.html">Startseite</a> lesbar.</p></noscript>
     <div class="arcade-layout" id="gameUI" hidden>
@@ -58,6 +58,7 @@
           <span class="best-display"><span>REKORD</span><strong id="best">0</strong></span>
           <span class="state-display"><span class="link-light" aria-hidden="true"></span><span id="stateBadge">BEREIT</span></span>
         </div>
+        <div class="route-status"><span id="alertPhase">GHOST ROUTE</span><span id="gateCount">0 GATES</span><span id="combo">COMBO —</span></div>
         <div class="flight-surface">
           <!-- Canvas is the interactive surface; native Start/Pause buttons are also provided. -->
           <!-- [html-validate-disable prefer-native-element] -->
@@ -71,6 +72,8 @@
           <button type="button" class="arcade-button primary" id="start">START</button>
           <button type="button" class="arcade-button" id="pause" disabled>PAUSE</button>
         </div>
+        <label class="online-choice"><input type="checkbox" id="onlineRun" disabled /> Online-Run für freiwillige Rangliste</label>
+        <p id="onlineNotice" class="arcade-small">Backend deaktiviert. Dieser Run bleibt lokal.</p>
         <p id="controls" class="arcade-small">Leertaste · ↑ · W · Tap auf das Spielfeld. Erst Countdown, dann fliegen. Tastatursteuerung bei Fokus im Spielfeld; Tab verlässt es. Scrollen und Zoom bleiben möglich.</p>
         <p id="runStatus" class="arcade-notice" role="status">BEREIT — lokale Rekorde, kein Upload.</p>
         <p id="storageNotice" class="arcade-small" hidden></p>
@@ -81,7 +84,7 @@
           <p class="arcade-kicker">LOADOUT</p><h2 id="skinsTitle">Dein Paket</h2>
           <label class="sr-only" for="skin">Skin auswählen</label>
           <select id="skin"></select>
-          <p class="arcade-small">Skins bei 10, 25 und 50 Punkten — auch im Daily. Jede Hitbox bleibt gleich.</p>
+          <p class="arcade-small">Skins bei 10, 25 und 50 passierten Gates — auch im Daily. Jede Hitbox bleibt gleich.</p>
           <div class="rank-list"><span>10 / PACKET ROUTER</span><span>25 / SYSADMIN</span><span>50 / ROOT</span></div>
         </section>
         <section id="leaderboard" tabindex="-1" aria-labelledby="leaderboardTitle">
@@ -96,7 +99,8 @@
           <button type="button" id="refreshBoard" class="arcade-button quiet" disabled>AKTUALISIEREN</button>
           <p class="arcade-small" id="boardExplanation">Das Backend ist noch nicht aktiviert. Spiel und lokale Rekorde funktionieren; öffentliche Eintragung ist deaktiviert. Keine Upload-Warteschlange.</p>
         </section>
-        <section aria-labelledby="dailyTitle"><h2 id="dailyTitle">Eine Route pro Tag</h2>
+        <p class="arcade-small" id="legacyRecords" hidden></p>
+        <section aria-labelledby="dailyTitle"><h2 id="dailyTitle">Ghost protocol</h2><p class="arcade-small">Gate: 10 Punkte. Optionales Fragment dahinter: 2 × Combo (bis ×5). Ein verpasstes angebotenes Fragment beendet die Combo. Warnung ist noch ungefährlich; solide rote Strahlen und Projektile sind tödlich.</p>
           <p class="arcade-small">Daily wechselt um 00:00 UTC. Derselbe UTC-Tag und dieselbe Spielversion ergeben dieselben Gates. Ein Online-Run behält seinen Server-Starttag, auch über Mitternacht.</p>
           <p class="arcade-small">Dieses visuelle Echtzeitspiel ist nicht vollständig barrierefrei. Reduzierte Bewegung beruhigt die Dekoration; die Spielbewegung bleibt für die Mechanik erforderlich.</p>
         </section>
@@ -107,7 +111,7 @@
     <p class="arcade-kicker">RUN TERMINATED</p>
     <h2 id="resultTitle">CONNECTION LOST</h2>
     <p class="result-score" id="resultScore">0</p>
-    <p id="resultSummary"></p><p class="arcade-kicker" id="resultRank"></p>
+    <p id="resultParts" class="arcade-small"></p><p id="resultSummary"></p><p class="arcade-kicker" id="resultRank"></p>
     <p id="publishQuestion">Dein Score bleibt lokal.</p>
     <div id="resultActions" class="result-actions">
       <button type="button" class="arcade-button primary" id="again">NOCHMAL</button>
@@ -127,8 +131,8 @@
     <label for="copyFallback" id="copyLabel" hidden>Score auswählen und kopieren</label>
     <textarea id="copyFallback" readonly hidden></textarea>
   </dialog>
-  <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-1</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
-  <script src="/script.js?v=20" defer></script>
-  <script type="module" src="/game/app.mjs?v=2"></script>
+  <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-2</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
+  <script src="/script.js?v=30" defer></script>
+  <script type="module" src="/game/app.mjs?v=pf2"></script>
 </body>
 </html>

@@ -15,7 +15,8 @@ export class Sound {
       const c = this.context, now = c.currentTime;
       const osc = c.createOscillator(), gain = c.createGain();
       osc.type = 'triangle';
-      const tones = { flap: [240, 480, .07], point: [600, 900, .12], end: [180, 55, .25] };
+      const tones = { flap: [240, 480, .07], point: [600, 900, .12], end: [180, 55, .25],
+        fragment: [1000, 1400, .09], alarm: [160, 220, .18], warning: [350, 290, .16], lock: [720, 720, .1], fire: [1600, 170, .12] };
       const [from, to, length] = tones[kind] || tones.flap;
       osc.frequency.setValueAtTime(from, now); osc.frequency.exponentialRampToValueAtTime(to, now + length);
       gain.gain.setValueAtTime(.035, now); gain.gain.exponentialRampToValueAtTime(.001, now + length);

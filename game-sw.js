@@ -1,6 +1,6 @@
 // Cache only the game shell. No API requests, legal pages or home page are intercepted.
-const CACHE = 'tr1stan-packet-flight-pf-1-shell-3';
-const FILES = ['/game.html', '/game/game.css?v=2', '/game/app.mjs?v=2', '/game/rules.mjs', '/game/physics.mjs', '/game/storage.mjs', '/game/audio.mjs', '/game/render.mjs?v=2', '/game/effects.mjs', '/game/api.mjs', '/game/config.mjs', '/style.css?v=20', '/script.js?v=20', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
+const CACHE = 'tr1stan-packet-flight-pf-2-shell-1';
+const FILES = ['/game.html', '/game/game.css?v=pf2', '/game/api.mjs?v=pf2', '/game/app.mjs?v=pf2', '/game/audio.mjs?v=pf2', '/game/config.mjs?v=pf2', '/game/effects.mjs?v=pf2', '/game/physics.mjs?v=pf2', '/game/render.mjs?v=pf2', '/game/rules.mjs?v=pf2', '/game/security-render.mjs?v=pf2', '/game/storage.mjs?v=pf2', '/game/world.mjs?v=pf2', '/style.css?v=20', '/script.js?v=20', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
 const PATHS = new Set(FILES.map(path => new URL(path, self.location.origin).pathname));
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(path => new Request(path, { cache: 'reload' }))))); });
 self.addEventListener('activate', event => {

@@ -1,4 +1,5 @@
-import { RULES as R, SKINS } from './rules.mjs';
+import { fragments, security } from './security-render.mjs?v=pf2';
+import { RULES as R, SKINS } from './rules.mjs?v=pf2';
 const TAU = Math.PI * 2;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const colorOf = skin => SKINS.find(s => s.id === skin)?.color || SKINS[0].color;
@@ -91,8 +92,10 @@ export class Renderer {
   }
   gate(c, gate, alpha, flash) {
     const x = gate.previousX + (gate.x - gate.previousX) * alpha;
+    const center = (gate.previousCenter ?? gate.center) + (gate.center - (gate.previousCenter ?? gate.center)) * alpha;
+    const gap = (gate.previousGap ?? gate.gap) + (gate.gap - (gate.previousGap ?? gate.gap)) * alpha;
     const glow = flash ? 1 - flash.age / flash.life : 0;
-    for (const [y, height, top] of [[R.ceiling, gate.center - gate.gap / 2 - R.ceiling, true], [gate.center + gate.gap / 2, R.floor - gate.center - gate.gap / 2, false]]) {
+    for (const [y, height, top] of [[R.ceiling, center - gap / 2 - R.ceiling, true], [center + gap / 2, R.floor - center - gap / 2, false]]) {
       c.save(); c.beginPath(); c.moveTo(x + 5, y); c.lineTo(x + 59, y); c.lineTo(x + 64, y + 5);
       c.lineTo(x + 64, y + height - 5); c.lineTo(x + 59, y + height); c.lineTo(x + 5, y + height); c.lineTo(x, y + height - 5); c.lineTo(x, y + 5); c.closePath();
       const shell = c.createLinearGradient(x, 0, x + 64, 0); shell.addColorStop(0, '#162436'); shell.addColorStop(.3, '#111729'); shell.addColorStop(1, '#25142e');
@@ -110,7 +113,7 @@ export class Renderer {
       c.fillStyle = glow > 0 ? '#92f5de' : top ? '#74dce8' : '#e28cbc';
       c.shadowColor = c.fillStyle; c.shadowBlur = 4 + glow * 6; c.fillRect(x, top ? edge - 3 : edge, 64, 3); c.shadowBlur = 0;
       c.fillStyle = '#c2cee4'; c.globalAlpha = .65; c.font = '8px "JetBrains Mono", monospace';
-      if (height > 48) c.fillText(top ? 'IN / 01' : 'OUT / 01', x + 9, top ? edge - 12 : edge + 20);
+      if (height > 48) c.fillText(gate.type === 'moving' ? 'MOVE / ↕' : gate.type === 'compress' ? 'CLAMP / !' : top ? 'IN / 01' : 'OUT / 01', x + 9, top ? edge - 12 : edge + 20);
       c.restore();
       c.strokeStyle = glow > 0 ? '#92f5de' : '#8b72b9'; c.lineWidth = 1;
       line(c, x - 4, top ? edge - 9 : edge + 9, x - 4, edge);
@@ -134,7 +137,7 @@ export class Renderer {
     }
     for (const item of effects.labels) {
       c.globalAlpha = 1 - item.age / item.life; c.fillStyle = item.color; c.font = '600 17px "JetBrains Mono", monospace';
-      c.fillText('+1', item.x, item.y - (reduced ? 0 : item.age * 28));
+      c.fillText(`+${item.value || 10}`, item.x, item.y - (reduced ? 0 : item.age * 28));
     }
     c.globalAlpha = 1;
   }
@@ -164,8 +167,10 @@ export class Renderer {
     const c = this.ctx; if (!c) return;
     c.setTransform(this.scale, 0, 0, this.scale, 0, 0); c.globalAlpha = 1;
     this.background(c, reduced ? 0 : flight.ticks * R.step);
+    if (flight.alarm) { c.fillStyle = ['', '#4c2c4310', '#7e3b3012', '#983d2917'][flight.alarm]; c.fillRect(0,40,480,632); }
     // Vignette stays behind gates/player; no scanline overlay on play elements.
     for (const gate of flight.gates) this.gate(c, gate, alpha, effects?.gates.find(item => item.gate === gate));
+    fragments(c, flight, alpha, reduced); security(c, flight, alpha, reduced);
     this.drawEffects(c, effects, reduced); this.player(c, flight, alpha, skin, effects, reduced);
     c.fillStyle = '#090e1dee'; c.fillRect(0, 0, 480, R.ceiling); c.fillRect(0, R.floor, 480, 48);
     c.lineWidth = 1; c.strokeStyle = '#61709966'; line(c, 0, R.ceiling, 480, R.ceiling);

@@ -1,4 +1,4 @@
-import { SKINS, randomSequence } from './rules.mjs';
+import { SKINS, randomSequence } from './rules.mjs?v=pf2';
 
 export const EFFECT_LIMITS = Object.freeze({ particles: 64, trail: 9, rings: 4, labels: 3, gates: 3 });
 const colorOf = skin => SKINS.find(s => s.id === skin)?.color || SKINS[0].color;
@@ -33,8 +33,8 @@ export class Effects {
     if (!reduced) this.rings.push({ x: 120, y: flight.y, age: 0, life: .27, color: colorOf(skin) });
     trim(this.rings, EFFECT_LIMITS.rings);
   }
-  point(gate, y, skin, reduced = false) {
-    this.labels.push({ x: 145, y: y - 22, age: 0, life: reduced ? .3 : .55, color: colorOf(skin) });
+  point(gate, y, skin, reduced = false, value = 10) {
+    this.labels.push({ x: 145, y: y - 22, value, age: 0, life: reduced ? .3 : .55, color: colorOf(skin) });
     if (gate) this.gates.push({ gate, age: 0, life: reduced ? .18 : .42 });
     trim(this.labels, EFFECT_LIMITS.labels); trim(this.gates, EFFECT_LIMITS.gates);
   }

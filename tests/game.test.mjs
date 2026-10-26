@@ -42,8 +42,8 @@ test('Score only after entire hitbox passes, once; gate and floor collisions', (
   const f = new Flight(1), gate = f.gates[0]; f.y = gate.center; f.vy = 0;
   gate.x = R.playerX - R.halfWidth - R.gateWidth + 3;
   f.step(); assert.equal(f.score, 0);
-  f.step(); f.step(); assert.equal(f.score, 1);
-  for (let i = 0; i < 10; i++) f.step(); assert.equal(f.score, 1);
+  f.step(); f.step(); assert.equal(f.score, 10);
+  for (let i = 0; i < 10; i++) f.step(); assert.equal(f.score, 10);
   const collision = new Flight(1); collision.gates[0].x = R.playerX; collision.y = 60; collision.vy = 0;
   collision.step(); assert.equal(collision.reason, 'PACKET LOSS');
   const floor = new Flight(1); floor.y = R.floor; floor.vy = 0; floor.step(); assert(floor.dead);
@@ -57,10 +57,10 @@ test('Reset and pause clock preserve a run without duplicate ticks', () => {
 test('Storage: modes/day separation, unlocks, selection, corrupt and blocked storage', () => {
   const store = memory(), warnings = [];
   const records = new Records(store, v => warnings.push(v));
-  records.record('normal', '', 10); records.record('daily', '2026-10-11', 25);
+  records.record('normal', '', 10, 10); records.record('daily', '2026-10-11', 25, 25);
   assert.equal(records.best('normal', ''), 10); assert.equal(records.best('daily', '2026-10-12'), 0);
   assert(records.selectSkin('admin')); assert(!records.selectSkin('root'));
-  records.record('daily', '2026-10-12', 50); assert(records.selectSkin('root'));
+  records.record('daily', '2026-10-12', 50, 50); assert(records.selectSkin('root'));
   records.setMuted(true);
   const restored = new Records(store); assert.equal(restored.data.skin, 'root'); assert(restored.data.muted);
   assert.equal(restored.data.playerId, records.data.playerId);
@@ -97,7 +97,7 @@ test('Audio failure never blocks play', async () => {
 
 test('Leaderboard projections: rank/time/own position and malformed API dates', async () => {
   const at = Date.parse('2026-10-11T12:00:00Z');
-  const ownEntry = { position: 22, alias: 'Tester', score: 10, rank: 'PACKET ROUTER', achievedAt: at, own: true };
+  const ownEntry = { position: 22, alias: 'Tester', score: 100, gates: 10, fragments: 0, bonusPoints: 0, rank: 'PACKET ROUTER', achievedAt: at, own: true };
   let answer = { version: VERSION, mode: 'alltime', day: '', entries: [], ownEntry };
   const bodies = [];
   const api = new LeaderboardAPI('https://example.invalid', async (_, options) => {
@@ -109,8 +109,8 @@ test('Leaderboard projections: rank/time/own position and malformed API dates', 
     answer = { version: VERSION, mode: 'alltime', day: '', entries: [], ownEntry: { ...ownEntry, ...invalid } };
     await assert.rejects(api.list('alltime', 'id'), /Ungültige/);
   }
-  const payload = Object.freeze({ token: 'test-token', playerId: 'id', alias: 'Tester', score: 10, activeMs: 100000 });
-  const receipt = { accepted: true, score: 10, version: VERSION, mode: 'normal', day: '', ownEntry, positionAsOf: at };
+  const payload = Object.freeze({ token: 'test-token', playerId: 'id', alias: 'Tester', score: 100, gates: 10, fragments: 0, bonusPoints: 0, activeMs: 100000 });
+  const receipt = { accepted: true, score: 100, version: VERSION, mode: 'normal', day: '', ownEntry, positionAsOf: at };
   answer = receipt;
   await api.submit(payload); await api.submit(payload); assert.equal(bodies[0], bodies[1]);
   for (const positionAsOf of ['date', -1, 8640000000000001]) {

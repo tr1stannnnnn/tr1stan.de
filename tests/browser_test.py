@@ -30,6 +30,7 @@ class BrowserTests(unittest.TestCase):
     def game(self, path='/game.html'):
         self.page.goto(BASE + path)
         self.page.wait_for_selector('#gameUI:not([hidden])')
+        if getattr(self, 'mockOnline', False): self.page.locator('#onlineRun').check()
         self.page.evaluate('document.fonts.ready')
         self.page.evaluate("window.scrollTo({top:0,behavior:'instant'})")
     def state(self):
@@ -80,7 +81,7 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#start').click()
         self.page.locator('#start').dispatch_event('click')
         self.assertEqual(self.state(), 'countdown')
-        self.page.clock.run_for(3200); self.assertEqual(self.state(), 'running')
+        self.page.clock.run_for(1700); self.assertEqual(self.state(), 'running')
         self.page.set_viewport_size({'width': 932, 'height': 430})
         self.assertEqual(self.state(), 'running')
         self.page.evaluate("Object.defineProperty(document, 'hidden', {configurable:true, get:()=>true}); document.dispatchEvent(new Event('visibilitychange'))")
@@ -115,8 +116,8 @@ class BrowserTests(unittest.TestCase):
         self.assertIn('PACKET//FLIGHT', self.page.locator('#copyFallback').input_value())
         self.assertEqual(self.page.evaluate('document.activeElement.id'), 'copyFallback')
     def online(self, score_failure=False, start_failure=False, populated=False):
-        self.scores = []; self.starts = []; self.failed_once = False; self.own_entry = None; self.receipt = None
-        self.context.route('**/game/config.mjs', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
+        self.scores = []; self.starts = []; self.mockOnline = True; self.failed_once = False; self.own_entry = None; self.receipt = None
+        self.context.route('**/game/config.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
         def api(route):
             req = route.request; path = urlparse(req.url).path
             headers = {'access-control-allow-origin': BASE, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Content-Type, X-Player-ID', 'content-type': 'application/json'}
@@ -125,18 +126,18 @@ class BrowserTests(unittest.TestCase):
                 self.starts.append(req.post_data_json)
                 if start_failure: route.fulfill(status=503, headers=headers, body='{"message":"offline"}'); return
                 time = self.page.evaluate('Date.now()')
-                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-1','mode':'normal','day':'','seed':1,'startedAt':time,'expiresAt':time+1800000}
+                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-2','mode':'normal','day':'','seed':1,'startedAt':time,'expiresAt':time+1800000}
             elif path == '/api/score':
                 self.scores.append(req.post_data_json)
                 if self.receipt is None:
-                    self.own_entry = {'position':22 if populated else 1,'alias':req.post_data_json['alias'],'score':req.post_data_json['score'],'rank':'SCRIPT KIDDIE','achievedAt':self.page.evaluate('Date.now()'),'own':True}
-                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-1','mode':'normal','day':'','positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
+                    self.own_entry = {'position':22 if populated else 1,'alias':req.post_data_json['alias'],'score':req.post_data_json['score'],'gates':req.post_data_json['gates'],'fragments':req.post_data_json['fragments'],'bonusPoints':req.post_data_json['bonusPoints'],'rank':'SCRIPT KIDDIE','achievedAt':self.page.evaluate('Date.now()'),'own':True}
+                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-2','mode':'normal','day':'','positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
                 if score_failure and not self.failed_once:
                     self.failed_once = True; route.fulfill(status=503, headers=headers, body='{"message":"Antwort verloren"}'); return
                 data = self.receipt
             else:
-                entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':25,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
-                data = {'version':'pf-1','mode':'alltime','day':'','entries':entries,'ownEntry':self.own_entry}
+                entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':250,'gates':25,'fragments':0,'bonusPoints':0,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
+                data = {'version':'pf-2','mode':'alltime','day':'','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
     def test_voluntary_submission_validation_cancel_and_identical_retry(self):

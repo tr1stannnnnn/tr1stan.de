@@ -15,7 +15,7 @@ const b64 = bytes => Buffer.from(bytes).toString('base64url');
 async function token(claims) {
   const payload = b64(JSON.stringify(claims));
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secrets.SIGNING_KEY), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return `pf1.${payload}.${b64(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('pf1.' + payload)))}`;
+  return `pf2.${payload}.${b64(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('pf2.' + payload)))}`;
 }
 async function request(path, { method = 'GET', body, headers = {}, ip, targetEnv = env } = {}) {
   const response = await worker.fetch(new Request('https://worker.invalid' + path, {
@@ -31,19 +31,19 @@ async function fixture(id = player(), mode = 'normal', elapsed = 120000) {
   claims.startedAt = now - elapsed; claims.expiresAt = claims.startedAt + RULES.tokenTtlMs;
   claims.day = mode === 'daily' ? utcDay(claims.startedAt) : '';
   if (mode === 'daily') claims.seed = dailySeed(claims.day);
-  await DB.prepare('UPDATE runs SET started_at=?,expires_at=?,day=?,seed=? WHERE id=?').bind(claims.startedAt, claims.expiresAt, claims.day, claims.seed, claims.runId).run();
+  await DB.prepare('UPDATE runs_v2 SET started_at=?,expires_at=?,day=?,seed=? WHERE id=?').bind(claims.startedAt, claims.expiresAt, claims.day, claims.seed, claims.runId).run();
   return { ...started.data, ...claims, token: await token(claims), playerId: id };
 }
-const submission = (run, score = 10, alias = 'Tester', activeMs = 100000) => ({ token: run.token, playerId: run.playerId, alias, score, activeMs });
+const submission = (run, gates = 10, alias = 'Tester', activeMs = 100000) => ({ token: run.token, playerId: run.playerId, alias, score: gates * 10, gates, fragments: 0, bonusPoints: 0, activeMs });
 before(async () => {
   mf = new Miniflare({ modules: true, script: await readFile(new URL('../.test-build/index.js', import.meta.url), 'utf8'), compatibilityDate: '2026-06-11', d1Databases: { DB: 'packet-flight-isolated-test' }, bindings: { ENABLED: 'true', ENVIRONMENT: 'production', ...secrets } });
   DB = await mf.getD1Database('DB');
-  const sql = (await readFile(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8')).replace(/^--.*$/gm, '');
+  const sql = (await readFile(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8') + await readFile(new URL('../migrations/0002_escape_pf2.sql', import.meta.url), 'utf8')).replace(/^--.*$/gm, '');
   await DB.batch(sql.split(';').map(s => s.trim()).filter(Boolean).map(s => DB.prepare(s)));
   env = { DB, ENABLED: 'true', ENVIRONMENT: 'production', ...secrets };
 });
 beforeEach(async t => {
-  await DB.batch(['runs', 'scores', 'rate_buckets'].map(table => DB.prepare(`DELETE FROM ${table}`)));
+  await DB.batch(['runs_v2', 'scores_v2', 'rate_buckets'].map(table => DB.prepare(`DELETE FROM ${table}`)));
   now = Date.parse('2026-10-11T15:00:00Z'); ipCounter = 1;
   t.mock.method(Date, 'now', () => now);
 });
@@ -55,7 +55,7 @@ test('Actual workerd runtime: health, preflight and signed start', async () => {
   const response = await mf.dispatchFetch('https://worker.invalid/api/run/start', { method: 'POST', headers: { Origin: origin, 'CF-Connecting-IP': '203.0.113.1', 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'daily', version: VERSION, playerId: player() }) });
   assert.equal(response.status, 200); const start = await response.json();
   assert.equal(start.seed, dailySeed(start.day)); assert.equal(start.expiresAt - start.startedAt, RULES.tokenTtlMs);
-  assert.match(start.token, /^pf1\./); assert.equal(response.headers.get('Cache-Control'), 'no-store');
+  assert.match(start.token, /^pf2\./); assert.equal(response.headers.get('Cache-Control'), 'no-store');
   const preflight = await request('/api/score', { method: 'OPTIONS', headers: { 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'Content-Type' } });
   assert.equal(preflight.status, 204); assert.equal(preflight.response.headers.get('Access-Control-Allow-Origin'), origin);
   assert.equal((await request('/api/score', { method: 'OPTIONS', headers: { 'Access-Control-Request-Method': 'DELETE' } })).status, 403);
@@ -76,7 +76,7 @@ test('Signature, expiry, player binding, score/time bounds and harmful aliases',
   const data = submission(run);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, token: run.token.slice(0, -4) + 'AAAA' } })).status, 401);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, playerId: player() } })).status, 403);
-  for (const score of [-1, 1.5, '10', null, 1001]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score } })).status, 400);
+  for (const score of [-1, 1.5, '10', null, 19971]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score } })).status, 400);
   for (const alias of ['<img>', 'a\u202Eb', 'a\u200Bb', 'a\nb', 'a\tb', 'a'.repeat(17), [], 42]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, alias } })).status, 400);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score: 500, activeMs: 1 } })).status, 422);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, activeMs: 120000 } })).status, 422);
@@ -87,8 +87,8 @@ test('Atomic concurrent submission, identical retry and conflicting reuse', asyn
   const run = await fixture(), data = submission(run);
   const responses = await Promise.all([request('/api/score', { method: 'POST', body: data }), request('/api/score', { method: 'POST', body: data })]);
   assert(responses.every(r => r.status === 200)); assert.deepEqual(responses[0].data, responses[1].data);
-  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores').first()).n, 1);
-  assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score: 11 } })).status, 409);
+  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores_v2').first()).n, 1);
+  assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score: 110, gates: 11 } })).status, 409);
   now += RULES.tokenTtlMs;
   assert.deepEqual((await request('/api/score', { method: 'POST', body: data })).data, responses[0].data, 'stored retry confirmation survives token expiry during retention');
   const other = await fixture();
@@ -101,7 +101,7 @@ test('Best values do not regress, ties remain early, normal/Daily separation and
     const run = await fixture(id); const answer = await request('/api/score', { method: 'POST', body: submission(run, score, alias) }); assert.equal(answer.status, 200); now += 1000;
   }
   let board = await request('/api/leaderboard?mode=alltime', { headers: { 'X-Player-ID': id } });
-  assert.equal(board.data.entries.length, 1); assert.equal(board.data.entries[0].score, 25); assert.equal(board.data.entries[0].alias, 'Müller'); assert(board.data.entries[0].own);
+  assert.equal(board.data.entries.length, 1); assert.equal(board.data.entries[0].score, 250); assert.equal(board.data.entries[0].alias, 'Müller'); assert(board.data.entries[0].own);
   assert(!JSON.stringify(board.data).includes(id)); assert(!('player_hash' in board.data.entries[0]));
   const id2 = player(), normal = await fixture(id2);
   await request('/api/score', { method: 'POST', body: submission(normal, 25, 'Second') });
@@ -109,17 +109,17 @@ test('Best values do not regress, ties remain early, normal/Daily separation and
   const daily = await fixture(id, 'daily'); await request('/api/score', { method: 'POST', body: submission(daily, 10, 'Daily') });
   assert.equal((await request('/api/leaderboard?mode=daily')).data.entries[0].alias, 'Daily');
   const improved = await fixture(id); await request('/api/score', { method: 'POST', body: submission(improved, 50, 'Root') });
-  assert.equal((await request('/api/leaderboard?mode=alltime')).data.entries[0].score, 50);
+  assert.equal((await request('/api/leaderboard?mode=alltime')).data.entries[0].score, 500);
 });
 test('Online Daily preserves server start day across UTC midnight', async () => {
   now = Date.parse('2026-10-11T23:59:58Z');
   const id = player(), response = await request('/api/run/start', { method: 'POST', body: { mode: 'daily', version: VERSION, playerId: id } });
   now = Date.parse('2026-10-12T00:00:06Z');
-  const saved = await request('/api/score', { method: 'POST', body: { token: response.data.token, playerId: id, alias: 'Midnight', score: 0, activeMs: 3000 } });
+  const saved = await request('/api/score', { method: 'POST', body: { token: response.data.token, playerId: id, alias: 'Midnight', score: 0, gates: 0, fragments: 0, bonusPoints: 0, activeMs: 3000 } });
   assert.equal(saved.status, 200); assert.equal(saved.data.day, '2026-10-11');
   assert.equal(saved.data.ownEntry.position, 1); assert.equal(saved.data.ownEntry.achievedAt, now);
   assert.equal((await request('/api/leaderboard?mode=daily')).data.entries.length, 0);
-  assert.equal((await DB.prepare("SELECT day FROM scores WHERE mode='daily'").first()).day, '2026-10-11');
+  assert.equal((await DB.prepare("SELECT day FROM scores_v2 WHERE mode='daily'").first()).day, '2026-10-11');
 });
 test('Per-network rate limits survive changing player IDs; no raw IP persisted', async () => {
   const ip = '203.0.113.12';
@@ -127,16 +127,16 @@ test('Per-network rate limits survive changing player IDs; no raw IP persisted',
   assert.equal((await request('/api/run/start', { method: 'POST', ip, body: { mode: 'normal', version: VERSION, playerId: player() } })).status, 429);
   const rows = await DB.prepare('SELECT * FROM rate_buckets').all(); assert(!JSON.stringify(rows).includes(ip));
 });
-test('Retention cleans expired runs, rate buckets and Daily days after 30 days', async () => {
+test('Retention cleans expired runs_v2, rate buckets and Daily days after 30 days', async () => {
   const expired = await fixture(player(), 'normal', RULES.tokenTtlMs + 172800001);
   const valid = await fixture();
   const old = await fixture(player(), 'daily');
   await request('/api/score', { method: 'POST', body: submission(old) });
-  await DB.prepare("UPDATE scores SET day='2026-09-01' WHERE mode='daily'").run();
+  await DB.prepare("UPDATE scores_v2 SET day='2026-09-01' WHERE mode='daily'").run();
   await cleanup(env, now);
-  assert.equal(await DB.prepare('SELECT id FROM runs WHERE id=?').bind(expired.runId).first(), null);
-  assert(await DB.prepare('SELECT id FROM runs WHERE id=?').bind(valid.runId).first());
-  assert.equal((await DB.prepare("SELECT COUNT(*) AS n FROM scores WHERE mode='daily'").first()).n, 0);
+  assert.equal(await DB.prepare('SELECT id FROM runs_v2 WHERE id=?').bind(expired.runId).first(), null);
+  assert(await DB.prepare('SELECT id FROM runs_v2 WHERE id=?').bind(valid.runId).first());
+  assert.equal((await DB.prepare("SELECT COUNT(*) AS n FROM scores_v2 WHERE mode='daily'").first()).n, 0);
 });
 
 test('Lost confirmation: immutable retry after expiry, expired fresh write forbidden', async () => {
@@ -147,17 +147,17 @@ test('Lost confirmation: immutable retry after expiry, expired fresh write forbi
   now = Math.max(run.expiresAt, unused.expiresAt) + 1;
   const retry = await request('/api/score', { method: 'POST', body: data });
   assert.equal(retry.status, 200); assert.deepEqual(retry.data, saved.data);
-  for (const change of [{ alias: 'Änne' }, { score: 11 }, { activeMs: 99999 }]) {
+  for (const change of [{ alias: 'Änne' }, { score: 110, gates: 11 }, { activeMs: 99999 }]) {
     assert.equal((await request('/api/score', { method: 'POST', body: { ...data, ...change } })).status, 409);
   }
   assert.equal((await request('/api/score', { method: 'POST', body: submission(unused) })).status, 410);
-  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores').first()).n, 1);
-  assert.equal((await DB.prepare('SELECT consumed_at FROM runs WHERE id=?').bind(unused.runId).first()).consumed_at, null);
+  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores_v2').first()).n, 1);
+  assert.equal((await DB.prepare('SELECT consumed_at FROM runs_v2 WHERE id=?').bind(unused.runId).first()).consumed_at, null);
 });
 test('Rank, server timestamp and own placement outside Top 20; fully deterministic ties', async () => {
   const achieved = now - 1000;
-  await DB.batch(Array.from({ length: 21 }, (_, i) => DB.prepare('INSERT INTO scores(entry_id,player_hash,version,mode,day,alias,score,achieved_at) VALUES(?,?,?,?,?,?,?,?)')
-    .bind(`tie-${String(i).padStart(2, '0')}`, `private-player-${i}`, VERSION, 'normal', '', `Ahead_${i}`, 25, achieved)).reverse());
+  await DB.batch(Array.from({ length: 21 }, (_, i) => DB.prepare('INSERT INTO scores_v2(entry_id,player_hash,version,mode,day,alias,score,gates,fragments,bonus_points,achieved_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(`tie-${String(i).padStart(2, '0')}`, `private-player-${i}`, VERSION, 'normal', '', `Ahead_${i}`, 250, 25, 0, 0, achieved)).reverse());
   const id = player(), run = await fixture(id), data = submission(run);
   const saved = await request('/api/score', { method: 'POST', body: data });
   assert.equal(saved.status, 200); assert.equal(saved.data.ownEntry.position, 22);
@@ -167,7 +167,7 @@ test('Rank, server timestamp and own placement outside Top 20; fully determinist
   assert(board.entries.every((e, i) => e.rank === 'SYSADMIN' && e.achievedAt === achieved && e.position === i + 1 && !e.own));
   assert.equal(board.ownEntry.position, 22); assert.deepEqual(board.ownEntry, saved.data.ownEntry);
   assert(!JSON.stringify(board).includes('private-player')); assert(!JSON.stringify(board).includes(id));
-  for (const entry of [...board.entries, board.ownEntry]) assert.deepEqual(Object.keys(entry).sort(), ['position','alias','score','rank','achievedAt','own'].sort());
+  for (const entry of [...board.entries, board.ownEntry]) assert.deepEqual(Object.keys(entry).sort(), ['position','alias','score','gates','fragments','bonusPoints','rank','achievedAt','own'].sort());
   assert.equal((await request('/api/leaderboard?mode=alltime')).data.ownEntry, null);
   assert.equal((await request('/api/leaderboard?mode=daily', { headers: { 'X-Player-ID': id } })).data.ownEntry, null);
   now += 1000;
@@ -178,7 +178,7 @@ test('Rank, server timestamp and own placement outside Top 20; fully determinist
   now += 1000;
   const worse = await fixture(id);
   const lower = await request('/api/score', { method: 'POST', body: submission(worse, 0, 'Lower') });
-  assert.equal(lower.data.score, 0); assert.equal(lower.data.ownEntry.score, 50); assert.equal(lower.data.ownEntry.achievedAt, bestTime);
+  assert.equal(lower.data.score, 0); assert.equal(lower.data.ownEntry.score, 500); assert.equal(lower.data.ownEntry.achievedAt, bestTime);
   board = (await request('/api/leaderboard?mode=alltime', { headers: { 'X-Player-ID': id } })).data;
   assert.deepEqual(board.entries[0], board.ownEntry);
   now = run.expiresAt + 1;

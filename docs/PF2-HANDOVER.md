@@ -1,0 +1,118 @@
+# PACKET//FLIGHT pf-2 — unfertiger Zwischenstand
+
+Stand: 26.10.2026. **Nicht freigabefertig. Kein Merge, keine Veröffentlichung.**
+Auf ausdrücklichen Nutzerwunsch wird die Arbeit hier für eine neue Cloud-Aufgabe
+gesichert. Die frühere Veröffentlichungsfreigabe gilt nicht für diesen Zwischenstand.
+
+Branch: `codex/packet-flight-escape-v2`.
+Ausgangspunkt: `main` / `34e47d6e4a4e925c4ea688ac007035c38e5df53d`.
+Nur in der entfernten Codex-Cloud arbeiten; vorhandenen Checkout verwenden.
+
+## Bereits umgesetzt, noch nicht vollständig abgenommen
+
+- Regeln `pf-2`, Generator `escape-1`, feste 120-Hz-Simulation und getrennte
+  Zufallszustände für Welt, Gegner und kosmetische Effekte.
+- Bewegliche/komprimierende Gates; TRACE//UNIT mit Warnung, Zielerfassung,
+  festgeschriebener Höhe und Projektil; Laser mit Warnung, Aufladung, aktiver
+  Phase und Abklingen. Sicherheitskorridore unterdrücken bewegliche Gates und
+  weitere Angriffe. Erste Drohne bei Gate 12, erster Laser bei Gate 20.
+- 10 Punkte pro Gate; höchstens ein optionales Fragment hinter einem Gate;
+  Fragmentbonus 2 × Combo, maximal ×5, Reset beim verpassten angebotenen Fragment.
+  Ergebnis trennt Gates, Fragmente und Bonus. Konservative Score-Obergrenze 19.980.
+- Neue Darstellung/Sounds/HUD, bestehende Sprungeffekte integriert; kürzerer
+  Countdown (1,5 s), getrenntes Online-Run-Kontrollfeld standardmäßig aus.
+- Neuer versionierter Browser-Speicher mit pf-1-Archiv; Kennung, Mute und Skins
+  werden übernommen. Neue Freischaltungen basieren auf Gates, nicht Gesamtpunkten.
+- Konsistente pf-2-Asset-URLs und neuer Offline-Cache inklusive neuer Module.
+- Worker für pf-2-Aggregate, Gate-basierte Dauerprüfung, pf-2-Tokens,
+  manuelle unveränderte Retries, neue Tabellen und `schemaReady` im Health-Endpunkt.
+  Bisherige atomare Speicherung und Ranglistenfunktionen wurden angepasst.
+- Additive Migration `cloudflare-worker/migrations/0002_escape_pf2.sql`:
+  `runs_v2`, `scores_v2`, Indizes und Score-/Typ-Prüfungen. Keine alten Tabellen
+  gelöscht oder umgeschrieben. **Nicht produktiv angewendet.**
+
+## Tatsächlicher Teststand
+
+Alle Tests liefen nur in der Cloud mit isolierten Browserprofilen/Testdaten.
+
+| Prüfung | Letzter beobachteter Stand |
+| --- | --- |
+| `node --test tests/game.test.mjs tests/escape.test.mjs` | 21 bestanden |
+| `python3 tests/browser_test.py` | 12 bestanden, 39,755 s |
+| `python3 tests/visual_browser_test.py` | 7 bestanden, 75,059 s |
+| Worker `npm test` (Dry-Run-Build + Miniflare/D1) | zuletzt 9 bestanden, 1 fehlgeschlagen |
+
+Bekannter Worker-Testfehler: `cloudflare-worker/tests/worker.test.mjs` enthält
+noch `19971` in der Liste ungültiger Scores mit erwarteter Antwort 400. Seit der
+korrigierten Maximalgrenze **19980** ist das ein gültiger Integer innerhalb der
+Grenze; wegen unpassender Aggregate kommt korrekt 422 zurück. Die Grenzfall-Fixture
+muss angepasst und die ganze Backend-Suite erneut ausgeführt werden. Ein früherer
+Backend-Lauf vor der Grenzwertkorrektur bestand 10/10; dieser ist keine aktuelle
+Abnahme. Zusätzliche geplante Backend-Regressionen wurden noch nicht ergänzt.
+
+Die neuen Unit-Tests prüfen u. a. 100 Seeds bis 35 Gates mit einem nur Eingaben
+erzeugenden Controller, Projektil-/Laserphasen, Combo, Migration des lokalen
+Speichers und Framerate-Replay. Das ist kein Beweis, dass alle möglichen Runs
+fair sind. Es fehlen ausgiebige tatsächliche Spieltests und die neue Aufnahme.
+
+Cloud-Testserver wurde auf `127.0.0.1:8000` neu gestartet; auf einer neuen Aufgabe
+nicht als laufend voraussetzen. Loopback-Tests gehören zum Cloud-Executor.
+Keine TLS-Prüfung ausschalten und keine externen Netzwerksperren umgehen.
+
+## Offene Aufgaben
+
+1. Gesamtdiff prüfen und aktuelle Tests erneut ausführen. Kleine Whitespace-Funde
+   in `game/app.mjs` sind noch offen. Neue Backend-Tests für Scorekomponenten,
+   SQL-Grenzen/Typen, additive Altdatenerhaltung, fehlendes Schema und neue
+   Aufbewahrung ergänzen. Datenschutz, README und Deployment-Anleitung aktualisieren.
+2. Tatsächliche Runs mit beweglicher Firewall, Drohne, Laser und Combo spielen;
+   Touch/Pointer, Pause in allen Angriffsphasen und Neustarts überprüfen.
+   Neue Vorher-/Nachher-Bilder und echte Spielaufnahme erstellen. Bisherige
+   Layouttests ersetzen diese inhaltliche Sichtprüfung nicht.
+3. Produktionszugriff reparieren/neu verbinden und den **tatsächlichen**
+   D1-Schema-/Migrationsstand vor Änderungen lesen. Die Nutzerangabe
+   `configured=true` beweist keine Tabellen. Bestehende Runtime-Secrets weder
+   auslesen noch ändern. Keine Produktionsdatenbank zurücksetzen.
+4. Fehlende Betreiber-/Anbieterangaben zur Datenschutzergänzung konkret prüfen;
+   keine Rechtsgrundlagen, Datenorte, Vertrags- oder Logeinstellungen erfinden.
+5. Nach späterer ausdrücklicher Fortsetzungsfreigabe und erfolgreichen Prüfungen:
+   Datenschutzhinweise zuerst veröffentlichen, Migrationen kontrolliert anwenden,
+   Worker pf-2 prüfen, Produktions-ENABLED aktivieren/deployen und erst nach
+   Backend-Nachweis die Frontend-API-URL aktivieren. Anschließend echten freiwilligen
+   Testeintrag speichern und nach Reload abrufen, Modi/Position/Fallback/Free-CPU
+   prüfen. PR und Veröffentlichungsstatus wahrheitsgemäß dokumentieren.
+
+## Cloud-Zugriff: letzter konkreter Befund
+
+Der Nutzer meldete am 26.10., dass die Cloud-Umgebung veröffentlicht und
+`CLOUDFLARE_API_TOKEN` sicher hinterlegt sei. Der **laufende Executor** zeigte
+anschließend weiterhin den alten Laufzeitstand: keine Secret-Bindung, keine
+zusätzlichen Netzwerkziele, Wrangler `not authenticated`, HTTPS-Proxy 403 für
+Worker und GitHub-API. Der gespeicherte Entwurf enthielt dagegen die neue
+Secret-Anforderung und Freigaben für `api.cloudflare.com`, `api.github.com`,
+`developers.cloudflare.com`, `tr1stan.de` und den Worker-Host. Eine neue Aufgabe
+muss die veröffentlichte Konfiguration tatsächlich verwenden und dies mit
+`cloud_environment.environment_status` und read-only API-Aufrufen bestätigen.
+Keine Secrets im Chat anfordern oder deren Werte protokollieren.
+
+Git-Fetch über die konfigurierte Verbindung funktioniert. GitHub-API, PR-Anlage,
+Merge, Pages-Livekontrolle und Cloudflare-Verwaltung waren im laufenden Executor
+zuletzt blockiert. Der Dashboard-Hinweis „Configured API token unavailable“ für
+Worker Builds wurde noch nicht unabhängig geprüft.
+
+## Unverändert / nicht durchgeführt
+
+- `game/config.mjs`: **API_URL leer**. Produktion: **ENABLED=false**.
+- Bestehende D1-ID `bc462466-1ed9-41d9-ab75-dc0197d50502` und Binding `DB` erhalten.
+- Kein `[limits]`/`cpu_ms`-Block; Fehler 100328 nicht wieder einführen.
+- Kein produktiver SQL-Schreibzugriff, keine Migration, kein Worker-Deployment,
+  kein echter Ranglisteneintrag, kein Merge und kein Pages-Deployment dieser Arbeit.
+- Domain, DNS, Mail, Impressum und bisherige Homepage-Navigation nicht geändert.
+- Keine produktiven Secret-Werte im Repository. Testdateien verwenden weiterhin
+  ausdrücklich falsche, isolierte Test-Schlüssel.
+
+Offizielle Cloudflare-Dokumentation wurde über die erlaubte offizielle
+GitHub-Quelle `cloudflare/cloudflare-docs`, Branch `production`, gelesen:
+`src/content/docs/d1/reference/migrations.mdx` und
+`src/content/docs/workers/platform/limits.mdx`. Free HTTP-CPU bleibt laut dieser
+Quelle 10 ms; echte Produktions-CPU-Werte wurden nicht gemessen.
