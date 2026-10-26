@@ -1,0 +1,33 @@
+{
+  "state": "running",
+  "flap": false,
+  "gates": 30,
+  "score": 338,
+  "fragments": 9,
+  "bonus": 38,
+  "combo": 0,
+  "ticks": 6923,
+  "y": 372.2708333334576,
+  "vy": -167.5,
+  "reason": "",
+  "phase": null,
+  "locked": null,
+  "gateType": "static",
+  "phases": [
+    "laser-active",
+    "laser-charging",
+    "laser-fading",
+    "laser-warning",
+    "trace-active",
+    "trace-locked",
+    "trace-tracking",
+    "trace-warning"
+  ],
+  "types": [
+    "compress",
+    "moving",
+    "static"
+  ],
+  "maxCombo": 4,
+  "paused": []
+}

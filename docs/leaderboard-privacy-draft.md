@@ -1,79 +1,95 @@
-# Prüffassung für eine spätere Ranglistenaktivierung
+# Datenschutzentwurf PACKET//FLIGHT pf-2
 
-**Nicht die aktive Datenschutzerklärung.** Die API-URL ist leer, Cloudflare wurde
-nicht aktiviert. Diese Vorlage muss vor Aktivierung fachlich und rechtlich
-geprüft und auf den tatsächlichen Betreiber, Account, Vertrag und Betrieb
-angepasst werden. Sie behauptet keine garantierte Rechtskonformität.
+Prüffassung vom 26.10.2026, **nicht die aktive Datenschutzerklärung**. Keine
+Rechtskonformität oder Vertragslage wird zugesichert. Verantwortlicher und
+Kontakt bleiben die in Impressum/datenschutz.html genannten Angaben. Kein
+Wechsel von GitHub Pages, Domain, DNS oder Mail ist vorgesehen.
 
-## Geplanter Ablauf und Daten
+## Tatsächlich beobachteter Stand
 
-Bei einem Online-Spielstart wird bereits eine Anfrage an den später benannten
-Cloudflare-Worker geschickt: zufällige pseudonyme Browserkennung, Spielversion
-und Modus. Der Server legt Run-ID, Startzeit, Ablaufzeit, Tageszuordnung und Seed
-fest. Er speichert einen mit einem geheimen Schlüssel abgeleiteten Kennungshash,
-nicht die unveränderte Browserkennung. Ein Token kehrt zum Browser zurück.
-Ein lokaler Run ohne gültigen Serverstart ist später nicht öffentlich einreichbar.
+Frontend-API_URL ist leer. Der produktive Cloudflare-Worker antwortet als pf-1,
+ENABLED=false, configured=true. Die bestehende D1-Datenbank enthält nur pf-1-
+Tabellen. In dieser Arbeit wurden ausschließlich Schema-/Metadaten gelesen;
+keine produktiven Scores übertragen, Migrationen oder Deployments ausgeführt.
+Worker-Logpush ist laut API false; observability ist null. Daraus lassen sich
+weder vollständige Logfreiheit noch Backup-Fristen oder Datenresidenz ableiten.
+Die Antwortregion WEUR/CDG einer Anfrage ist kein Nachweis der Speicherorte.
 
-**Veröffentlichung bleibt freiwillig:** Erst SCORE EINTRAGEN öffnet das Formular;
-ÖFFENTLICH EINTRAGEN sendet Alias, Score, behauptete aktive Spielzeit, Token und
-Browserkennung. Abbrechen vor Absenden sendet keine Eintragung. Der öffentliche
-Top-20-Eintrag zeigt Alias, Score, Position, Rang und den serverseitigen Zeitpunkt
-des Bestwerts (UTC). Eigene Einträge werden ohne Veröffentlichung vollständiger
-Kennungen markiert. Das anfragende Browserprofil erhält außerdem seine eigene
-Bestwertposition außerhalb der Top 20; keine zusätzlichen fremden Einträge.
-Es gibt weder Konto noch E-Mail-Abfrage noch Fingerprinting.
+## Entwurf des Hinweises vor einer späteren Aktivierung
 
-Die Kennung ermöglicht einen Bestwert pro Browserprofil, nicht pro Mensch.
-Andere Geräte/Profile oder gelöschte Website-Daten ermöglichen weitere Einträge.
-Pseudonymisierung ist keine vollständige Anonymität. Weder ein Alias noch
-technische Metadaten dürfen pauschal als anonym bezeichnet werden.
+Du kannst PACKET//FLIGHT vollständig lokal spielen. Ohne Online-Run und ohne
+bewusstes Laden der Rangliste sendet das Spiel keine Anfrage an Cloudflare.
+Auch bei später konfiguriertem Backend wird die Rangliste nicht automatisch
+beim Seitenaufruf geladen. Ein Klick auf AKTUALISIEREN oder einen Ranglistenmodus
+ruft sie ab und übermittelt die pseudonyme Browserkennung für deine eigene Position.
 
-## Anbieter und technische Verarbeitung
+Nur mit aktivierter Online-Run-Auswahl sendet START Browserkennung, Modus und
+Spielversion an den Cloudflare-Worker. Der Server erstellt einen signierten Run
+mit Seed, Start-/Ablaufzeit und UTC-Tag. Das geschieht bereits vor einer möglichen
+Scoreeintragung. Ein rein lokaler Run ist später nicht nachträglich einreichbar.
+Es gibt keine versteckte Upload-Warteschlange.
 
-Der künftig konkret benannte Cloudflare-Account verarbeitet HTTPS-Anfragen als
-Worker-/D1-Anbieter. Dabei können IP-Adressen und weitere Netzwerkmetadaten
-verarbeitet werden. Unsere Anwendung verarbeitet eine IP vorübergehend zur
-Bildung eines täglich wechselnden HMAC für Missbrauchsbegrenzung, speichert aber
-keine rohen IP-Adressen dauerhaft und loggt keine Tokens oder Request-Bodies.
-Cloudflares eigene Logs, Aufbewahrung, Backups, Sicherheitsverarbeitung und
-gegebenenfalls internationale Übermittlungen müssen anhand des tatsächlichen
-Vertrags und der Account-Einstellungen separat beschrieben werden. Die Aussage
-„IP-Adressen werden niemals verarbeitet“ wäre falsch.
+SCORE EINTRAGEN öffnet erst das Formular. ÖFFENTLICH EINTRAGEN übermittelt den
+gewählten Alias, Score, Gatezahl, Fragmentzahl, Combo-Bonuspunkte, behauptete
+aktive Spielzeit, Token und Browserkennung. Abbrechen vor dem Absenden sendet
+keinen Score. Nach verlorener Antwort ist eine ausschließlich manuell ausgelöste
+identische Wiederholung möglich; eine schon verarbeitete Anfrage kann bereits
+öffentlich sein. Kein automatischer Retry, keine Übernahme früherer Aliase.
 
-## Im Code vorgesehene Aufbewahrung
+Öffentlich beziehungsweise an den anfragenden Browser zurückgegeben werden Alias,
+Score, Gate-/Fragment-/Bonussummen, Rang, Position und serverseitiger Zeitpunkt
+des Bestwerts (UTC). Vollständige Browserkennungen, Kennungshashes, IP-Adressen,
+Tokens und interne Entry-IDs werden nicht im Board veröffentlicht. Der Browser
+erhält seinen eigenen Bestwert auch außerhalb der Top 20, keine zusätzlichen
+fremden Einträge. Eine bestätigte Position ist eine zeitliche Momentaufnahme.
 
-- Lokaler Browser-Speicher: Rekorde/Einstellungen/Skins/Kennung bis zur Löschung
-  der Website-Daten; höchstens 90 gespeicherte Daily-Tagesrekorde. Offline-Dateien
-  im Browser-Cache bis zur Cache-/Website-Datenlöschung oder Versionsbereinigung.
-- Server-Runs: 30 Minuten Gültigkeit, Bereinigung 48 Stunden nach Ablauf beim
-  nächsten täglichen Lauf um 03:17 UTC; maximal weitere 24h Verzögerung bei
-  funktionierendem Cron. Verbrauchte Runs bewahren die Retry-Bestätigung.
-- Daily-Rangliste: aktueller UTC-Tag plus 29 vorangegangene Tage, Löschung beim
-  nächsten täglichen Bereinigungslauf.
-- Allzeit-Bestwerte: bis zur Betreiberlöschung oder einem angekündigten Reset.
-  Diese längere Frist muss vor Aktivierung ausdrücklich überprüft werden.
-- IP-bezogene HMAC-Rate-Buckets: Minuten-Buckets 2 Minuten, Tages-Buckets 48h
-  ab Anlage, jeweils Löschung beim nächsten täglichen Lauf (bis zu 24h später).
-- Anbieter-Logs und Time-Travel-/Backup-Daten: **tatsächliche Fristen ergänzen**;
-  diese werden durch unsere Tabellenbereinigung nicht automatisch gelöscht.
+Ein Profil kann einen Bestwert pro Version/Modus/UTC-Tag haben. Ein anderes
+Gerät, anderes Profil oder gelöschter Speicher kann weitere Kennungen erzeugen.
+Es gibt kein Konto, E-Mail-Zwang oder Fingerprinting und keine verlässliche
+Identitätsprüfung. Pseudonymisierte Werte und Aliase sind nicht pauschal anonym.
 
-## Vor Aktivierung konkret zu ergänzen
+## Datenverarbeitung und Aufbewahrung laut pf-2-Code
 
-1. Zweck und geprüfte Rechtsgrundlagen für lokalen optionalen Spielspeicher,
-   Online-Run-Start, öffentliche Eintragung und Missbrauchsschutz. Keine pauschale
-   Einwilligungsbehauptung für alle Anbieter-/Sicherheitsvorgänge.
-2. Cloudflare-Anbieteridentität, Auftragsverarbeitung, tatsächliche Datenorte,
-   Übermittlungsgrundlagen und Account-/Log-/Backup-Einstellungen.
-3. Verständlicher Online-Hinweis **vor dem Spielstart**, da Cloudflare-Anfragen
-   schon dann erfolgen, auch wenn später kein Score veröffentlicht wird.
-4. Betreiberprozess für Moderation, Auskunft, Löschung und Beschwerden, inklusive
-   Umgang mit einer vom Nutzer freiwillig übermittelten Browserkennung. Keine
-   Kennungen oder Tokens öffentlich posten lassen. Keine Identitätsprüfung
-   behaupten, die das kontolose Modell nicht bietet.
-5. Tatsächliche Aufbewahrungsfristen, Cron-Überwachung und Löschkontrolle; prüfen,
-   ob die Allzeit-Aufbewahrung begrenzt werden muss. Änderungen zuerst im Code
-   und in dieser Beschreibung konsistent vornehmen.
+- localStorage: zufällige Browserkennung, Sound, Skins, pf-2-Rekorde, kumulative
+  Spielstatistik und pf-1-Archiv. Bis zur Löschung der Website-Daten; höchstens
+  90 pf-2-Daily-Tageswerte. Alte pf-1-Daten bleiben getrennt erhalten. Bei
+  blockiertem Speicher Sitzungsspeicher/Arbeitsspeicher mit sichtbarem Hinweis.
+- Service Worker: lokale Spieldateien/Fonts, keine API-Antworten. Bis zur
+  Versionsbereinigung oder Löschung des Browser-Caches/der Website-Daten.
+- D1-Runs: HMAC der Browserkennung, Version, Modus, Seed, Tageszuordnung,
+  Serverzeiten, Verbrauchsstatus und gegebenenfalls Alias, Komponenten,
+  Submission-Digest und Retry-Bestätigung. 30 Minuten gültig; Löschung 48 Stunden
+  nach Ablauf beim nächsten täglichen Bereinigungslauf.
+- Daily-Bestwerte: aktueller UTC-Tag und 29 frühere Tage, danach tägliche Löschung.
+- Normal-Bestwerte: Löschung bei einem Alter des Achievement-Zeitpunkts über
+  365 Tagen beim nächsten Cron; keine unbegrenzte Allzeit-Aufbewahrung behaupten.
+- Rate-Buckets: täglicher HMAC aus IP und Datum/Scope, kein roher IP-Speicher in
+  dieser Anwendung. Minuten-Buckets laufen nach 2 Minuten, Tages-Buckets nach
+  48 Stunden ab. Das globale Tageslimit enthält keine Profilkennung.
+- Cron: 03:17 UTC; bei funktionierendem Lauf bis zu weitere 24 Stunden zur
+  jeweiligen Löschung. Fehlgeschlagene Cron-Läufe verlängern die Aufbewahrung
+  und benötigen Betriebsüberwachung. Bereinigung ist kein Backup-Löschnachweis.
+- Legacy pf-1: Migration und pf-2-Cron löschen/überschreiben bestehende Tabellen
+  nicht. Ihre tatsächlichen Daten und erforderlichen Fristen separat prüfen;
+  vor Freigabe eine ausdrücklich genehmigte Archiv-/Löschentscheidung festhalten.
 
-Die vorhandene Datenschutzerklärung wird nicht ersetzt. Ihr Zusatz zum aktiven
-lokalen Spielspeicher ist davon getrennt. Impressum, GitHub Pages, DNS und
-E-Mail-Dienste werden durch diese Vorlage nicht verändert.
+IP-Adressen und HTTPS-Metadaten werden bei Cloudflare verarbeitet. Die Anwendung
+verwendet die IP vorübergehend für Missbrauchsschutz und loggt keine Tokenwerte
+oder Request-Bodies. Das ist keine Aussage über sämtliche Anbieter-Logs.
+
+## Konkrete Freigabepunkte für Betreiber/Datenschutzprüfung
+
+| Punkt | Stand / erforderlicher Nachweis |
+| --- | --- |
+| Anbieter/Vertrag | Tatsächliche Cloudflare-Vertragspartei und Auftragsverarbeitungsvertrag anhand des bestehenden Accounts ergänzen; nicht aus der Worker-Domain ableiten. |
+| Rechtsgrundlagen | Für optionalen Browserspeicher auch §25 TDDDG prüfen; für Online-Start, öffentliche Eintragung und Missbrauchsschutz jeweils Zweck, Erforderlichkeit und Art.-6-Grundlage begründen. Checkbox allein belegt keine wirksame Einwilligung für alle Verarbeitung. |
+| Datenorte/Übermittlung | Tatsächliche Anbieter-/D1-Einstellungen, Unterauftragnehmer und Übermittlungsgrundlagen Art.44ff prüfen. Keine EU-only-Zusage aus einer Antwortregion. |
+| Logs/Backups | Plattformlogs, Fehlerlogs, Time Travel/Backups und deren Fristen/Restore-Verfahren prüfen; logpush=false ist dafür unzureichend. |
+| Betrieb | Cron-Erfolg, Quoten/Free-CPU, Missbrauch, Löscherfolg und Wiederherstellung prüfen; keine unbeobachteten Fristen zusichern. |
+| Betroffenenrechte | Kontakt und Verfahren für Auskunft/Berichtigung/Löschung/Widerspruch festlegen, inklusive sicherer freiwilliger Zuordnung zur Browserkennung. Keine Kennungen oder Tokens öffentlich anfordern. |
+| Moderation | Alias-Missbrauch und vollständige Löschung zugehöriger Scores/Runs/Receipts privat behandeln; keine öffentliche Admin-API. |
+| pf-1-Altbestand | Bestehende Tabellen erhalten; angemessene Altaufbewahrung und erst später genehmigte Löschung dokumentieren. |
+
+Vor der Online-Aktivierung muss aus diesem Entwurf eine geprüfte, tatsächliche
+Verarbeitung beschreibende Ergänzung von datenschutz.html werden und zuerst
+veröffentlicht werden. Bis dahin bleiben API_URL leer und Worker deaktiviert.

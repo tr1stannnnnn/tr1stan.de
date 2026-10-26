@@ -8,10 +8,11 @@ only in the remote development environment.
 cd /workspace/tr1stan.de
 python3 -m http.server 8000 --bind 127.0.0.1
 # In another cloud terminal:
-node --test tests/game.test.mjs
+node --test tests/game.test.mjs tests/escape.test.mjs
 python3 tests/site_test.py
 python3 tests/browser_test.py
 python3 tests/visual_browser_test.py
+python3 tests/escape_browser_test.py
 npm_config_cache=/tmp/packet-flight-npm npm exec --yes --package=html-validate@10.5.0 -- html-validate --config tests/html-validate.json index.html game.html datenschutz.html impressum.html 404.html
 cd cloudflare-worker
 npm_config_cache=/tmp/packet-flight-npm npm ci --no-audit --no-fund
@@ -89,3 +90,35 @@ Observe the actual Free CPU/DB quotas. No production load/abuse tests are needed
   Equal scores/timestamps sort by stable entry ID, even with reverse insertion.
   Lower scores preserve best-value rank/time; Daily receipts keep the start day.
 - Responses contain only public entry fields, never other players’ IDs/hashes.
+
+## pf-2 escape checks
+
+The backend suite separates malformed/out-of-range score 400 from inconsistent
+components 422, including the inclusive 19980 aggregate/SQL bound. The independent
+active-time limit is preserved: maximum components do not bypass duration checks.
+Additional checks cover SQL integer/formula constraints, additive pf-1 row
+preservation, repeated migrations, missing-schema health and year-long Normal
+retention. All SQL mutations use ephemeral emulated D1; strip production credentials
+from the test subprocess. Production schema checks are SELECT-only.
+
+`escape.test.mjs` also samples 1000 deterministic routes through 80 gates at
+maximum difficulty while collecting optional fragments; this is reachability
+evidence for an input-only controller, not a universal fairness or human study.
+`escape_browser_test.py` plays to 30 gates via actual keyboard and touch inputs,
+collects fragments, observes moving/compressing gates, all trace/laser phases and
+full pause snapshots. Touch runs use 390×844 with Reduced Motion. Observers read
+Flight/Effects in intercepted modules; no production debug hooks, gameplay writes,
+forced scores, seeds or collision bypasses are shipped. Artifacts go to /tmp.
+
+`tools/capture-pf2.py` generates committed before/after images, phase screenshots
+and a real wall-clock input-driven run through both attacks and compression.
+Serve this checkout on port 8000 and an exported main/34e47d6 tree on port 8001;
+use no extra Git worktree. Run with the FFmpeg bridge already described:
+`PLAYWRIGHT_BROWSERS_PATH=/workspace/cloud-tools/playwright python3 tools/capture-pf2.py`.
+The real-time driver anticipates 100ms of browser/protocol input latency but
+never changes physics. Initial failed captures are not evidence of completion;
+the committed video metadata must show the completed current run.
+
+The enabled-API privacy regression verifies that local play/page load sends no
+backend requests until explicit online action. Physical iOS/Safari/Android, legal
+review, pf-2 production CPU and a voluntary production score remain release checks.

@@ -31,6 +31,19 @@ function updateRoute() {
   $('gateCount').textContent = `${flight.gatesPassed} GATES`;
   $('combo').textContent = flight.combo ? `COMBO ×${flight.combo}` : 'COMBO —';
   $('alertPhase').textContent = ALARMS[flight.alarm]; document.body.dataset.alarm = flight.alarm;
+  const h = flight.hazard;
+  const messages = {
+    'trace:warning': 'TRACE//UNIT nähert sich. Warte auf die Zielmarkierung.',
+    'trace:tracking': 'Ziel wird verfolgt. Erst nach LOCKED die Höhe wechseln.',
+    'trace:locked': 'LOCKED: Zielhöhe bleibt fest. Jetzt nach oben oder unten ausweichen.',
+    'trace:active': 'Schuss auf die feste Zielhöhe. Halte Abstand zur Markierung.',
+    'laser:warning': 'LASER: Die markierte Zone verlassen. Der breite Korridor bleibt frei.',
+    'laser:charging': 'LASER lädt. Bleibe auf der angezeigten sicheren Seite.',
+    'laser:active': 'LASER aktiv. Sichere Seite halten.',
+    'laser:fading': 'LASER klingt ab. Die Route wird wieder frei.',
+  };
+  const hint = h ? messages[`${h.kind}:${h.phase}`] : 'Durch die Lücken fliegen. Goldene Fragmente sind freiwillig.';
+  if ($('threatStatus').textContent !== hint) $('threatStatus').textContent = hint;
 }
 function best() { $('best').textContent = records.best(mode, mode === 'daily' ? run?.day || currentDay : ''); }
 function dayInfo() {
@@ -126,7 +139,7 @@ function finish() {
   best(); skins(); setState('gameover');
   $('resultTitle').textContent = flight.reason;
   $('resultScore').textContent = String(result.score);
-  $('resultParts').textContent = `${result.gates} Gates × 10 = ${result.gates * 10} · ${result.fragments} Fragmente · ${result.bonusPoints} Bonuspunkte`; 
+  $('resultParts').textContent = `${result.gates} Gates × 10 = ${result.gates * 10} · ${result.fragments} Fragmente · ${result.bonusPoints} Bonuspunkte`;
   $('resultRank').textContent = rank(result.gates);
   $('resultSummary').textContent = `${run.mode === 'daily' ? `Daily ${run.day} UTC` : 'Normal'} · Rekord ${local.best}${local.newRecord ? ' · Neuer Rekord!' : ''}${local.unlocked.length ? ` · Skin freigeschaltet: ${local.unlocked.join(', ')}` : ''}`;
   $('publishQuestion').textContent = canSubmit() ? 'Möchtest du diesen Score öffentlich mit einem Alias veröffentlichen? Erst SCORE EINTRAGEN öffnet die Eingabe.' : `${run.online ? 'Server-Run abgelaufen; Score bleibt lokal.' : run.offlineReason} Keine öffentliche Eintragung möglich.`;
@@ -273,7 +286,7 @@ function frame(time) {
       announce(run.online ? 'LÄUFT — Online-Run. Eine Veröffentlichung bleibt freiwillig.' : `LÄUFT — ${run.offlineReason}`);
     }
   } else if (state === 'running') {
-    
+
     alpha = clock.advance(delta, () => flight.step()).alpha;
     effects.advance(delta, flight, { running: true, skin: records.data.skin, reduced: reduceMotion.matches });
     for (const event of flight.drainEvents()) {
@@ -307,10 +320,11 @@ if (records.data.legacy) {
 if (renderer.ctx) { $('gameUI').hidden = false; renderer.resize(); requestAnimationFrame(frame); }
 else { $('runStatus').textContent = 'Canvas ist nicht verfügbar; das Spiel kann hier nicht starten.'; $('gameUI').hidden = false; $('start').disabled = true; }
 if (api.enabled) {
-  $('onlineNotice').textContent = 'Vor dem Start: Schon der Online-Run-Start übermittelt Browserkennung, Modus und Version an Cloudflare. Alias und Score erst nach freiwilliger Eintragung. Du kannst stattdessen lokal spielen.';
+  $('onlineNotice').textContent = 'Online-START sendet Browserkennung, Modus und Version an Cloudflare. Auch bewusstes Laden der Rangliste übermittelt die Kennung für deine eigene Position. Alias und Score erst nach freiwilliger Eintragung. Ohne diese Online-Aktionen spielst du lokal.';
   announce('BEREIT — beim Online-Start gehen Spielerkennung, Version und Modus an Cloudflare. Score-Veröffentlichung bleibt freiwillig.');
   $('boardExplanation').textContent = 'Online-Runs fragen beim Start das Backend an. Alias und Score werden erst nach deiner ausdrücklichen Eintragung veröffentlicht. Ein Bestwert pro Browserprofil ist keine Identitätsprüfung.';
-  $('refreshBoard').disabled = false; loadBoard();
+  $('refreshBoard').disabled = false;
+  $('boardStatus').textContent = 'Rangliste erst mit AKTUALISIEREN laden. Bis dahin bleibt die Kennung lokal.';
 } else loadBoard();
 if ('serviceWorker' in navigator && window.isSecureContext) {
   navigator.serviceWorker.register('/game-sw.js').then(() => navigator.serviceWorker.ready).then(() => {

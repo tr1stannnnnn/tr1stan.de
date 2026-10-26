@@ -140,6 +140,16 @@ class BrowserTests(unittest.TestCase):
                 data = {'version':'pf-2','mode':'alltime','day':'','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
+    def test_enabled_api_stays_unused_until_explicit_online_action(self):
+        self.online(); self.clock(); self.game()
+        self.page.locator('#onlineRun').uncheck()
+        self.assertFalse(any(urlparse(url).hostname == 'packet-flight.test' for url in self.requests))
+        self.end_run()
+        self.assertEqual(self.starts, []); self.assertEqual(self.scores, [])
+        self.assertFalse(any(urlparse(url).hostname == 'packet-flight.test' for url in self.requests))
+        self.page.locator('#skipScore').click(); self.page.locator('#refreshBoard').click()
+        self.page.wait_for_function("document.querySelector('#boardStatus').textContent.includes('Noch keine')")
+        self.assertTrue(any('/api/leaderboard?' in url for url in self.requests))
     def test_voluntary_submission_validation_cancel_and_identical_retry(self):
         self.online(score_failure=True); self.clock(); self.game(); self.end_run()
         self.assertEqual(len(self.scores), 0)

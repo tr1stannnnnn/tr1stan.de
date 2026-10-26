@@ -190,12 +190,12 @@ class VisualBrowserTests(unittest.TestCase):
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.clock.install(time=datetime(2026,10,11,12,tzinfo=timezone.utc))
         page.goto(BASE + '/')
-        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-2');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
+        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-1');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
         page.goto(BASE + '/game.html')
         page.wait_for_function('navigator.serviceWorker.controller !== null')
-        self.assertNotIn('tr1stan-packet-flight-pf-2-shell-2', page.evaluate('caches.keys()'))
-        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-1')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
-        for asset in ['/game/effects.mjs?v=pf2','/game/render.mjs?v=pf2','/game/app.mjs?v=pf2','/game/game.css?v=pf2','/style.css?v=20','/script.js?v=20']:
+        self.assertNotIn('tr1stan-packet-flight-pf-2-shell-1', page.evaluate('caches.keys()'))
+        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-2')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
+        for asset in ['/game/effects.mjs?v=pf2','/game/render.mjs?v=pf2','/game/app.mjs?v=pf2','/game/game.css?v=pf2','/style.css?v=30','/script.js?v=30']:
             self.assertIn(asset, paths)
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')
@@ -206,5 +206,15 @@ class VisualBrowserTests(unittest.TestCase):
         page.clock.run_for(4000)
         self.assertTrue(page.locator('#resultDialog').evaluate('d=>d.open'))
         self.assertEqual(errors, []); ctx.close()
+
+    def test_repeated_resize_preserves_paused_canvas_pixels(self):
+        self.game(); self.start(); self.page.locator('#pause').click()
+        before = self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()')
+        self.page.evaluate("""async () => {
+          const {Renderer}=await import('/game/render.mjs?v=pf2');
+          const renderer=new Renderer(document.querySelector('#flightCanvas'));
+          renderer.resize(); renderer.resize();
+        }""")
+        self.assertEqual(self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()'), before)
 
 if __name__ == '__main__': unittest.main(verbosity=2)

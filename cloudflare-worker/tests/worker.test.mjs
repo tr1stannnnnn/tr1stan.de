@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare } from 'miniflare';
 import worker, { cleanup } from '../src/index.mjs';
-import { VERSION, RULES, utcDay, dailySeed } from '../../game/rules.mjs';
+import { VERSION, RULES, utcDay, dailySeed, scoreParts, maximumBonus, minimumActiveMs } from '../../game/rules.mjs';
 
 // Deliberately fake keys, ephemeral D1, no production endpoints or credentials.
 const secrets = { SIGNING_KEY: 'test-only-signing-key-not-for-production-000', PSEUDONYM_KEY: 'test-only-player-key-not-for-production-111', RATE_KEY: 'test-only-rate-key-not-for-production-222' };
@@ -76,7 +76,8 @@ test('Signature, expiry, player binding, score/time bounds and harmful aliases',
   const data = submission(run);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, token: run.token.slice(0, -4) + 'AAAA' } })).status, 401);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, playerId: player() } })).status, 403);
-  for (const score of [-1, 1.5, '10', null, 19971]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score } })).status, 400);
+  for (const score of [-1, 1.5, '10', null, 19981]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score } })).status, 400);
+  for (const score of [101, 19971, 19980]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score } })).status, 422);
   for (const alias of ['<img>', 'a\u202Eb', 'a\u200Bb', 'a\nb', 'a\tb', 'a'.repeat(17), [], 42]) assert.equal((await request('/api/score', { method: 'POST', body: { ...data, alias } })).status, 400);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, score: 500, activeMs: 1 } })).status, 422);
   assert.equal((await request('/api/score', { method: 'POST', body: { ...data, activeMs: 120000 } })).status, 422);
@@ -94,6 +95,78 @@ test('Atomic concurrent submission, identical retry and conflicting reuse', asyn
   const other = await fixture();
   const competing = await Promise.all([request('/api/score', { method: 'POST', body: submission(other, 10, 'First') }), request('/api/score', { method: 'POST', body: submission(other, 11, 'Other') })]);
   assert.deepEqual(competing.map(r => r.status).sort(), [200, 409]);
+});
+test('Score components are server-calculated; maximum is bounded independently of active time', async () => {
+  const run = await fixture();
+  const data = { ...submission(run, 12), score: 150, fragments: 5, bonusPoints: 30 };
+  for (const change of [{ score: 151 }, { fragments: 13 }, { bonusPoints: 31 }, { gates: '12' }, { fragments: -1 }, { bonusPoints: 32 }]) {
+    assert.equal((await request('/api/score', { method: 'POST', body: { ...data, ...change } })).status, 422);
+  }
+  const saved = await request('/api/score', { method: 'POST', body: data });
+  assert.equal(saved.status, 200); assert.equal(saved.data.score, 150);
+  assert.equal(saved.data.ownEntry.rank, 'PACKET ROUTER', 'rank follows gates, not points');
+  assert.equal(saved.data.ownEntry.fragments, 5); assert.equal(saved.data.ownEntry.bonusPoints, 30);
+  assert.deepEqual((await request('/api/score', { method: 'POST', body: data })).data, saved.data);
+  assert.equal((await request('/api/score', { method: 'POST', body: { ...data, fragments: 4, bonusPoints: 20, score: 140 } })).status, 409);
+
+  const bonus = maximumBonus(1000);
+  assert.equal(bonus, 9980); assert.equal(scoreParts(1000, 1000, bonus).score, 19980);
+  const maxRun = await fixture(player(), 'normal', RULES.maxActiveMs + RULES.countdownMs + 1000);
+  const maximum = { ...submission(maxRun, 1000, 'Maximum', RULES.maxActiveMs), fragments: 1000, bonusPoints: bonus, score: 19980 };
+  assert.equal((await request('/api/score', { method: 'POST', body: { ...maximum, score: 19981 } })).status, 400);
+  const answer = await request('/api/score', { method: 'POST', body: maximum });
+  assert.equal(answer.status, 422);
+  assert.match(answer.data.message, /Spielzeit/, 'valid maximum components must still satisfy the independent time bound');
+  assert(minimumActiveMs(1000) > RULES.maxActiveMs, 'conservative score cap is not a promise of a reachable timed run');
+});
+test('D1 enforces score formula, integer types, version, and the inclusive 19980 bound', async () => {
+  const insert = (score, gates, fragments, bonus) => DB.prepare('INSERT INTO scores_v2(entry_id,player_hash,version,mode,day,alias,score,gates,fragments,bonus_points,achieved_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(player(), player(), VERSION, 'normal', '', 'Bounds', score, gates, fragments, bonus, now).run();
+  await insert(19980, 1000, 1000, 9980);
+  assert.equal((await DB.prepare('SELECT score FROM scores_v2').first()).score, 19980);
+  for (const values of [[19981,1000,1000,9981], [19971,1000,1000,9980], [150.5,12,5,30.5], [150,12,13,30], [150,12,5,31], [150,12,'bad',30], [150,null,5,30]]) {
+    await assert.rejects(insert(...values), /constraint|NOT NULL/i);
+  }
+  await assert.rejects(DB.prepare("UPDATE scores_v2 SET version='pf-1'").run(), /constraint/i);
+  const run = await fixture();
+  await assert.rejects(DB.prepare('UPDATE runs_v2 SET score=150,gates=12,fragments=5,bonus_points=31 WHERE id=?').bind(run.runId).run(), /constraint/i);
+});
+test('Additive migration preserves pf-1 rows; health detects missing pf-2 schema', async () => {
+  const isolated = new Miniflare({ modules: true, script: await readFile(new URL('../.test-build/index.js', import.meta.url), 'utf8'), compatibilityDate: '2026-06-11', d1Databases: { DB: 'pf2-migration-preservation' } });
+  try {
+    const db = await isolated.getD1Database('DB');
+    const apply = async name => {
+      const sql = (await readFile(new URL('../migrations/' + name, import.meta.url), 'utf8')).replace(/^--.*$/gm, '');
+      await db.batch(sql.split(';').map(s => s.trim()).filter(Boolean).map(s => db.prepare(s)));
+    };
+    await apply('0001_initial.sql');
+    await db.prepare("INSERT INTO scores VALUES('legacy-entry','legacy-player','pf-1','normal','','Legacy',25,1)").run();
+    await db.prepare("INSERT INTO runs(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES('legacy-run','legacy-player','pf-1','normal','',1,0,1)").run();
+    const legacy = await db.batch([db.prepare('SELECT * FROM scores'), db.prepare('SELECT * FROM runs')]);
+    const targetEnv = { ...env, DB: db };
+    let health = await request('/api/health', { targetEnv });
+    assert.equal(health.status, 200); assert.equal(health.data.configured, true); assert.equal(health.data.schemaReady, false);
+    assert.equal((await request('/api/run/start', { targetEnv, method: 'POST', body: { mode: 'normal', version: VERSION, playerId: player() } })).status, 503);
+    await apply('0002_escape_pf2.sql'); await apply('0002_escape_pf2.sql');
+    const after = await db.batch([db.prepare('SELECT * FROM scores'), db.prepare('SELECT * FROM runs')]);
+    assert.deepEqual(after.map(r => r.results), legacy.map(r => r.results));
+    health = await request('/api/health', { targetEnv }); assert.equal(health.data.schemaReady, true);
+    await cleanup(targetEnv, now);
+    assert.deepEqual((await db.prepare('SELECT * FROM scores').all()).results, legacy[0].results);
+    assert.deepEqual((await db.prepare('SELECT * FROM runs').all()).results, legacy[1].results);
+  } finally { await isolated.dispose(); }
+});
+test('Retention keeps current Daily and recent Normal; removes one-year Normal and expired rate buckets', async () => {
+  const put = async (id, mode, day, achieved) => DB.prepare('INSERT INTO scores_v2 VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, id, VERSION, mode, day, 'Retention', 10, 1, 0, 0, achieved).run();
+  await put('daily-keep', 'daily', utcDay(now - 29 * 86400000), now);
+  await put('daily-drop', 'daily', utcDay(now - 30 * 86400000), now);
+  await put('normal-keep', 'normal', '', now - 365 * 86400000);
+  await put('normal-drop', 'normal', '', now - 365 * 86400000 - 1);
+  await DB.prepare("INSERT INTO rate_buckets VALUES('expired',1,?),('current',1,?)").bind(now-1,now+1).run();
+  await cleanup(env, now);
+  assert.deepEqual((await DB.prepare('SELECT entry_id FROM scores_v2 ORDER BY entry_id').all()).results.map(r => r.entry_id), ['daily-keep','normal-keep']);
+  assert.deepEqual((await DB.prepare('SELECT bucket FROM rate_buckets').all()).results, [{ bucket: 'current' }]);
 });
 test('Best values do not regress, ties remain early, normal/Daily separation and own marker', async () => {
   const id = player();

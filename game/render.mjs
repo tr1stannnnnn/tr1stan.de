@@ -15,7 +15,11 @@ export class Renderer {
     const dpr = Math.min(2, globalThis.devicePixelRatio || 1);
     const width = Math.max(1, this.canvas.getBoundingClientRect().width);
     this.scale = Math.min(2, width / R.width * dpr);
-    this.canvas.width = Math.round(R.width * this.scale); this.canvas.height = Math.round(R.height * this.scale);
+    const pixelWidth = Math.round(R.width * this.scale), pixelHeight = Math.round(R.height * this.scale);
+    // Reassigning canvas dimensions clears its pixels, even when unchanged.
+    // Height-only browser chrome/viewport changes must preserve a paused frame.
+    if (this.canvas.width !== pixelWidth) this.canvas.width = pixelWidth;
+    if (this.canvas.height !== pixelHeight) this.canvas.height = pixelHeight;
   }
   background(c, phase) {
     const sky = c.createLinearGradient(0, 0, 0, R.height);
@@ -113,7 +117,7 @@ export class Renderer {
       c.fillStyle = glow > 0 ? '#92f5de' : top ? '#74dce8' : '#e28cbc';
       c.shadowColor = c.fillStyle; c.shadowBlur = 4 + glow * 6; c.fillRect(x, top ? edge - 3 : edge, 64, 3); c.shadowBlur = 0;
       c.fillStyle = '#c2cee4'; c.globalAlpha = .65; c.font = '8px "JetBrains Mono", monospace';
-      if (height > 48) c.fillText(gate.type === 'moving' ? 'MOVE / ↕' : gate.type === 'compress' ? 'CLAMP / !' : top ? 'IN / 01' : 'OUT / 01', x + 9, top ? edge - 12 : edge + 20);
+      if (height > 48) c.fillText(gate.type === 'moving' ? 'MOVE / ~' : gate.type === 'compress' ? 'CLAMP / !' : top ? 'IN / 01' : 'OUT / 01', x + 9, top ? edge - 12 : edge + 20);
       c.restore();
       c.strokeStyle = glow > 0 ? '#92f5de' : '#8b72b9'; c.lineWidth = 1;
       line(c, x - 4, top ? edge - 9 : edge + 9, x - 4, edge);
@@ -177,7 +181,7 @@ export class Renderer {
     c.strokeStyle = '#65d5df66'; line(c, 0, R.floor, 480, R.floor);
     c.fillStyle = '#76859f'; c.font = '10px "JetBrains Mono", monospace';
     c.fillText(mode === 'daily' ? 'DAILY / UTC' : 'NORMAL / UPLINK', 18, 25);
-    c.textAlign = 'right'; c.fillText('PACKET TRANSPORT', 462, 25); c.textAlign = 'left';
+    c.textAlign = 'right'; c.fillText('STOLEN PAYLOAD', 462, 25); c.textAlign = 'left';
     c.fillText('NET / TUNNEL 01', 18, 701); c.fillStyle = '#6acbd4';
     for (let i = 0; i < 5; i++) c.fillRect(410 + i * 9, 692, 4, 7 + i % 2 * 3);
   }

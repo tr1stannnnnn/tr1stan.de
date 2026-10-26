@@ -74,12 +74,18 @@
         </div>
         <label class="online-choice"><input type="checkbox" id="onlineRun" disabled /> Online-Run für freiwillige Rangliste</label>
         <p id="onlineNotice" class="arcade-small">Backend deaktiviert. Dieser Run bleibt lokal.</p>
+        <p id="threatStatus" class="arcade-notice" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="controls" class="arcade-small">Leertaste · ↑ · W · Tap auf das Spielfeld. Erst Countdown, dann fliegen. Tastatursteuerung bei Fokus im Spielfeld; Tab verlässt es. Scrollen und Zoom bleiben möglich.</p>
         <p id="runStatus" class="arcade-notice" role="status">BEREIT — lokale Rekorde, kein Upload.</p>
         <p id="storageNotice" class="arcade-small" hidden></p>
         <p id="offlineReady" class="arcade-small"></p>
       </section>
       <aside class="arcade-side">
+        <section aria-labelledby="routeGuideTitle">
+          <p class="arcade-kicker">ESCAPE BRIEFING</p><h2 id="routeGuideTitle">Ein Impuls. Deine Route.</h2>
+          <p class="arcade-small">Bewegliche Firewalls langsam anfliegen. TRACE//UNIT erfasst deine Höhe: Nach LOCKED ausweichen, der Schuss folgt dir nicht. Beim Laser die markierte Zone verlassen.</p>
+          <p class="arcade-small">Jedes Gate zählt 10 Punkte. Goldene Fragmente danach sind optional: 2 × Combo, bis ×5. Ein verpasstes Fragment setzt die Combo zurück. Überleben geht vor Bonus.</p>
+        </section>
         <section aria-labelledby="skinsTitle">
           <p class="arcade-kicker">LOADOUT</p><h2 id="skinsTitle">Dein Paket</h2>
           <label class="sr-only" for="skin">Skin auswählen</label>
@@ -119,7 +125,7 @@
       <button type="button" class="arcade-button quiet" id="skipScore">ÜBERSPRINGEN</button>
     </div>
     <form id="aliasForm" hidden novalidate>
-      <p>Freiwillige Veröffentlichung: Alias, Score, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
+      <p>Freiwillige Veröffentlichung: Alias, Score, Gates, Fragmente, Bonuspunkte, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
       <label for="alias">Öffentlicher Alias (2–16 Zeichen)</label>
       <input id="alias" type="text" name="alias" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="aliasHint aliasError" />
       <p id="aliasHint" class="arcade-small">Buchstaben, Zahlen, einfache Leerzeichen, _ und -. Keine automatische Übernahme früherer Namen.</p>

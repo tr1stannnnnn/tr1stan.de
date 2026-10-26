@@ -91,3 +91,17 @@ test('100 deterministic seed samples: an input-only safe-route controller passes
   }
   assert.deepEqual(failures,[]); assert(types.has('moving')); assert(types.has('compress'));
 });
+test('1000 sampled routes remain traversable with optional fragments through maximum difficulty', () => {
+  let fragments=0, combo=0;
+  for(let seed=1;seed<=1000;seed++) {
+    const f=new Flight(Math.imul(seed,2654435761)>>>0);
+    while(!f.dead&&f.gatesPassed<80&&f.time<165) {
+      if(shouldFlap(f,true)) f.flap(); f.step(); f.drainEvents();
+      combo=Math.max(combo,f.combo);
+      assert(f.projectiles.length<=1); assert(f.gates.length<=6);
+    }
+    assert.equal(f.gatesPassed,80,`seed ${seed}: ${f.reason} at ${f.gatesPassed}`);
+    fragments+=f.fragments;
+  }
+  assert(fragments>1000); assert.equal(combo,5);
+});

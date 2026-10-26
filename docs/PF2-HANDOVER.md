@@ -1,3 +1,17 @@
+# Aktuelle Fortsetzung — 26.10.2026
+
+Der Nutzer hat die Entwicklungsarbeit auf diesem Branch wieder freigegeben.
+Die frühere Pause im unten unverändert erhaltenen Zwischenstandsbericht ist
+historisch. Weiterhin gesperrt: Merge, produktive Migrationen, Deployments und
+Umgebungseinstellungen. Isolierte Testdatenbank-Migrationen sind erlaubt.
+
+Aktueller Review-/Test-/Zugriffsstand, Aufnahmen und verbleibende Freigabeschritte:
+[PF2-REVIEW.md](PF2-REVIEW.md). Backendvertrag und Betrieb:
+[Worker-README](../cloudflare-worker/README.md). Die Cloudflare-Bindung funktioniert;
+der produktive D1-Stand wurde ausschließlich lesend als pf-1 bestätigt.
+
+---
+
 # PACKET//FLIGHT pf-2 — unfertiger Zwischenstand
 
 Stand: 26.10.2026. **Nicht freigabefertig. Kein Merge, keine Veröffentlichung.**
