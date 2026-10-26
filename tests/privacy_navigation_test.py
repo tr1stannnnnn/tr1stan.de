@@ -129,7 +129,10 @@ class PrivacyNavigationTests(unittest.TestCase):
                 page.locator('#term').screenshot(path=str(out/f'terminal-shortcuts-{width}.png'))
                 page.get_by_role('button',name=command,exact=True).tap();page.wait_for_url(BASE+suffix)
                 if command=='play --daily': self.assertTrue(page.locator('[name="mode"][value="daily"]').is_checked())
-                if command=='leaderboard': self.assertEqual(page.evaluate('location.hash'),'#leaderboard')
+                if command=='leaderboard':
+                    page.wait_for_selector('#gameUI:not([hidden])')
+                    self.assertEqual(page.evaluate('location.hash'),'#leaderboard')
+                    self.assertTrue(0 <= page.locator('#leaderboard').bounding_box()['y'] < 844, 'Target must be in the viewport')
             ctx.close()
         for key in ['Enter','Space']:
             self.page.goto(BASE+'/')

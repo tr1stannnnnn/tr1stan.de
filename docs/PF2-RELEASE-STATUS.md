@@ -5,6 +5,19 @@ Vertragsstand und bewusste lokale Speicherwahl bestätigt. Der kontrollierte
 Produktionsablauf samt begrenzten freiwilligen Tests und dokumentierten
 Rücknahmen ist freigegeben. Keine weitere pauschale Freigabe einholen.
 
+## Gesicherte Branches und PRs
+
+- Feature: `codex/packet-flight-escape-v2`, Implementierungscommit
+  `5e847594e045e5c67ff68bc5c22430b7bda72f87`, gepusht;
+  [Draft-PR #4](https://github.com/tr1stannnnnn/tr1stan.de/pull/4) aktualisiert.
+- Notice separat auf bisherigem main: `release/pf2-notice`,
+  `e97f6e21132c131950ae783203755a41145ea975`, gepusht;
+  [Draft-PR #5](https://github.com/tr1stannnnnn/tr1stan.de/pull/5).
+  Nachweislich nur datenschutz.html geändert. Noch kein Merge.
+- Zusätzliche Navigationsprüfung bestätigt: Der Ranglistenabschnitt ist nach
+  Klick/Tap bei beiden mobilen Breiten tatsächlich im sichtbaren Viewport.
+- Letzter Pages-Build weiterhin main/34e47d6, status=built, kein Fehler.
+
 ## Umgesetzter und geprüfter Arbeitsstand
 
 - Finale Notice vorbereitet in datenschutz.html, einschließlich getrennter

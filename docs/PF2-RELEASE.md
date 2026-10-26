@@ -113,8 +113,9 @@ Nach deren Klärung gegebenenfalls die konkret gewählte lokale Speicherwahl
 umsetzen/testen (bestehende Daten erhalten). Danach den Einwilligungs-/Veröffentlichungstext im Formular von #4
 mit der gewählten Rechtsgrundlage abgleichen (beim vorgeschlagenen Modell ausdrücklich
 „Mit ÖFFENTLICH EINTRAGEN willige ich … ein; Widerruf über chef@tr1stan.de“).
-Dann ausschließlich datenschutz.html aus main in einem separaten
-Notice-PR ändern: Empfänger/Vertrag/Übermittlungen, bewusstes Online-Starten und
+Der separate Draft-PR #5 (release/pf2-notice, e97f6e21132c131950ae783203755a41145ea975)
+liegt bereits mit ausschließlich datenschutz.html auf Basis von main vor. Nicht
+noch einmal einen Ersatz-PR erstellen. Seine vorbereitete Notice umfasst: Empfänger/Vertrag/Übermittlungen, bewusstes Online-Starten und
 Board-Laden, Eintragung/Komponenten, Rechtsgrundlagen, Widerruf/Löschkontakt und
 konkrete Aufbewahrung ergänzen. Die Aussagen „derzeit deaktiviert/keine
 Cloudflare-Anfragen“ durch dauerhaft zutreffende bedingte Formulierungen
