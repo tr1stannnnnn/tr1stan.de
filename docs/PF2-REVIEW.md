@@ -138,10 +138,32 @@ Deaktivierte und aktivierte CLI-Variante wurden ausschließlich lokal mit
 Wrangler maskiert CLI-Variablen in seiner Ausgabe. Kein Upload wurde ausgeführt.
 
 Lesender Neu-Befund: alle pf-1-Tabellen leer. Pages veröffentlicht main automatisch;
-ein früherer main-Push hat auch Workers Builds ausgeführt. Aktuelle Builds-Settings
-403, daher vor erstem main-Push deren konkrete No-op-Sperre bestätigen.
+ein früherer main-Push hat auch Workers Builds ausgeführt. Der damalige API-403
+ist durch die unten dokumentierte manuelle Dashboard-Bestätigung ergänzt; der
+Release-Plan nutzt vor dem ersten main-Push den Disable-builds-Schalter.
 GraphQL-Account-/D1-Metriken funktionieren; nur pf-1-Baseline, kein pf-2-Livebeweis.
 Region-/Backup-/Analysefristen sind anhand offizieller Quellen konkretisiert.
 
 [Ablauf, begrenzte Prüfungen, Abbruch und genauer Freigabeumfang](PF2-RELEASE.md).
 Die dortigen produktiven Schritte sind **noch nicht freigegeben oder ausgeführt**.
+
+## Manuell bestätigte Build-Konfiguration
+
+Der Betreiber hat am 26.10.2026 die Dashboard-Werte ausschließlich abgelesen:
+Produktion main, Root /, `npm ci --prefix cloudflare-worker`, Deploy
+`./cloudflare-worker/node_modules/.bin/wrangler deploy --config cloudflare-worker/wrangler.toml --env=`,
+Disable builds AUS. Preview-Branches AUS, Root /, gleicher Build-Befehl und
+`npx wrangler preview`. Dies ist eine **manuelle Bestätigung**, kein nachträglich
+behaupteter API-Nachweis. Die Information ersetzt die zuvor offene Branch-/Root-/
+Befehlsfrage; die API bleibt eingeschränkt.
+
+Der Release-Plan nutzt nun vor dem ersten main-Push den bestätigten dedizierten
+Disable-builds-Schalter statt No-op-Befehlen. Previews bleiben deaktiviert.
+Beim späteren Wiedereinschalten sind aktive Git-Konfiguration und ein möglicher
+sofortiger Auto-Build ausdrücklich berücksichtigt. Keine Einstellung wurde in
+dieser Dokumentationsfortsetzung geändert, kein Deployment ausgeführt.
+
+Der bestätigte Deploy-Pfad wurde zusätzlich aus dem Repository-Root mit
+`--config cloudflare-worker/wrangler.toml --env= --keep-vars --dry-run` lokal
+ausgeführt: Kompilierung/Config-Auflösung erfolgreich, kein Upload. Der Build-
+Befehl nutzt das vorhandene gepinnte Lockfile im Worker-Unterverzeichnis.

@@ -149,8 +149,9 @@ Stand 26.10.2026, ergänzend zum früheren Prüfbefund:
 Dies sind die offenen Betreiberpunkte. Nicht erneut zur Entscheidung gestellt
 werden müssen: vorhandener Anbieter/Worker/D1, aktuelle Region, leere Alttabellen,
 Anwendungsspeicher, implementierte Score-/Run-Daten, bekannte Standardfristen oder
-vorhandene Kontaktadresse. Technisch fehlende Leserechte sind getrennt im
-Veröffentlichungsplan dokumentiert, keine ersatzweise erfundenen Einstellungen.
+vorhandene Kontaktadresse. Technisch eingeschränkte Leserechte sind getrennt im Veröffentlichungsplan
+dokumentiert. Die Build-Konfiguration ist inzwischen manuell vom Betreiber
+bestätigt und keine offene Datenschutz-/Betreiberentscheidung mehr.
 
 ## Konkreter Textvorschlag für die Notice-Veröffentlichung
 

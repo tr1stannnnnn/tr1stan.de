@@ -12,12 +12,34 @@ abgerufen und lokale Dateien/Testdatenbanken geändert.
 | Pages | GitHub API: legacy build, source main, path /, CNAME tr1stan.de, HTTPS erzwungen. Ein main-Push baut/veröffentlicht automatisch. |
 | Letzter Pages-Stand | main `34e47d6e4a4e925c4ea688ac007035c38e5df53d`; erfolgreicher Pages-Build. |
 | Workers Builds | main-Commit hat erfolgreichen Check „Workers Builds: packet-flight-leaderboard“, Build `6bc000fa-b1fc-4964-8dab-890e31b976e3`, Version `77300fb5-761f-4a97-91f7-343a3af74513`. Der PR-Head hatte keinen solchen Check. Automatische main-Builds sind historisch belegt. |
-| Aktuelle Build-Schalter | GET Worker-Build-Konfiguration, Trigger und Build-Historie: HTTP 403. Aktuelle Branch-/Root-/Deploy-/Preview-Einstellungen daher nicht auslesbar, nicht als ausgeschaltet behandeln. GitHub-Hooks/Branchschutz ebenfalls 403; daraus folgt nicht „keine Hooks/kein Schutz“. |
+| Aktuelle Build-Schalter | Vom Betreiber am 26.10.2026 ausschließlich lesend im Dashboard manuell bestätigt: Produktionsbranch main, Disable builds AUS, Preview-Branches AUS. Main-Push/Merge kann damit produktive Builds/Deployments auslösen. API-Lesezugriff weiterhin 403; die manuelle Bestätigung ist als solche dokumentiert. GitHub-Hooks/Branchschutz waren ebenfalls 403. |
 | Live-Worker | pf-1, enabled=false, configured=true. Aktive 100%-Version `c9ceaaf3-c911-4b41-bc6b-eb41dc493c33`. Deployment `2141879b-d313-4d03-a1c7-17b64954d733`. |
 | D1 | Bestehende UUID `bc462466-1ed9-41d9-ab75-dc0197d50502`; runs/scores/rate_buckets, jeweils **0 Zeilen**. Keine pf-2-Tabellen, keine d1_migrations. SELECT meldet rows_written=0 und changed_db=false. |
 | Region | running_in_region=WEUR, jurisdiction=null, Read Replication disabled. Keine EU-only-Garantie. |
 | Secrets | DB-Binding und vorhandene SIGNING_KEY/PSEUDONYM_KEY/RATE_KEY-Bindungsnamen bestätigt; keine Werte gelesen/verändert. |
 | Logs/Vertrag/Tarif | logpush=false, tail_consumers=[], observability nicht als expliziter Wert geliefert. Observability-Ziele, Billing/Subscriptions und Billing-Profil: 403. Das beweist keine vollständige Logfreiheit und keinen Tarif. |
+
+### Manuell bestätigter Dashboard-Stand (26.10.2026)
+
+Quelle: ausdrückliche Betreiberangabe aus Worker → Settings → Build. Nicht als
+unabhängig gelesene API-Antwort ausgeben. Die Einstellungen wurden abgelesen,
+**nicht verändert**. Worker packet-flight-leaderboard, Repository
+tr1stannnnnn/tr1stan.de.
+
+| Einstellung | Produktion | Previews Base |
+| --- | --- | --- |
+| Branch/Schalter | main; Disable builds **AUS** | Builds for Preview branches **AUS** |
+| Root-Verzeichnis | / (Repository-Root) | / (Repository-Root) |
+| Build-Befehl | `npm ci --prefix cloudflare-worker` | `npm ci --prefix cloudflare-worker` |
+| Deploy-/Preview-Befehl | `./cloudflare-worker/node_modules/.bin/wrangler deploy --config cloudflare-worker/wrangler.toml --env=` | `npx wrangler preview` |
+
+`/` ist die Cloudflare-Bezeichnung für den Repository-Root, kein Auftrag zum
+Wechsel ins Dateisystem-Root des Cloud-Executors. Die Befehle sind mit dem
+Repository vereinbar: Lockfile und Paket liegen in cloudflare-worker; Wrangler
+löst main/migrations_dir relativ zur angegebenen Konfigurationsdatei auf.
+Ein main-Push kann beide Systeme unabhängig anstoßen: Pages und Workers Builds.
+Die Bestätigung schließt die bisherige Informationslücke zu diesen Feldern.
+Watch-Paths sind nicht bestätigt; der Ablauf verlässt sich nicht auf sie.
 
 Das Builds-Token für Git-Deployments ist unabhängig vom erfolgreich verwendeten
 Codex-Netzwerk-Secret. Funktionierender Codex-Zugriff beweist kein funktionierendes
@@ -44,35 +66,31 @@ veränderten Stand anwenden. Keine Force-Pushes oder Resets.
 
 ## 2. Automatik vor dem ersten main-Push beherrschen (PRODUKTIV)
 
-Ein Merge von #4 ist gleichzeitig ein Pages-Deployment und kann ein Worker-
-Deployment auslösen. Die Reihenfolge lässt sich daher nicht mit „erst mergen,
-dann in Ruhe migrieren“ garantieren.
+Ein Merge von #4 veröffentlicht Pages und kann mit den bestätigten aktiven
+Produktionsbuilds auch den Worker ausrollen. Vorher die Reihenfolge absichern:
 
-1. Aktuelle Workers-Build-Root-, Branch-, Build-, Deploy-, Preview- und
-   Watch-Path-Einstellungen aller Trigger **lesen und ohne Variablen-/Secretwerte
-   sichern**. Dafür muss der vorhandene Zugriff um lesende Builds-Rechte ergänzt
-   werden oder der Betreiber die konkreten Dashboard-Werte bereitstellen.
-   Bei weiterem 403/fehlender Bestätigung: keinen main-Push beginnen.
-2. Nach gesonderter Freigabe für das Veröffentlichungsfenster Build- und
-   Deploy-/Preview-Kommandos sämtlicher Produktions-/Legacy-Preview-Trigger auf
-   einen erfolgreichen No-op setzen: `node -e "console.log('PF2 release hold')"`.
-   Auch den Build-Befehl ersetzen, da dieser eigene Schreibaktionen enthalten
-   könnte. Keine Token-/Secretfelder ändern. Bestehende Jobs abwarten oder nach
-   ausdrücklicher Freigabe abbrechen; keine alten Deploy-Jobs dürfen später laufen.
-3. No-op-Konfiguration durch erneutes GET/Dashboard-Lesen bestätigen. Nicht bloß
-   Watch-Paths ausschließen: Cloudflare umgeht diese bei leeren Pushes und bei
-   3000+ Dateien oder 20+ Commits. Ein geänderter Produktionsbranch allein ist bei
-   Legacy-Previews ebenfalls kein sicherer Deployment-Stopp.
-4. Die vorübergehende CI-Sperre bleibt bis einschließlich Frontend-Aktivierung
-   und Rückkehrprüfung bestehen. Es gibt in dieser Phase genau einen manuellen
-   Deployment-Pfad. Keine Preview-Migration des Cloudflare-Projekts durchführen.
+1. Nach ausdrücklicher Veröffentlichungsfreigabe im bestätigten Worker-Dashboard
+   **Disable builds auf AN** setzen. **Builds for Preview branches bleibt AUS**.
+   Root, Build-/Deploy-Befehle und Token-/Secretfelder dabei unverändert lassen.
+   Der bisher vorgeschlagene No-op-Befehlsumbau ist durch den jetzt bestätigten
+   dedizierten Schalter nicht mehr erforderlich.
+2. Den gesetzten Schalter manuell im Dashboard erneut bestätigen und festhalten,
+   dass keine laufenden/ausstehenden alten Deploy-Jobs später fortgesetzt werden.
+   Bestehende Jobs abwarten oder – nur im freigegebenen Umfang – abbrechen. Ein
+   deaktivierter Trigger allein beendet keinen bereits laufenden Prozess.
+3. Die Sperre bleibt bis einschließlich Frontend-Aktivierung und Rückkehrprüfung
+   bestehen. Pages bleibt separat aktiv; Notice-/Feature-/Frontend-main-Pushes
+   werden deshalb nach wie vor automatisch als Website veröffentlicht. Manuelle
+   Worker-CLI-Deployments erfolgen ausschließlich in den unten genannten Phasen.
+4. Ohne bestätigte tatsächliche Sperre kein erster main-Push. Das fortbestehende
+   API-403 erfordert keine neue Secret-Bindung, wenn der Betreiber die Änderung
+   im Dashboard ausführt und bestätigt. Es werden keine Einstellungen allein
+   aufgrund einer unbekannten API-Antwort erfunden oder verändert.
 
-Der unterstützte API-Weg (nur später, mit ermittelten echten Trigger-IDs) ist
-PATCH `/accounts/{account}/builds/triggers/{trigger_uuid}` mit ausschließlich
-`build_command` und `deploy_command`. Neuere Worker-Build-Konfigurationen nutzen
-PATCH `/accounts/{account}/builds/workers/{script_tag}` mit production_settings,
-previews_base_config und previews_enabled. Nicht beide Modelle blind mischen;
-vorher GET-Ergebnis/schema prüfen. Worker-Tag: `8072e2e0903e49918118a46feb6c51af`.
+Keine Ersatzsperre nur über Watch-Paths: Cloudflare umgeht diese bei leeren
+Pushes sowie bei 3000+ Dateien oder 20+ Commits. Keine Produktionsbranch-Änderung,
+keine Preview-Migration, kein Entfernen der Repository-Verbindung erforderlich.
+Worker-Tag für spätere lesende Zuordnung: 8072e2e0903e49918118a46feb6c51af.
 
 ## 3. Datenschutzhinweise zuerst veröffentlichen (PRODUKTIV)
 
@@ -137,7 +155,7 @@ Bei Abweichung stoppen; keine Datenbank zurücksetzen oder Tabellen löschen.
 
 ## 5. PR #4 mergen und pf-2 zunächst deaktiviert ausrollen (PRODUKTIV)
 
-Erst nach Notice-Nachweis, erfolgreicher Migration und bestätigter CI-Sperre #4
+Erst nach Notice-Nachweis, erfolgreicher Migration und bestätigtem Disable-builds-Schalter #4
 mergen. Pages liefert nun pf-2 mit **leerer API_URL**. Noch kein Browser geht
 wegen des Spiels an Cloudflare. Worker-Konfiguration bleibt ENABLED=false.
 Pages- und Worker-Artefakte gegen den freigegebenen Commit prüfen.
@@ -173,7 +191,7 @@ Fehlt ein Gate, bleibt deaktiviert. Noch keine Aktivierung „zum Ausprobieren�
 Die Aktivierung muss im gewünschten Git-Zustand nachvollziehbar sein: in einem
 kleinen separaten Commit nur das **oberste** ENABLED in wrangler.toml auf true
 setzen, lokalen Dry-Run prüfen, diesen Aktivierungs-Commit nach Freigabe mergen.
-CI ist weiter No-op. Damit deaktiviert ein späteres normales CI-Deployment den
+Automatische Worker-Builds sind weiter deaktiviert. Damit deaktiviert ein späteres normales CI-Deployment den
 Worker nicht versehentlich wieder anhand einer false-Konfiguration.
 
 ```sh
@@ -245,14 +263,26 @@ veröffentlicht Pages automatisch. Nach frischem Laden tatsächlich ausgeliefert
 URL/Cache-Version, weiterhin deaktivierte Online-Auswahl als Standard, bewusstes
 Board-Laden und lokale Offline-Alternative überprüfen. Keine neuen Scores nötig.
 
-Anschließend No-op-CI nur kontrolliert ersetzen: Produktionsbranch main,
-Root cloudflare-worker, gepinnter Wrangler, Build ohne Migration, Deploy
-`npx wrangler deploy --env= --keep-vars`; Watch-Includes cloudflare-worker/* und
- game/rules.mjs. Aktive Git-Konfiguration muss ENABLED=true enthalten. Preview-
-Builds deaktiviert lassen, sofern ihre Ressourcenisolation nicht separat belegt
-ist; keine Legacy-Preview-Kommandos mit Produktions-D1 ausführen. Das bestehende
-Builds-Token erhalten; funktioniert es nicht, Automatik gehalten lassen und den
-konkreten Fehler melden. Nicht unbemerkt ein neues Token/Secret anlegen.
+Anschließend die bestätigte Produktionseinstellung kontrolliert wiederherstellen:
+Branch main, Root /, Build `npm ci --prefix cloudflare-worker`. Deploy-Befehl wie
+bestätigt, ergänzt um den bereits lokal geprüften Erhalt zusätzlicher Variablen:
+
+```sh
+./cloudflare-worker/node_modules/.bin/wrangler deploy --config cloudflare-worker/wrangler.toml --env= --keep-vars
+```
+
+Das ist der einzige geplante Befehlsunterschied zum abgelesenen Dashboard-Stand.
+Keine Runtime- oder Builds-Secrets ändern. Aktiver Git-Stand muss ENABLED=true
+und den bereits freigegebenen Konfigurationsstand enthalten, sonst könnte der
+nächste Auto-Deploy wieder deaktivieren. Erst danach **Disable builds wieder AUS**;
+Preview-Branches bleiben AUS und ihr bisheriger Preview-Befehl bleibt unverändert.
+Ein möglicher sofortiger Build beim Wiedereinschalten ist im Freigabeumfang
+enthalten, muss aber den freigegebenen aktuellen main-SHA verwenden. Alte Jobs
+nicht nachträglich freigeben. Kein künstlicher Push ist zur Reaktivierung nötig.
+
+Ein später optionaler Watch-Path-Filter ist nicht Teil dieser notwendigen
+Rückführung. Funktioniert das bestehende Builds-Token nicht, Builds deaktiviert
+lassen und den konkreten Fehler melden; kein neues Token/Secret anlegen.
 
 ## 8. Abbruch und Rückkehr
 
@@ -264,7 +294,7 @@ konkreten Fehler melden. Nicht unbemerkt ein neues Token/Secret anlegen.
 | pf-2 deaktivierter Deploy/Gates fehlerhaft | Zur zuvor gespeicherten deaktivierten Worker-Version zurückrollen; Pages lokal/offline lassen. |
 | CPU/Quota/Score-/CORS-Fehler nach Aktivierung | Sofort zur gemerkten pf2-disabled-Version zurückrollen. Noch kein Frontend-Release oder, wenn bereits verbunden, API_URL leeren und Cache erneut versionieren. |
 | Bereits verbundene Frontend-Version in offenen Tabs | Worker zuerst serverseitig deaktivieren; bloßer Pages-Revert stoppt alte Tabs nicht. Alte bereits verarbeitete Einträge nicht rückwirkend als ungesendet bezeichnen. |
-| CI noch No-op | Guard erhalten bis Git-Zustand und Worker-Zustand konsistent sind. Keine alte Job-Warteschlange freigeben. |
+| Automatische Builds noch deaktiviert | Disable builds AN belassen, bis Git-Zustand und Worker-Zustand konsistent sind. Keine alte Job-Warteschlange freigeben. |
 
 Beispiel des später freizugebenden Code-Rollbacks (ID aus aktuellem Release-
 Protokoll einsetzen; nicht auf eine inzwischen veraltete historische ID vertrauen):
@@ -277,7 +307,7 @@ node node_modules/wrangler/bin/wrangler.js rollback "${PF2_DISABLED_VERSION_ID:?
 
 Rollback setzt keine D1-Daten zurück und löscht keine pf-2-Ergebnisse. Nachher
 Health enabled=false prüfen. Git-Aktivierungscommit separat auf false
-zurücknehmen, bevor die CI wieder echte Deployments ausführen darf. Nicht den
+zurücknehmen, bevor automatische Builds wieder aktiviert werden dürfen. Nicht den
 alten Pages-Gesamtstand blind zurückrollen: aktuelle Datenschutzhinweise erhalten.
 Keine bestehende Secret-Version bewusst rotieren oder ersetzen.
 
@@ -289,8 +319,10 @@ sind ausdrücklich **nicht** von der geplanten Freigabe umfasst.
 
 ## 9. Exakter spätere Freigabeumfang
 
-Eine Freigabe muss diese konkreten Vorgänge abdecken: temporäre No-op-CI und
-spätere kontrollierte Wiederherstellung; separater Notice-Merge/Pages-Build;
+Eine Freigabe muss diese konkreten Vorgänge abdecken: Disable builds vorübergehend AN,
+Preview-Branches unverändert AUS, später kontrolliert Disable builds AUS und
+Deploy-Befehl um --keep-vars ergänzen (einschließlich eines möglichen sofortigen
+Auto-Builds des geprüften main-SHA); separater Notice-Merge/Pages-Build;
 additive 0001/0002-Migration samt Ledger in der bestehenden D1; Merge von #4;
 deaktiviertes pf-2-Deployment und nach Gates Aktivierungscommit/-Deployment;
 maximal zwei freiwillige Release_Check-Einträge mit Readback und begrenztem
