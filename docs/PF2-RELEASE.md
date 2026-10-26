@@ -10,10 +10,12 @@
 
 # PR #4 – ausführbarer Veröffentlichungsablauf
 
-Stand 26.10.2026. **Vorbereitung, keine Ausführungsfreigabe.** Alle unten als
-PRODUKTIV bezeichneten Befehle sind erst von einer späteren ausdrücklichen
-Freigabe umfasst. In dieser Arbeit wurden nur Account-/Schema-/Aggregatdaten
-abgerufen und lokale Dateien/Testdatenbanken geändert.
+Stand 26.10.2026. **Kontrollierter Ablauf ausdrücklich freigegeben.**
+Die produktiven Schritte sind autorisiert, bleiben aber bis zum Nachweis der
+jeweiligen technischen Voraussetzungen angehalten. Keine neue allgemeine
+Zwischenfreigabe anfordern. Bisher nur lesende Produktionsprüfungen, lokale
+Änderungen und isolierte Datenbanktests; tatsächlicher Stand siehe
+[PF2-RELEASE-STATUS.md](PF2-RELEASE-STATUS.md).
 
 ## 1. Festgestellter Ausgangszustand
 
@@ -104,30 +106,25 @@ Worker-Tag für spätere lesende Zuordnung: 8072e2e0903e49918118a46feb6c51af.
 
 ## 3. Datenschutzhinweise zuerst veröffentlichen (PRODUKTIV)
 
-Die belegten Fakten und der konkrete vorgeschlagene Text stehen in
-[leaderboard-privacy-draft.md](leaderboard-privacy-draft.md). Alle vier Betreiberentscheidungen wurden ausdrücklich bestätigt. Die konkrete
-vorbereitete Fassung steht jetzt in datenschutz.html; die Quellenbeschränkung
-beim direkten DPA-/Terms-Abruf ist dokumentiert.
+Alle vier Betreiberentscheidungen sind bestätigt; die Speicherwahl und der
+Einwilligungstext sind implementiert und getestet. Die vorbereitete Notice steht
+in datenschutz.html. Vertragliche Standardquellen und die konkrete Begrenzung
+des aktuellen Wortlautabrufs stehen in
+[leaderboard-privacy-draft.md](leaderboard-privacy-draft.md).
 
-Nach deren Klärung gegebenenfalls die konkret gewählte lokale Speicherwahl
-umsetzen/testen (bestehende Daten erhalten). Danach den Einwilligungs-/Veröffentlichungstext im Formular von #4
-mit der gewählten Rechtsgrundlage abgleichen (beim vorgeschlagenen Modell ausdrücklich
-„Mit ÖFFENTLICH EINTRAGEN willige ich … ein; Widerruf über chef@tr1stan.de“).
-Der separate Draft-PR #5 (release/pf2-notice, e97f6e21132c131950ae783203755a41145ea975)
-liegt bereits mit ausschließlich datenschutz.html auf Basis von main vor. Nicht
-noch einmal einen Ersatz-PR erstellen. Seine vorbereitete Notice umfasst: Empfänger/Vertrag/Übermittlungen, bewusstes Online-Starten und
-Board-Laden, Eintragung/Komponenten, Rechtsgrundlagen, Widerruf/Löschkontakt und
-konkrete Aufbewahrung ergänzen. Die Aussagen „derzeit deaktiviert/keine
-Cloudflare-Anfragen“ durch dauerhaft zutreffende bedingte Formulierungen
-ersetzen. Lokales Spielen bleibt ohne Online-Anfrage möglich. Noch keine API_URL,
-ENABLED-Änderung oder pf-2-Auslieferung in diesen Notice-PR aufnehmen.
+Der separate **Draft-PR #5**, Branch release/pf2-notice, Commit
+`e97f6e21132c131950ae783203755a41145ea975`, liegt bereits mit ausschließlich
+datenschutz.html auf Basis von main vor. Keinen Ersatz-PR erstellen. Die Fassung
+nennt Empfänger/Standard-DPA/SCC, bewusstes Online-Starten und Board-Laden,
+Einwilligung/Widerruf, Komponenten und konkrete Aufbewahrung. Sie beschreibt
+ältere automatische Speicherfassungen und die schrittweise Umstellung ausdrücklich.
+Keine API_URL-/ENABLED-Änderung oder pf-2-Spielauslieferung in diesem Notice-PR.
 
 ```sh
-# Nur nach Freigabe: separaten Notice-PR auf aktuellem main vorbereiten.
-git switch -c release/pf2-notice origin/main
-# Ausschließlich die abgeschlossene Fassung von datenschutz.html übernehmen.
-# HTML-Validierung; git diff --check; Commit; Push; Notice-PR erstellen.
-# Nach Prüfung diesen Notice-PR mergen. Pages veröffentlicht automatisch.
+# Erst nach tatsächlichem Nachweis: Disable builds AN, Previews AUS, keine alten Jobs.
+gh pr view 5 --json headRefOid,baseRefName,files,isDraft
+gh pr ready 5
+gh pr merge 5 --merge --match-head-commit e97f6e21132c131950ae783203755a41145ea975
 gh api repos/tr1stannnnnn/tr1stan.de/pages/builds/latest
 ```
 
@@ -151,7 +148,7 @@ export XDG_CONFIG_HOME=/tmp/packet-flight-release-config
 export WRANGLER_SEND_METRICS=false
 # Nutzt vorhandene Bindung; weder Login noch secret put.
 node node_modules/wrangler/bin/wrangler.js d1 time-travel info packet-flight --env=
-# Erst mit gesonderter Schreibfreigabe:
+# Im bereits freigegebenen Ablauf, erst nach bestandenen vorherigen Gates:
 node node_modules/wrangler/bin/wrangler.js d1 migrations apply packet-flight --remote --env=
 node node_modules/wrangler/bin/wrangler.js d1 migrations list packet-flight --remote --env=
 ```
@@ -202,7 +199,7 @@ Fehlt ein Gate, bleibt deaktiviert. Noch keine Aktivierung „zum Ausprobieren�
 
 Die Aktivierung muss im gewünschten Git-Zustand nachvollziehbar sein: in einem
 kleinen separaten Commit nur das **oberste** ENABLED in wrangler.toml auf true
-setzen, lokalen Dry-Run prüfen, diesen Aktivierungs-Commit nach Freigabe mergen.
+setzen, lokalen Dry-Run prüfen, diesen Aktivierungs-Commit nach bestandenen vorherigen Gates mergen.
 Automatische Worker-Builds sind weiter deaktiviert. Damit deaktiviert ein späteres normales CI-Deployment den
 Worker nicht versehentlich wieder anhand einer false-Konfiguration.
 
@@ -314,7 +311,7 @@ lassen und den konkreten Fehler melden; kein neues Token/Secret anlegen.
 | Bereits verbundene Frontend-Version in offenen Tabs | Worker zuerst serverseitig deaktivieren; bloßer Pages-Revert stoppt alte Tabs nicht. Alte bereits verarbeitete Einträge nicht rückwirkend als ungesendet bezeichnen. |
 | Automatische Builds noch deaktiviert | Disable builds AN belassen, bis Git-Zustand und Worker-Zustand konsistent sind. Keine alte Job-Warteschlange freigeben. |
 
-Beispiel des später freizugebenden Code-Rollbacks (ID aus aktuellem Release-
+Freigegebener Code-Rollback (ID aus aktuellem Release-
 Protokoll einsetzen; nicht auf eine inzwischen veraltete historische ID vertrauen):
 
 ```sh
@@ -333,11 +330,11 @@ Die zwei freiwilligen Release_Check-Einträge bleiben reguläre öffentliche
 Einträge unter der erklärten Aufbewahrung, sofern keine spätere konkrete
 Löschanweisung erteilt wird. Ein automatisches Löschen gehört nicht stillschweigend
 zur Testfreigabe. Produktive Time-Travel-Restores, Massenlöschung und Paid-Upgrades
-sind ausdrücklich **nicht** von der geplanten Freigabe umfasst.
+sind ausdrücklich **nicht** von der erteilten Freigabe umfasst.
 
-## 9. Exakter spätere Freigabeumfang
+## 9. Umfang der erteilten Freigabe
 
-Eine Freigabe muss diese konkreten Vorgänge abdecken: Disable builds vorübergehend AN,
+Die ausdrückliche Freigabe deckt diese konkreten Vorgänge ab: Disable builds vorübergehend AN,
 Preview-Branches unverändert AUS, später kontrolliert Disable builds AUS und
 Deploy-Befehl um --keep-vars ergänzen (einschließlich eines möglichen sofortigen
 Auto-Builds des geprüften main-SHA); separater Notice-Merge/Pages-Build;
