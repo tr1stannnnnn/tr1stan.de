@@ -8,6 +8,37 @@ Branch: `codex/packet-flight-escape-v2`.
 Ausgangspunkt: `main` / `34e47d6e4a4e925c4ea688ac007035c38e5df53d`.
 Nur in der entfernten Codex-Cloud arbeiten; vorhandenen Checkout verwenden.
 
+## Ursprünglicher Auftrag — Kurzfassung
+
+PACKET//FLIGHT als Flucht mit gestohlenem Datenpaket weiterentwickeln und danach
+die öffentliche Rangliste vollständig einrichten und nachweisen:
+
+- Eine Flap-Aktion beibehalten; bewegliche/zeitweise engere Firewalls,
+  TRACE//UNIT mit festgeschriebenem Schussziel und seltene Laser mit klaren
+  Warnphasen, Reaktionszeiten und erreichbarer Ausweichroute ergänzen.
+- Optionale Fragmente, Combo 1–5 und Scoring 10 pro Gate plus 2 × Combo pro
+  Fragment; Schwierigkeit, Rang und neue Skins nach Gates steuern.
+- Synthwave-Landschaft erhalten; eigene erkennbare Gegner/Gefahren, kontrollierte
+  Alarmphasen und Sound; Reduced Motion und begrenzte Effektspeicher.
+- Neue Vergleichsversion, deterministischer Daily, feste Simulation, vollständige
+  Pause und Erhalt alter Rekorde, Kennung, Einstellungen und kosmetischer Skins.
+- Worker und D1 additiv anpassen: serverseitige Scoreberechnung, plausible
+  Dauer-/Bonusgrenzen, signierte Tokens, atomare Bestwerte, identische manuelle
+  Retries, Aliasprüfung, deterministische Top 20 und eigene Position erhalten.
+- Datenschutz anhand tatsächlicher Verarbeitung ergänzen. Erst Hinweise
+  veröffentlichen, dann geprüfte Migration/Worker und zuletzt Frontend-API
+  aktivieren. Eine echte freiwillige Testeintragung speichern und wieder abrufen;
+  Health allein reicht nicht. Bestehende Worker-Secrets unverändert erhalten.
+- Cloud-Tests, echte Runs, mobile/Tablet/Desktop-/Zoom-Prüfung, Vorher-/Nachher-
+  Bilder und eine Aufnahme aller neuen Mechaniken liefern. CPU/Fehler im
+  Free-Tarif prüfen, soweit zugänglich; keine kostenpflichtigen Dienste.
+- GitHub Pages, Vanilla-Frontend ohne Build/Engine, Impressum, persönliche Texte,
+  DNS und Mail erhalten. Spielzugang auf der Homepage nur über Terminalbefehle.
+
+**Aktuelle Anweisung:** Nur Zwischenstand und Übergabe sichern, Umgebung lesend
+prüfen; keine weiteren Umgebungseinstellungen, Veröffentlichungsversuche, Merges
+oder Deployments. Die neue Aufgabe muss diese Sperre beachten.
+
 ## Bereits umgesetzt, noch nicht vollständig abgenommen
 
 - Regeln `pf-2`, Generator `escape-1`, feste 120-Hz-Simulation und getrennte
@@ -94,6 +125,17 @@ Secret-Anforderung und Freigaben für `api.cloudflare.com`, `api.github.com`,
 muss die veröffentlichte Konfiguration tatsächlich verwenden und dies mit
 `cloud_environment.environment_status` und read-only API-Aufrufen bestätigen.
 Keine Secrets im Chat anfordern oder deren Werte protokollieren.
+
+Erneute ausschließlich lesende Prüfung am 26.10.2026: Laufzeit-Spec und
+beobachtete Spec weiterhin Revision 1; Entwurf Revision 4. Der Status meldet
+`running`, `connected`, `observations_current=true`, Netzwerk `enforced` und
+keine zusätzlichen freigegebenen Hosts oder Secret-Bindungen. `failure=null`
+bezieht sich auf diesen Laufzeitstatus. Die Diagnosehistorie liefert
+`history_status=not_found`, keine Records und keinen Legacy-Snapshot.
+**Der genaue Veröffentlichungsfehler und ein eventuell neuerer global
+veröffentlichter Stand sind daher unbekannt.** Proxy-403 und fehlende Anmeldung
+sind beobachtete Zugriffsprobleme, kein belegter Veröffentlichungsfehler.
+Es wurden dabei keine Umgebungseinstellungen geändert oder Publikationen gestartet.
 
 Git-Fetch über die konfigurierte Verbindung funktioniert. GitHub-API, PR-Anlage,
 Merge, Pages-Livekontrolle und Cloudflare-Verwaltung waren im laufenden Executor
