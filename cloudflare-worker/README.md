@@ -143,3 +143,16 @@ changes rate-digest linkage. Preserve all existing keys for this release work.
 References: Cloudflare official Workers Web Crypto, D1 migrations/transactions,
 Workers platform limits/pricing, D1 limits, and Wrangler secrets documentation.
 No DNS, IONOS, Proton Mail, website-domain or hosting-model change is required.
+
+## Retention monitoring
+
+Health now returns `retentionOverdue: boolean|null`: read-only existence queries
+for runs, Daily/Normal bests and rate buckets beyond their retention deadline
+plus one daily cleanup interval. It does not delete data and exposes no row data.
+The Secret-free `.github/workflows/pf2-retention.yml` reads health daily at
+04:47 UTC; GitHub schedules can be delayed. Unknown schema/status, overdue data
+or a disabled Worker fail the job. Existing daily cleanup still runs 03:17 UTC
+and propagates errors to scheduled invocation outcomes. Inspect failed/missing
+Actions and Cloudflare cron invocations; no notification preference is changed.
+Run the workflow once manually after activation and verify its actual result
+before connecting the frontend. A locally passing test is not an Actions proof.

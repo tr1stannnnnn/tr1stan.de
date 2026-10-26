@@ -1,3 +1,13 @@
+> **Freigabe 26.10.2026:** Der Betreiber hat die vier Datenschutzentscheidungen und
+> den kontrollierten Ablauf einschließlich begrenzter Tests und dokumentierter
+> Rücknahmen ausdrücklich freigegeben. Keine weitere Zwischenfreigabe erforderlich.
+> Aktueller konkreter Blocker: Builds-API weiterhin HTTP 403; ohne bestätigte
+> tatsächliche Dashboard-Sperre kein main-Push, Merge oder produktiver Schreibzugriff.
+> Keine Sperre als gesetzt behaupten. Die automatische GitHub-Überwachung benötigt
+> nach der Aktivierung einen erfolgreichen manuellen Erstlauf vor der Frontend-Verbindung.
+> Vollständige aktuelle Vertragsseiten sind wegen Netzwerk-403 nicht abrufbar;
+> Quellen-/Vertragsstand siehe leaderboard-privacy-draft.md.
+
 # PR #4 – ausführbarer Veröffentlichungsablauf
 
 Stand 26.10.2026. **Vorbereitung, keine Ausführungsfreigabe.** Alle unten als
@@ -95,9 +105,9 @@ Worker-Tag für spätere lesende Zuordnung: 8072e2e0903e49918118a46feb6c51af.
 ## 3. Datenschutzhinweise zuerst veröffentlichen (PRODUKTIV)
 
 Die belegten Fakten und der konkrete vorgeschlagene Text stehen in
-[leaderboard-privacy-draft.md](leaderboard-privacy-draft.md). Offen sind die dort
-klar benannten Betreiberangaben/-entscheidungen, nicht ein pauschaler externer
-„Datenschutz-Freigabeblock“.
+[leaderboard-privacy-draft.md](leaderboard-privacy-draft.md). Alle vier Betreiberentscheidungen wurden ausdrücklich bestätigt. Die konkrete
+vorbereitete Fassung steht jetzt in datenschutz.html; die Quellenbeschränkung
+beim direkten DPA-/Terms-Abruf ist dokumentiert.
 
 Nach deren Klärung gegebenenfalls die konkret gewählte lokale Speicherwahl
 umsetzen/testen (bestehende Daten erhalten). Danach den Einwilligungs-/Veröffentlichungstext im Formular von #4
@@ -174,7 +184,8 @@ Operation. Neue deaktivierte Version-ID als **pf2-disabled** privat notieren.
 
 Technische Gate-Prüfungen:
 
-- GET /api/health → pf-2, enabled=false, configured=true, schemaReady=true.
+- GET /api/health → pf-2, enabled=false, configured=true, schemaReady=true,
+  retentionOverdue=false. Ein überfälliger Status ist kein Löschauftrag durch Health.
 - OPTIONS /api/score mit Origin https://tr1stan.de → 204 und passendes CORS;
   fremde Origin → 403, keine freigegebene fremde Origin.
 - Deaktivierte Run-/Board-Endpunkte → 503; dabei keine neuen Run-/Scorezeilen.
@@ -200,7 +211,13 @@ node node_modules/wrangler/bin/wrangler.js deploy --env= --keep-vars \
   --var ENABLED:true --var ENVIRONMENT:production
 ```
 
-API_URL bleibt zunächst leer. Health muss jetzt enabled=true liefern. Als
+API_URL bleibt zunächst leer. Health muss jetzt enabled=true und
+retentionOverdue=false liefern. Danach den Secret-freien Monitor manuell starten:
+`gh workflow run pf2-retention.yml --ref main`; anschließend den tatsächlichen
+Run unter GitHub Actions bis zum Ergebnis prüfen. Fehlender/fehlgeschlagener Run
+ist ein konkreter Monitorblocker vor Frontend-Verbindung. Er liest nur Health;
+der tägliche Zeitplan 04:47 UTC wird erst auf main wirksam und kann verzögert starten.
+Repository-Einstellungs-GET war HTTP 403, daher tatsächlichen Lauf nachweisen. Als
 Testprofil ausschließlich die reale Online-Origin tr1stan.de verwenden; keine
 Loopback-Origin in Produktion freischalten. Ein isolierter Cloud-Browser darf
 für den kontrollierten Test die einzelne config.mjs-Antwort für diese Origin

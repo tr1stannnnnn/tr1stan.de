@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Flight, FixedClock } from '../game/physics.mjs';
 import { RULES as R, VERSION, dailySeed, utcDay, validateAlias, rank, minimumActiveMs } from '../game/rules.mjs';
-import { Records, STORAGE_KEY } from '../game/storage.mjs';
+import { Records, STORAGE_KEY, mergeRecords } from '../game/storage.mjs';
 import { LeaderboardAPI } from '../game/api.mjs';
 import { Sound } from '../game/audio.mjs';
 import { Effects, EFFECT_LIMITS } from '../game/effects.mjs';
@@ -183,4 +183,17 @@ test('Collision breaks the packet once, settles, and dead-flight flap produces n
   assert.equal(JSON.stringify(fx), snapshot);
   for (let i = 0; i < 6; i++) fx.advance(.1, f, { settling: true });
   assert.equal(fx.active, false); assert.equal(fx.broken, true);
+});
+
+test('Opt-in merges preserved bests with RAM progress without duplicating cumulative stats after revocation', () => {
+  const store = memory(), original = new Records(store);
+  original.record('normal', '', 100, 10, 2);
+  const ram = new Records(memory()); ram.record('normal', '', 20, 2, 1);
+  let enabled = mergeRecords(new Records(store), ram);
+  assert.equal(enabled.data.normal, 100); assert.equal(enabled.data.stats.runs, 2);
+  const baseline = { ...enabled.data.stats };
+  enabled.storage = memory(); enabled.record('daily','2026-10-26',40,4,1);
+  enabled = mergeRecords(new Records(store), enabled, baseline);
+  assert.equal(enabled.data.stats.runs,3); assert.equal(enabled.data.stats.points,160);
+  assert.equal(enabled.data.normal,100); assert.equal(enabled.best('daily','2026-10-26'),40);
 });

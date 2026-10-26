@@ -1,21 +1,25 @@
-import { ALARMS } from './world.mjs?v=pf2';
-import { VERSION, RULES, SKINS, rank, utcDay, dailySeed, validateAlias } from './rules.mjs?v=pf2';
-import { Flight, FixedClock } from './physics.mjs?v=pf2';
-import { Records } from './storage.mjs?v=pf2';
-import { Sound } from './audio.mjs?v=pf2';
-import { Renderer } from './render.mjs?v=pf2';
-import { Effects } from './effects.mjs?v=pf2';
-import { LeaderboardAPI } from './api.mjs?v=pf2';
-import { API_URL } from './config.mjs?v=pf2';
+import { ALARMS } from './world.mjs?v=pf2-privacy1';
+import { VERSION, RULES, SKINS, rank, utcDay, dailySeed, validateAlias } from './rules.mjs?v=pf2-privacy1';
+import { Flight, FixedClock } from './physics.mjs?v=pf2-privacy1';
+import { Records, CHOICE_KEY, memoryStorage, mergeRecords } from './storage.mjs?v=pf2-privacy1';
+import { Sound } from './audio.mjs?v=pf2-privacy1';
+import { Renderer } from './render.mjs?v=pf2-privacy1';
+import { Effects } from './effects.mjs?v=pf2-privacy1';
+import { LeaderboardAPI } from './api.mjs?v=pf2-privacy1';
+import { API_URL } from './config.mjs?v=pf2-privacy1';
 
 const $ = id => document.getElementById(id);
 const canvas = $('flightCanvas'), renderer = new Renderer(canvas);
-let localStorageAccess, sessionStorageAccess;
+let localStorageAccess;
 try { localStorageAccess = globalThis.localStorage; } catch { localStorageAccess = null; }
-try { sessionStorageAccess = globalThis.sessionStorage; } catch { sessionStorageAccess = null; }
-const records = new Records(localStorageAccess, message => {
+const storageWarning = message => {
   $('storageNotice').hidden = false; $('storageNotice').textContent = message;
-}, sessionStorageAccess);
+};
+let keepStorage = false;
+try { keepStorage = localStorageAccess?.getItem(CHOICE_KEY) === 'yes'; } catch {}
+let records = new Records(keepStorage ? localStorageAccess : memoryStorage(), storageWarning);
+let memoryBaseline = {};
+$('keepStorage').checked = keepStorage;
 const sound = new Sound(records.data.muted), api = new LeaderboardAPI(API_URL);
 const clock = new FixedClock(), effects = new Effects();
 let mode = new URLSearchParams(location.search).get('mode') === 'daily' ? 'daily' : 'normal';
@@ -70,6 +74,7 @@ function setState(next) {
   redraw = true;
   state = next; document.body.dataset.gameState = state;
   $('stateBadge').textContent = { ready: 'BEREIT', starting: 'VERBINDEN', countdown: 'COUNTDOWN', running: 'LÄUFT', paused: 'PAUSIERT', gameover: 'BEENDET', entry: 'EINTRAGUNG' }[state];
+  $('keepStorage').disabled = ['starting','countdown','running','paused','entry'].includes(next) || !!(result && !result.submitted && result.run.online);
   $('onlineRun').disabled = ['starting','countdown','running','paused'].includes(next) || !api.enabled;
   const active = ['starting', 'countdown', 'running', 'paused'].includes(state);
   document.querySelectorAll('[name="mode"]').forEach(el => { el.disabled = active; });
@@ -97,13 +102,14 @@ async function start() {
   $('submitStatus').textContent = ''; $('publishQuestion').textContent = '';
   setState('starting'); announce('COUNTDOWN — Route wird vorbereitet.');
   const day = utcDay();
+  const playerId = records.data.playerId;
   let online = null, offlineReason = api.enabled ? 'Dieser Run ist nur lokal.' : 'Backend deaktiviert — nur lokaler Run.';
   if (api.enabled && $('onlineRun').checked) {
-    try { online = await api.start(mode, records.data.playerId); }
+    try { online = await api.start(mode, playerId); }
     catch (error) { offlineReason = `${error.message} Dieser Run ist nur lokal und später nicht einreichbar.`; }
   }
   if (attempt !== generation) return;
-  run = { mode, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason };
+  run = { mode, playerId, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason };
   flight = new Flight(run.seed); effects.reset(); $('score').textContent = '0'; updateRoute(); best(); dayInfo();
   if (pendingPause || document.hidden) { setState('paused'); announce('PAUSIERT — zum Start bewusst fortsetzen.'); }
   else beginCountdown();
@@ -211,7 +217,7 @@ $('aliasForm').addEventListener('submit', async event => {
   $('alias').removeAttribute('aria-invalid'); $('aliasError').textContent = '';
   // A retry always uses these exact primitives, never current form/storage values.
   // Kept only in this dialog/session; never persisted or automatically retried.
-  if (!pendingSubmission) pendingSubmission = Object.freeze({ token: result.run.online.token, playerId: records.data.playerId, alias: validation.alias, score: result.score, gates: result.gates, fragments: result.fragments, bonusPoints: result.bonusPoints, activeMs: result.activeMs });
+  if (!pendingSubmission) pendingSubmission = Object.freeze({ token: result.run.online.token, playerId: result.run.playerId, alias: validation.alias, score: result.score, gates: result.gates, fragments: result.fragments, bonusPoints: result.bonusPoints, activeMs: result.activeMs });
   $('alias').value = pendingSubmission.alias; $('alias').readOnly = true;
   submitting = true; $('publish').disabled = true; $('cancelEntry').disabled = true; $('submitStatus').textContent = 'Eintragung wird gesendet …';
   try {
@@ -317,10 +323,13 @@ function frame(time) {
   requestAnimationFrame(frame);
 }
 skins(); muteLabel(); dayInfo(); best(); updateRoute(); setState('ready');
-if (records.data.legacy) {
+function archiveLabel() {
+  $('legacyRecords').hidden = !records.data.legacy;
+  if (!records.data.legacy) return;
   const old = records.data.legacy, day = Object.keys(old.daily).sort().at(-1);
-  $('legacyRecords').hidden = false; $('legacyRecords').textContent = `Archiv pf-1: Normal ${old.normal}${day ? ` · Daily ${day}: ${old.daily[day]}` : ''}. Alte Rekorde bleiben getrennt; Skins und Einstellungen wurden übernommen.`;
+  $('legacyRecords').textContent = `Archiv pf-1: Normal ${old.normal}${day ? ` · Daily ${day}: ${old.daily[day]}` : ''}. Alte Rekorde bleiben getrennt; Skins und Einstellungen wurden übernommen.`;
 }
+archiveLabel();
 if (renderer.ctx) { $('gameUI').hidden = false; renderer.resize(); requestAnimationFrame(frame); }
 else { $('runStatus').textContent = 'Canvas ist nicht verfügbar; das Spiel kann hier nicht starten.'; $('gameUI').hidden = false; $('start').disabled = true; }
 if (api.enabled) {
@@ -330,8 +339,82 @@ if (api.enabled) {
   $('refreshBoard').disabled = false;
   $('boardStatus').textContent = 'Rangliste erst mit AKTUALISIEREN laden. Bis dahin bleibt die Kennung lokal.';
 } else loadBoard();
-if ('serviceWorker' in navigator && window.isSecureContext) {
-  navigator.serviceWorker.register('/game-sw.js').then(() => navigator.serviceWorker.ready).then(() => {
-    $('offlineReady').textContent = 'Spieldateien für Offline-Nutzung gespeichert. Offline erreichbare Spielseite: game.html.';
-  }).catch(() => { $('offlineReady').textContent = 'Offline-Cache hier nicht verfügbar. Die geladene Seite bleibt ohne Backend spielbar.'; });
+// Storage and offline persistence share one deliberate, reversible visitor choice.
+let storageTask = Promise.resolve();
+async function syncOffline(enabled) {
+  if (!navigator.serviceWorker || !window.isSecureContext) {
+    if (enabled) throw Error('Offline-Speicher nicht unterstützt');
+    return;
+  }
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  let registration = registrations.find(r => [r.active, r.waiting, r.installing].some(w => w && new URL(w.scriptURL).pathname === '/game-sw.js'));
+  if (!registration && !enabled) {
+    for (const key of await caches.keys()) if (key.startsWith('tr1stan-packet-flight-')) await caches.delete(key);
+    return;
+  }
+  if (!registration) registration = await navigator.serviceWorker.register('/game-sw.js', { updateViaCache: 'none' });
+  else try { await registration.update(); } catch {
+    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-3' })) return;
+    // Revocation must work with an already installed worker while offline.
+  }
+  // Upgrade pre-consent workers too: they must stop intercepting/caching requests.
+  const worker = registration.installing || registration.waiting || registration.active;
+  if (worker.state !== 'activated') await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(Error('Worker-Aktualisierung abgelaufen')), 15000);
+    worker.addEventListener('statechange', () => {
+      if (worker.state === 'activated') { clearTimeout(timer); resolve(); }
+      else if (worker.state === 'redundant') { clearTimeout(timer); reject(Error('Worker nicht aktiv')); }
+    });
+  });
+  await new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timer = setTimeout(() => reject(Error('Offline-Speicher antwortet nicht')), 15000);
+    channel.port1.onmessage = event => {
+      clearTimeout(timer); channel.port1.close();
+      event.data.ok ? resolve() : reject(Error('Offline-Speicher nicht verfügbar'));
+    };
+    worker.postMessage({ type: 'PF2_STORAGE', enabled }, [channel.port2]);
+  });
 }
+function offlineChoice(enabled) {
+  storageTask = storageTask.catch(() => {}).then(async () => {
+    $('offlineReady').textContent = enabled ? 'Offline-Dateien werden vorbereitet …' : 'Nur Arbeitsspeicher. Bereits gespeicherte Rekorde bleiben unangetastet.';
+    try {
+      await syncOffline(enabled);
+      $('offlineReady').textContent = enabled ? 'Spieldateien für Offline-Nutzung gespeichert. Offline erreichbare Spielseite: game.html.' : 'Nur Arbeitsspeicher. Offline-Cache entfernt; gespeicherte Rekorde bleiben erhalten und werden erst nach erneuter Auswahl gelesen.';
+    } catch {
+      $('offlineReady').textContent = enabled ? 'Offline-Cache nicht verfügbar. Geladene Seite bleibt spielbar.' : 'Offline-Speicher konnte nicht vollständig abgeschaltet werden. Bitte alle Spiel-Tabs schließen und Website-Cache im Browser entfernen; Rekorde dabei erhalten.';
+    }
+  });
+}
+function changeStorage(enabled, external = false) {
+  if (enabled === keepStorage) return;
+  if (enabled) {
+    try { if (!external) localStorageAccess.setItem(CHOICE_KEY, 'yes'); }
+    catch { storageWarning('Speicherwahl konnte nicht gespeichert werden. Nur Arbeitsspeicher.'); $('keepStorage').checked = false; return; }
+    const saved = new Records(localStorageAccess, storageWarning);
+    // Restore historical records without replacing them with a fresh empty session.
+    const previous = records;
+    records = mergeRecords(saved, previous, memoryBaseline);
+    if (!records.persistent) {
+      try { localStorageAccess?.setItem(CHOICE_KEY, 'no'); } catch {}
+      $('keepStorage').checked = false; records = previous; return;
+    }
+  } else {
+    // Preserve the last stored snapshot; future changes stay in RAM only.
+    if (!external) try { localStorageAccess?.setItem(CHOICE_KEY, 'no'); } catch {
+      try { localStorageAccess.removeItem(CHOICE_KEY); }
+      catch { storageWarning('Die Abwahl gilt jetzt im Arbeitsspeicher, konnte aber nicht im Browser gemerkt werden. Bitte die Speicherpräferenz in den Website-Daten entfernen, bevor du das Spiel neu lädst.'); }
+    }
+    memoryBaseline = { ...records.data.stats };
+    records.storage = memoryStorage(); records.save();
+  }
+  keepStorage = enabled; $('keepStorage').checked = enabled;
+  sound.muted = records.data.muted; skins(); muteLabel(); best(); archiveLabel();
+  offlineChoice(enabled);
+}
+$('keepStorage').addEventListener('change', event => changeStorage(event.target.checked));
+window.addEventListener('storage', event => {
+  if (event.key === CHOICE_KEY || event.key === null) changeStorage(event.newValue === 'yes', true);
+});
+offlineChoice(keepStorage);

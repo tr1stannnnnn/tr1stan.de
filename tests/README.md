@@ -135,3 +135,20 @@ needed. Release commands and exact stop/rollback gates: docs/PF2-RELEASE.md.
 Additional application regressions retain the persisted pf-1 archive after the
 old storage key is removed and complete the final explicit board selection when
 Alltime → Daily → Alltime happens during an outstanding request.
+
+## Bestätigte Speicherwahl und Terminal-Schnellbefehle (26.10.2026)
+
+`python3 tests/privacy_navigation_test.py` prüft fünf echte Chromium-Szenarien:
+RAM ohne Zustimmung/ohne Spielstand-Zugriff, alte Rekorde + Abwahl + erneute
+Auswahl + Offline-Reload, Abwahl über mehrere Tabs, Upgrade eines echten alten
+automatischen Service Workers und die drei Terminal-Schnellbefehle per Touch
+bei 320/390 Pixeln sowie Tab/Enter/Leertaste. Screenshots liegen unter
+/tmp/packet-flight-review/terminal-shortcuts-{320,390}.png. Vorhandene Befehle
+bleiben erhalten; keine neuen Hero-Links oder Arcade-Buttons außerhalb des
+Terminals. Frühere Aussagen über absichtlich fehlende Chips sind durch den
+neuen ausdrücklichen Nutzerauftrag ersetzt.
+
+Der Backendtest prüft jetzt zusätzlich lesende Retention-Erkennung, erhaltene
+Zeilen trotz Health-Aufruf und das Zurückkehren zu unauffälligem Status nach
+wirklicher isolierter Bereinigung. Die GitHub-Überwachung ist kein lokal
+nachgewiesener produktiver Actions-Lauf; dessen Erfolg ist ein Release-Gate.

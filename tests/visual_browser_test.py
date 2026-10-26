@@ -11,7 +11,7 @@ def inspect_effects(context):
     """Observe real inputs/RAF without changing gameplay or shipping debug hooks."""
     source = (ROOT / 'game/app.mjs').read_text()
     prefix = """
-import { Effects as ObservedEffects } from './effects.mjs?v=pf2';
+import { Effects as ObservedEffects } from './effects.mjs?v=pf2-privacy1';
 window.__visualEvents = {flap:0, point:0, collide:0, reset:0};
 window.__frameCalls = 0;
 for (const method of ['flap','point','collide','reset','advance']) {
@@ -128,7 +128,7 @@ class VisualBrowserTests(unittest.TestCase):
         self.page.clock.run_for(3500)
         self.assertTrue(self.page.locator('#resultDialog').evaluate('d=>d.open'))
     def test_play_normal_and_daily_and_reload_separate_records(self):
-        self.game(); self.page.locator('[name="mode"][value="normal"]').check(); self.start()
+        self.game(); self.page.locator("#keepStorage").check(); self.page.locator('[name="mode"][value="normal"]').check(); self.start()
         self.assertEqual(steer(self.page, goal=2)['score'], 2)
         self.page.clock.run_for(4000)
         normal = int(self.page.locator('#resultScore').inner_text())
@@ -144,12 +144,12 @@ class VisualBrowserTests(unittest.TestCase):
         self.assertEqual(int(self.page.locator('#best').inner_text()), daily)
         self.page.locator('[name="mode"][value="normal"]').check()
         self.assertEqual(int(self.page.locator('#best').inner_text()), normal)
-    def test_home_has_only_typed_game_navigation(self):
+    def test_home_terminal_shortcuts_preserve_typed_navigation(self):
         self.page.goto(BASE + '/')
         self.assertEqual(self.page.locator('a[href*="game.html"]').count(), 0)
         self.assertEqual(self.page.locator('.home-actions').count(), 0)
         chips = self.page.locator('.term-chip').all_text_contents()
-        self.assertNotIn('play', chips); self.assertNotIn('leaderboard', chips)
+        self.assertIn('play', chips); self.assertIn('play --daily', chips); self.assertIn('leaderboard', chips)
         field = self.page.locator('#termIn'); field.fill('help'); field.press('Enter')
         self.page.wait_for_function("document.querySelector('#termOut').textContent.includes('leaderboard')")
         for command in ['play', 'play --daily', 'leaderboard']:
@@ -192,10 +192,11 @@ class VisualBrowserTests(unittest.TestCase):
         page.goto(BASE + '/')
         page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-1');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
         page.goto(BASE + '/game.html')
-        page.wait_for_function('navigator.serviceWorker.controller !== null')
+        page.locator('#keepStorage').check()
+        page.wait_for_function("document.querySelector('#offlineReady').textContent.includes('für Offline-Nutzung gespeichert')")
         self.assertNotIn('tr1stan-packet-flight-pf-2-shell-1', page.evaluate('caches.keys()'))
-        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-2')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
-        for asset in ['/game/effects.mjs?v=pf2','/game/render.mjs?v=pf2','/game/app.mjs?v=pf2','/game/game.css?v=pf2','/style.css?v=30','/script.js?v=30']:
+        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-3')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
+        for asset in ['/game/effects.mjs?v=pf2-privacy1','/game/render.mjs?v=pf2-privacy1','/game/app.mjs?v=pf2-privacy1','/game/game.css?v=pf2-privacy1','/style.css?v=31','/script.js?v=31']:
             self.assertIn(asset, paths)
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')
@@ -211,7 +212,7 @@ class VisualBrowserTests(unittest.TestCase):
         self.game(); self.start(); self.page.locator('#pause').click()
         before = self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()')
         self.page.evaluate("""async () => {
-          const {Renderer}=await import('/game/render.mjs?v=pf2');
+          const {Renderer}=await import('/game/render.mjs?v=pf2-privacy1');
           const renderer=new Renderer(document.querySelector('#flightCanvas'));
           renderer.resize(); renderer.resize();
         }""")

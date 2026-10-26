@@ -1,5 +1,5 @@
-import { RULES as R, randomSequence } from './rules.mjs?v=pf2';
-import { gatePlan, gateShape, alarmPhase } from './world.mjs?v=pf2';
+import { RULES as R, randomSequence } from './rules.mjs?v=pf2-privacy1';
+import { gatePlan, gateShape, alarmPhase } from './world.mjs?v=pf2-privacy1';
 export class Flight {
   constructor(seed) { this.reset(seed); }
   reset(seed) {

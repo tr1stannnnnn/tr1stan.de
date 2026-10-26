@@ -1,5 +1,5 @@
-import { fragments, security } from './security-render.mjs?v=pf2';
-import { RULES as R, SKINS } from './rules.mjs?v=pf2';
+import { fragments, security } from './security-render.mjs?v=pf2-privacy1';
+import { RULES as R, SKINS } from './rules.mjs?v=pf2-privacy1';
 const TAU = Math.PI * 2;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const colorOf = skin => SKINS.find(s => s.id === skin)?.color || SKINS[0].color;

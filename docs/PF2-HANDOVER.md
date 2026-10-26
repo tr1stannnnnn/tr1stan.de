@@ -1,3 +1,9 @@
+> **Fortsetzung 26.10.2026:** Betreiberentscheidungen und kontrollierte Veröffentlichung
+> sind ausdrücklich freigegeben. Speicherwahl, Einwilligung, Löschüberwachung und
+> Terminal-Schnellbefehle wurden umgesetzt. Tatsächlicher Release-/Test-/Blockerstand:
+> [PF2-RELEASE-STATUS.md](PF2-RELEASE-STATUS.md). Kein main-Push vor bestätigter
+> tatsächlicher Builds-Sperre; keine weitere pauschale Zwischenfreigabe einholen.
+
 # Aktuelle Fortsetzung — 26.10.2026
 
 Der Nutzer hat die Entwicklungsarbeit auf diesem Branch wieder freigegeben.

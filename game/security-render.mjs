@@ -1,4 +1,4 @@
-import { RULES as R } from './rules.mjs?v=pf2';
+import { RULES as R } from './rules.mjs?v=pf2-privacy1';
 const text = (c, value, x, y) => { c.font = '600 10px "JetBrains Mono", monospace'; c.fillText(value, x, y); };
 export function fragments(c, flight, alpha, reduced) {
   for (const g of flight.gates) {

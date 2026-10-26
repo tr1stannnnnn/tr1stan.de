@@ -1,4 +1,4 @@
-import { VERSION, dailySeed, validateAlias, rank, RULES, scoreParts } from './rules.mjs?v=pf2';
+import { VERSION, dailySeed, validateAlias, rank, RULES, scoreParts } from './rules.mjs?v=pf2-privacy1';
 export class LeaderboardAPI {
   constructor(base = '', fetcher = globalThis.fetch?.bind(globalThis)) { this.base = base.replace(/\/$/, ''); this.fetcher = fetcher; }
   get enabled() { return /^https:\/\/[^/]+$/.test(this.base); }

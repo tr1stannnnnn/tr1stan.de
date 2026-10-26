@@ -1,4 +1,4 @@
-import { VERSION, SKINS, RULES, validPlayerId } from './rules.mjs?v=pf2';
+import { VERSION, SKINS, RULES, validPlayerId } from './rules.mjs?v=pf2-privacy1';
 export const STORAGE_KEY = `tr1stan.packet-flight.${VERSION}.storage-1`;
 export const LEGACY_KEY = 'tr1stan.packet-flight.pf-1.storage-1';
 function newId() {
@@ -92,4 +92,20 @@ export class Records {
     if (!SKINS.some(s => s.id === id && this.data.highest >= s.at)) return false;
     this.data.skin = id; this.save(); return true;
   }
+}
+
+// No sessionStorage fallback: optional persistence requires an explicit choice.
+export const CHOICE_KEY = 'tr1stan.packet-flight.storage-choice-1';
+export function memoryStorage() {
+  const values = new Map();
+  return { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+}
+export function mergeRecords(saved, current, baseline = {}) {
+  saved.data.normal = Math.max(saved.data.normal, current.data.normal);
+  for (const [day, score] of Object.entries(current.data.daily)) saved.data.daily[day] = Math.max(saved.data.daily[day] || 0, score);
+  saved.data.highest = Math.max(saved.data.highest, current.data.highest);
+  for (const key of Object.keys(saved.data.stats)) saved.data.stats[key] += Math.max(0, current.data.stats[key] - (baseline[key] || 0));
+  saved.data.legacy ||= current.data.legacy;
+  saved.save();
+  return saved;
 }

@@ -1,4 +1,4 @@
-import { SKINS, randomSequence } from './rules.mjs?v=pf2';
+import { SKINS, randomSequence } from './rules.mjs?v=pf2-privacy1';
 
 export const EFFECT_LIMITS = Object.freeze({ particles: 64, trail: 9, rings: 4, labels: 3, gates: 3 });
 const colorOf = skin => SKINS.find(s => s.id === skin)?.color || SKINS[0].color;

@@ -26,8 +26,8 @@
   <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="stylesheet" href="/style.css?v=30" />
-  <link rel="stylesheet" href="/game/game.css?v=pf2" />
+  <link rel="stylesheet" href="/style.css?v=31" />
+  <link rel="stylesheet" href="/game/game.css?v=pf2-privacy1" />
 </head>
 <body class="arcade-page">
   <a class="skip" href="#content">Zum Spiel springen</a>
@@ -77,6 +77,8 @@
         <p id="threatStatus" class="arcade-notice" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="controls" class="arcade-small">Leertaste · ↑ · W · Tap auf das Spielfeld. Erst Countdown, dann fliegen. Tastatursteuerung bei Fokus im Spielfeld; Tab verlässt es. Scrollen und Zoom bleiben möglich.</p>
         <p id="runStatus" class="arcade-notice" role="status">BEREIT — lokale Rekorde, kein Upload.</p>
+        <label class="online-choice"><input type="checkbox" id="keepStorage" aria-describedby="storageChoiceHint" /> Rekorde und Offline-Nutzung auf diesem Gerät behalten</label>
+        <p id="storageChoiceHint" class="arcade-small">Ohne Auswahl nur Arbeitsspeicher. Auswahl hier änderbar; vorhandene Rekorde werden nicht gelöscht und erst nach Zustimmung wieder gelesen. Während eines Runs oder einer offenen Online-Eintragung ist die Auswahl gesperrt. <a href="/datenschutz.html#spielspeicher">Datenschutz</a></p>
         <p id="storageNotice" class="arcade-small" hidden></p>
         <p id="offlineReady" class="arcade-small"></p>
       </section>
@@ -125,7 +127,7 @@
       <button type="button" class="arcade-button quiet" id="skipScore">ÜBERSPRINGEN</button>
     </div>
     <form id="aliasForm" hidden novalidate>
-      <p>Freiwillige Veröffentlichung: Alias, Score, Gates, Fragmente, Bonuspunkte, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte.</p>
+      <p>Mit ÖFFENTLICH EINTRAGEN willige ich ausdrücklich in die freiwillige Veröffentlichung ein: Alias, Score, Gates, Fragmente, Bonuspunkte, Rang und Zeitpunkt werden öffentlich sichtbar. Kein Konto. Ein Bestwert pro Browserprofil verhindert keine weiteren Profile oder Geräte. Ich kann die Einwilligung jederzeit für die Zukunft über <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a> widerrufen und die Löschung verlangen. Der Widerruf berührt die Rechtmäßigkeit der bisherigen Verarbeitung nicht. <a href="/datenschutz.html#rangliste">Datenschutz, Betrieb und Missbrauchsschutz</a>.</p>
       <label for="alias">Öffentlicher Alias (2–16 Zeichen)</label>
       <input id="alias" type="text" name="alias" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="aliasHint aliasError" />
       <p id="aliasHint" class="arcade-small">Buchstaben, Zahlen, einfache Leerzeichen, _ und -. Keine automatische Übernahme früherer Namen.</p>
@@ -138,7 +140,7 @@
     <textarea id="copyFallback" readonly hidden></textarea>
   </dialog>
   <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-2</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
-  <script src="/script.js?v=30" defer></script>
-  <script type="module" src="/game/app.mjs?v=pf2"></script>
+  <script src="/script.js?v=31" defer></script>
+  <script type="module" src="/game/app.mjs?v=pf2-privacy1"></script>
 </body>
 </html>

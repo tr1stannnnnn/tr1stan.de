@@ -171,6 +171,17 @@ export async function cleanup(env, now = Date.now()) {
     env.DB.prepare('DELETE FROM rate_buckets WHERE expires_at<?').bind(now),
   ]);
 }
+// Only boolean retention state leaves D1. A grace period allows the daily cron.
+export async function retentionOverdue(env, now = Date.now()) {
+  const grace = 86400000;
+  const results = await env.DB.batch([
+    env.DB.prepare('SELECT 1 FROM runs_v2 WHERE expires_at<? LIMIT 1').bind(now - 172800000 - grace),
+    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='daily' AND day<? LIMIT 1").bind(utcDay(now - 30 * 86400000)),
+    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='normal' AND achieved_at<? LIMIT 1").bind(now - 366 * 86400000),
+    env.DB.prepare('SELECT 1 FROM rate_buckets WHERE expires_at<? LIMIT 1').bind(now - grace),
+  ]);
+  return results.some(result => result.results.length > 0);
+}
 export default {
   async fetch(request, env) {
     let cors = null;
@@ -190,7 +201,8 @@ export default {
         if (env.DB) try {
           await env.DB.batch([env.DB.prepare('SELECT score,gates,fragments,bonus_points FROM scores_v2 LIMIT 1'), env.DB.prepare('SELECT submission_hash,confirmation FROM runs_v2 LIMIT 1'), env.DB.prepare('SELECT hits FROM rate_buckets LIMIT 1')]); schemaReady = true;
         } catch {}
-        return response({ ok: true, enabled: env.ENABLED === 'true', configured: !!env.DB && secretsReady(env), schemaReady, version: VERSION }, 200, cors);
+        const overdue = schemaReady ? await retentionOverdue(env) : null;
+        return response({ ok: true, enabled: env.ENABLED === 'true', configured: !!env.DB && secretsReady(env), schemaReady, retentionOverdue: overdue, version: VERSION }, 200, cors);
       }
       if (env.ENABLED !== 'true' || !env.DB || !secretsReady(env)) fail(503, 'Leaderboard noch nicht aktiviert.');
       if (method === 'POST' && !cors) fail(403, 'Origin erforderlich.');

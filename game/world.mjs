@@ -1,4 +1,4 @@
-import { RULES as R } from './rules.mjs?v=pf2';
+import { RULES as R } from './rules.mjs?v=pf2-privacy1';
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export function securityKind(ordinal) {
   if (ordinal >= 12 && ordinal % 16 === 12) return 'trace';

@@ -2,7 +2,7 @@ import test, { before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Miniflare } from 'miniflare';
-import worker, { cleanup } from '../src/index.mjs';
+import worker, { cleanup, retentionOverdue } from '../src/index.mjs';
 import { VERSION, RULES, utcDay, dailySeed, scoreParts, maximumBonus, minimumActiveMs } from '../../game/rules.mjs';
 
 // Deliberately fake keys, ephemeral D1, no production endpoints or credentials.
@@ -256,4 +256,26 @@ test('Rank, server timestamp and own placement outside Top 20; fully determinist
   assert.deepEqual(board.entries[0], board.ownEntry);
   now = run.expiresAt + 1;
   assert.deepEqual((await request('/api/score', { method: 'POST', body: data })).data, saved.data, 'retry keeps its original position snapshot after later best-value changes');
+});
+
+test('Read-only retention monitor detects delayed cleanup and clears only after actual cleanup', async () => {
+  assert.equal(await retentionOverdue(env, now), false);
+  await DB.prepare("INSERT INTO scores_v2 VALUES('overdue','overdue','pf-2','normal','','Retention',10,1,0,0,?)").bind(now - 366 * 86400000 - 1).run();
+  const first = await request('/api/health');
+  assert.equal(first.data.retentionOverdue, true);
+  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores_v2').first()).n, 1, 'health never deletes rows');
+  await cleanup({ ...env, ENABLED: 'false' }, now);
+  assert.equal(await retentionOverdue(env, now), true, 'disabled worker pauses cleanup');
+  await cleanup(env, now);
+  assert.equal((await request('/api/health')).data.retentionOverdue, false);
+  for (const [mode, day, achieved] of [
+    ['daily', utcDay(now - 31 * 86400000), now],
+    ['normal', '', now - 366 * 86400000 - 1],
+  ]) {
+    await DB.prepare("INSERT INTO scores_v2 VALUES(?,?,?,?,?,'Retention',10,1,0,0,?)").bind(mode, mode, VERSION, mode, day, achieved).run();
+    assert.equal(await retentionOverdue(env, now), true); await cleanup(env, now);
+  }
+  await DB.prepare("INSERT INTO rate_buckets VALUES('delayed',1,?)").bind(now - 86400001).run();
+  assert.equal(await retentionOverdue(env, now), true); await cleanup(env, now);
+  assert.equal(await retentionOverdue(env, now), false);
 });

@@ -109,7 +109,8 @@ class BrowserTests(unittest.TestCase):
         self.assertNotEqual(self.page.evaluate('document.activeElement.id'), 'flightCanvas')
     def test_storage_audio_failure_and_copy_fallback(self):
         self.context.add_init_script("Object.defineProperty(window,'localStorage',{get:()=>({getItem(){throw Error('blocked')},setItem(){throw Error('blocked')}})}); window.AudioContext=class {constructor(){throw Error('blocked')}};")
-        self.clock(); self.game(); self.end_run()
+        self.clock(); self.game(); self.page.locator("#keepStorage").click(); self.end_run()
+        self.assertFalse(self.page.locator("#keepStorage").is_checked())
         self.assertTrue(self.page.locator('#storageNotice').is_visible())
         self.page.evaluate("() => { navigator.clipboard.writeText = () => Promise.reject(Error('denied')); }")
         self.page.locator('#copyScore').click(); self.page.wait_for_selector('#copyFallback:not([hidden])')
@@ -254,7 +255,8 @@ class BrowserTests(unittest.TestCase):
         # Separate context explicitly enables the real game-only service worker.
         ctx = self.browser.new_context(reduced_motion='reduce')
         page = ctx.new_page(); page.goto(BASE + '/game.html')
-        page.wait_for_function('navigator.serviceWorker.controller !== null')
+        page.locator('#keepStorage').check()
+        page.wait_for_function("document.querySelector('#offlineReady').textContent.includes('für Offline-Nutzung gespeichert')")
         page.evaluate('navigator.serviceWorker.ready')
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')
