@@ -178,14 +178,19 @@ export async function cleanup(env, now = Date.now()) {
 }
 // Only boolean retention state leaves D1. A grace period allows the daily cron.
 export async function retentionOverdue(env, now = Date.now()) {
-  const grace = 86400000;
-  const results = await env.DB.batch([
-    env.DB.prepare('SELECT 1 FROM runs_v2 WHERE expires_at<? LIMIT 1').bind(now - 172800000 - grace),
-    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='daily' AND day<? LIMIT 1").bind(utcDay(now - 30 * 86400000)),
-    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='normal' AND achieved_at<? LIMIT 1").bind(now - 366 * 86400000),
-    env.DB.prepare('SELECT 1 FROM rate_buckets WHERE expires_at<? LIMIT 1').bind(now - grace),
-  ]);
-  return results.some(result => result.results.length > 0);
+  // Compile every required health column even when tables are empty. Only
+  // bounded scalar probes and a boolean are returned; no record data is exposed.
+  const row = await env.DB.prepare(`SELECT
+    (SELECT score+gates+fragments+bonus_points FROM scores_v2 LIMIT 1) AS schema_score,
+    (SELECT length(submission_hash)+length(confirmation) FROM runs_v2 LIMIT 1) AS schema_run,
+    (SELECT hits FROM rate_buckets LIMIT 1) AS schema_rate,
+    (EXISTS(SELECT 1 FROM runs_v2 WHERE expires_at<?)
+      OR EXISTS(SELECT 1 FROM scores_v2 WHERE mode='daily' AND day<?)
+      OR EXISTS(SELECT 1 FROM scores_v2 WHERE mode='normal' AND achieved_at<?)
+      OR EXISTS(SELECT 1 FROM rate_buckets WHERE expires_at<?)) AS overdue`)
+    .bind(now - 3 * 86400000, utcDay(now - 30 * 86400000), now - 366 * 86400000, now - 86400000).first();
+  if (!row || ![0, 1].includes(row.overdue)) fail(503, 'Aufbewahrungsstatus nicht verfügbar.');
+  return row.overdue === 1;
 }
 export default {
   async fetch(request, env) {
@@ -202,11 +207,8 @@ export default {
       }
       if (request.method !== method) return response({ message: 'Methode nicht erlaubt.' }, 405, cors, { Allow: `${method}, OPTIONS` });
       if (url.pathname === '/api/health') {
-        let schemaReady = false;
-        if (env.DB) try {
-          await env.DB.batch([env.DB.prepare('SELECT score,gates,fragments,bonus_points FROM scores_v2 LIMIT 1'), env.DB.prepare('SELECT submission_hash,confirmation FROM runs_v2 LIMIT 1'), env.DB.prepare('SELECT hits FROM rate_buckets LIMIT 1')]); schemaReady = true;
-        } catch {}
-        const overdue = schemaReady ? await retentionOverdue(env) : null;
+        let schemaReady = false, overdue = null;
+        if (env.DB) try { overdue = await retentionOverdue(env); schemaReady = true; } catch {}
         return response({ ok: true, enabled: env.ENABLED === 'true', configured: !!env.DB && secretsReady(env), schemaReady, retentionOverdue: overdue, version: VERSION }, 200, cors);
       }
       if (env.ENABLED !== 'true' || !env.DB || !secretsReady(env)) fail(503, 'Leaderboard noch nicht aktiviert.');
