@@ -298,3 +298,21 @@ test('Concurrent requests increment minute, day and global rate counters once an
   assert(after.filter(row => row.bucket.startsWith('start:')).every(row => row.hits === 11));
   assert(after.filter(row => row.bucket.startsWith('board:')).every(row => row.hits === 1));
 });
+
+test('Health still rejects missing required columns in empty tables after probe consolidation', async () => {
+  const isolated = new Miniflare({ modules: true, script: 'export default {fetch(){return new Response("isolated")}}', compatibilityDate: '2026-06-11', d1Databases: { DB: 'health-column-isolated' } });
+  try {
+    const db = await isolated.getD1Database('DB');
+    await db.batch([
+      db.prepare('CREATE TABLE scores_v2(score INTEGER,gates INTEGER,fragments INTEGER,mode TEXT,day TEXT,achieved_at INTEGER)'),
+      db.prepare('CREATE TABLE runs_v2(submission_hash TEXT,confirmation TEXT,expires_at INTEGER)'),
+      db.prepare('CREATE TABLE rate_buckets(hits INTEGER,expires_at INTEGER)'),
+    ]);
+    const targetEnv = { ...env, DB: db };
+    let health = await request('/api/health', { targetEnv });
+    assert.equal(health.data.schemaReady, false); assert.equal(health.data.retentionOverdue, null);
+    await db.prepare('ALTER TABLE scores_v2 ADD COLUMN bonus_points INTEGER').run();
+    health = await request('/api/health', { targetEnv });
+    assert.equal(health.data.schemaReady, true); assert.equal(health.data.retentionOverdue, false);
+  } finally { await isolated.dispose(); }
+});
