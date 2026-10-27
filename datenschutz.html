@@ -274,8 +274,11 @@
           <p>Auch bei aktiviertem Backend lädt ein Seitenaufruf die Rangliste nicht automatisch.
             Erst AKTUALISIEREN oder ein bewusst ausgewählter Ranglistenmodus sendet die zufällige
             Browserkennung an den Cloudflare-Worker, um deinen eigenen Bestwert zuzuordnen.
-            Bei ausgewähltem Online-Run sendet START Kennung, Modus und Spielversion bereits
-            vor einer möglichen Scoreeintragung. Der Server speichert einen HMAC der Kennung,
+            MIT RANGLISTE STARTEN bereitet vor Spielbeginn einen Server-Run vor und sendet dafür
+            Kennung, Modus und Spielversion an Cloudflare. Alias und öffentliche Scoreeintragung
+            bleiben nach Game Over freiwillig. NUR LOKAL SPIELEN startet ohne Server-Run.
+            Scheitert der Ranglistenstart, beginnt kein Spiel automatisch: Du kannst ihn bewusst
+            erneut versuchen oder lokal spielen. Der Server speichert einen HMAC der Kennung,
             Seed, Version, Modus, UTC-Tag, Start-/Ablaufzeit und Verbrauchsstatus des signierten
             Run-Tokens. Lokale Runs werden nicht nachträglich hochgeladen; es gibt keine
             versteckte Upload-Warteschlange. Online-Funktionen können technisch deaktiviert sein.</p>

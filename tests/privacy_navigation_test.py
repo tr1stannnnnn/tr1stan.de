@@ -110,6 +110,42 @@ class PrivacyNavigationTests(unittest.TestCase):
             self.assertEqual(self.page.evaluate('navigator.serviceWorker.getRegistrations().then(r=>r.length)'),0)
             self.assertEqual(self.page.evaluate('(k)=>JSON.parse(localStorage.getItem(k)).normal',LEGACY),73)
         finally: server.shutdown();server.server_close()
+    def test_published_shell4_upgrades_to_two_start_actions_and_offline_shell5(self):
+        # Serve the actual previously published client/worker first, then this checkout.
+        old = {name: subprocess.check_output(['git','show',f'7ab097c:{name}'],cwd=ROOT)
+               for name in ['game.html','game-sw.js','game/app.mjs','game/api.mjs','game/game.css']}
+        class Handler(SimpleHTTPRequestHandler):
+            live=False
+            def log_message(self,*args): pass
+            def do_GET(self):
+                path=self.path.split('?')[0].lstrip('/')
+                if not Handler.live and path in old:
+                    self.send_response(200)
+                    self.send_header('Content-Type','text/html' if path.endswith('.html') else 'text/css' if path.endswith('.css') else 'text/javascript')
+                    self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(old[path])
+                else: super().do_GET()
+        server=ThreadingHTTPServer(('127.0.0.1',0),partial(Handler,directory=str(ROOT)))
+        threading.Thread(target=server.serve_forever,daemon=True).start()
+        try:
+            url=f'http://127.0.0.1:{server.server_port}'
+            self.page.goto(url+'/index.html')
+            self.page.evaluate('([k,v])=>localStorage.setItem(k,v)',[LEGACY,'{"normal":73,"daily":{}}'])
+            self.page.goto(url+'/game.html');self.page.locator('#keepStorage').check();self.ready_cache()
+            self.assertIn('tr1stan-packet-flight-pf-2-shell-4',self.page.evaluate('caches.keys()'))
+            self.assertEqual(self.page.locator('#onlineRun').count(),1)
+            Handler.live=True
+            self.page.reload();self.ready_cache()
+            self.assertEqual(self.page.locator('#onlineRun').count(),0)
+            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN')
+            self.assertEqual(self.page.evaluate('caches.keys()'),['tr1stan-packet-flight-pf-2-shell-5'])
+            self.assertEqual(self.page.evaluate('(k)=>JSON.parse(localStorage.getItem(k)).legacy.normal',KEY),73)
+            self.ctx.set_offline(True);self.page.reload(wait_until='load')
+            self.page.wait_for_selector('#gameUI:not([hidden])')
+            self.assertEqual(self.page.locator('#onlineRun').count(),0)
+            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN')
+            self.page.locator('#start').click()
+            self.assertEqual(self.page.locator('body').get_attribute('data-game-state'),'countdown')
+        finally: server.shutdown();server.server_close()
     def test_terminal_touch_reflow_targets_and_keyboard(self):
         out=Path('/tmp/packet-flight-review');out.mkdir(exist_ok=True)
         for width in [320,390]:

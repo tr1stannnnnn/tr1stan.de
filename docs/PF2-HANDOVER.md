@@ -1,3 +1,10 @@
+> **Folgeänderung: eindeutige Startwahl (27.10.2026):** MIT RANGLISTE STARTEN
+> oder NUR LOKAL SPIELEN statt Online-Häkchen; kein stiller lokaler Ersatzstart.
+> 88 Prüfungen erneut bestanden, Cache5/pf2-start2 und passende Datenschutzhinweise.
+> Ablauf, Nachweise und Veröffentlichungsweg:
+> [PF2-START-FLOW-2026-10-27.md](PF2-START-FLOW-2026-10-27.md).
+> Die folgenden Abschnitte dokumentieren den vorherigen Release.
+
 > **Abschluss 27.10.2026:** Spiel, API und Shell-Cache 4 sind live. Die
 > Build-Rückführung (inklusive `--keep-vars`, Disable builds AUS) ist vom Betreiber
 > manuell bestätigt; Preview-Builds bleiben AUS. Letzter Health-Aufruf HTTP 200,

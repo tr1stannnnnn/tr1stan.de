@@ -30,15 +30,15 @@ class BrowserTests(unittest.TestCase):
     def game(self, path='/game.html'):
         self.page.goto(BASE + path)
         self.page.wait_for_selector('#gameUI:not([hidden])')
-        if getattr(self, 'mockOnline', False): self.page.locator('#onlineRun').check()
         self.page.evaluate('document.fonts.ready')
         self.page.evaluate("window.scrollTo({top:0,behavior:'instant'})")
     def state(self):
         return self.page.locator('body').get_attribute('data-game-state')
     def clock(self):
         self.page.clock.install(time=datetime(2026, 10, 11, 12, tzinfo=timezone.utc))
-    def end_run(self):
-        self.page.locator('#start').click()
+    def end_run(self, online=None):
+        online = getattr(self, 'mockOnline', False) if online is None else online
+        self.page.locator('#startOnline' if online else '#start').click()
         self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
         self.page.clock.run_for(6000)
         self.assertEqual(self.state(), 'gameover')
@@ -118,6 +118,7 @@ class BrowserTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('document.activeElement.id'), 'copyFallback')
     def online(self, score_failure=False, start_failure=False, populated=False):
         self.scores = []; self.starts = []; self.mockOnline = True; self.failed_once = False; self.own_entry = None; self.receipt = None
+        self.start_failure = start_failure; self.submit_status = None; self.start_override = {}
         self.context.route('**/game/config.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
         def api(route):
             req = route.request; path = urlparse(req.url).path
@@ -125,27 +126,33 @@ class BrowserTests(unittest.TestCase):
             if req.method == 'OPTIONS': route.fulfill(status=204, headers=headers); return
             if path == '/api/run/start':
                 self.starts.append(req.post_data_json)
-                if start_failure: route.fulfill(status=503, headers=headers, body='{"message":"offline"}'); return
+                if self.start_failure: route.fulfill(status=503, headers=headers, body='{"message":"offline"}'); return
                 time = self.page.evaluate('Date.now()')
-                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-2','mode':'normal','day':'','seed':1,'startedAt':time,'expiresAt':time+1800000}
+                self.run_mode = req.post_data_json['mode']
+                self.run_day = datetime.fromtimestamp(time/1000, timezone.utc).date().isoformat() if self.run_mode == 'daily' else ''
+                seed = 2166136261
+                for char in 'pf-2|escape-1|' + self.run_day: seed = ((seed ^ ord(char)) * 16777619) & 0xffffffff
+                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-2','mode':self.run_mode,'day':self.run_day,'seed':(seed or 1) if self.run_mode == 'daily' else 1,'startedAt':time,'expiresAt':time+1800000}
+                data.update(self.start_override)
             elif path == '/api/score':
                 self.scores.append(req.post_data_json)
+                if self.submit_status: route.fulfill(status=self.submit_status, headers=headers, body='{"message":"Run abgelaufen."}'); return
                 if self.receipt is None:
                     self.own_entry = {'position':22 if populated else 1,'alias':req.post_data_json['alias'],'score':req.post_data_json['score'],'gates':req.post_data_json['gates'],'fragments':req.post_data_json['fragments'],'bonusPoints':req.post_data_json['bonusPoints'],'rank':'SCRIPT KIDDIE','achievedAt':self.page.evaluate('Date.now()'),'own':True}
-                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-2','mode':'normal','day':'','positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
+                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-2','mode':self.run_mode,'day':self.run_day,'positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
                 if score_failure and not self.failed_once:
                     self.failed_once = True; route.fulfill(status=503, headers=headers, body='{"message":"Antwort verloren"}'); return
                 data = self.receipt
             else:
                 entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':250,'gates':25,'fragments':0,'bonusPoints':0,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
-                data = {'version':'pf-2','mode':'alltime','day':'','entries':entries,'ownEntry':self.own_entry}
+                requested = 'daily' if 'mode=daily' in req.url else 'alltime'
+                data = {'version':'pf-2','mode':requested,'day':self.run_day if requested == 'daily' else '','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
     def test_enabled_api_stays_unused_until_explicit_online_action(self):
         self.online(); self.clock(); self.game()
-        self.page.locator('#onlineRun').uncheck()
         self.assertFalse(any(urlparse(url).hostname == 'packet-flight.test' for url in self.requests))
-        self.end_run()
+        self.end_run(online=False)
         self.assertEqual(self.starts, []); self.assertEqual(self.scores, [])
         self.assertFalse(any(urlparse(url).hostname == 'packet-flight.test' for url in self.requests))
         self.page.locator('#skipScore').click(); self.page.locator('#refreshBoard').click()
@@ -190,7 +197,7 @@ class BrowserTests(unittest.TestCase):
         self.online(); self.clock(); self.game(); self.end_run()
         self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('Expired')
         self.page.clock.set_system_time(datetime(2026, 10, 11, 12, 31, tzinfo=timezone.utc))
-        self.page.locator('#publish').click()
+        self.page.clock.run_for(50)
         self.assertTrue(self.page.locator('#publish').is_disabled()); self.assertEqual(len(self.scores), 0)
         self.page.locator('#cancelEntry').click(); self.assertTrue(self.page.locator('#enterScore').is_disabled())
         self.page.locator('#again').click(); self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
@@ -247,10 +254,140 @@ class BrowserTests(unittest.TestCase):
         self.page.evaluate("document.documentElement.style.zoom='2'")
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), self.page.evaluate('document.documentElement.clientWidth'))
         self.page.locator('#leaderboard').screenshot(path=str(ARTIFACTS/'leaderboard-zoom-200.png'))
-    def test_failed_start_stays_local(self):
-        self.online(start_failure=True); self.clock(); self.game(); self.end_run()
+    def test_failed_start_never_begins_a_run_and_explicit_retry_succeeds(self):
+        self.online(start_failure=True); self.clock(); self.game()
+        self.page.locator('#startOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+        self.assertIn('kein Spiel gestartet', self.page.locator('#startFailure').inner_text())
+        self.assertEqual(self.page.evaluate('document.activeElement.id'), 'startFailure')
+        self.page.clock.run_for(10000); self.assertEqual(self.state(), 'start-error')
+        self.assertEqual(len(self.starts), 1); self.assertEqual(self.scores, [])
+        self.start_failure = False
+        self.page.get_by_role('button', name='ERNEUT VERSUCHEN', exact=True).click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000)
+        self.assertEqual(len(self.starts), 2)
+        self.assertTrue(self.page.locator('#enterScore').is_enabled())
+        self.assertTrue(self.page.locator('#startFailure').is_hidden())
+    def test_failed_start_local_choice_remains_unverifiable(self):
+        self.online(start_failure=True); self.clock(); self.game('/game.html?mode=daily')
+        self.page.locator('#startOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+        self.end_run(online=False)
+        self.assertEqual(len(self.starts), 1); self.assertEqual(self.scores, [])
+        self.assertTrue(self.page.locator('#enterScore').is_hidden())
+        self.assertIn('nicht nachträglich', self.page.locator('#publishQuestion').inner_text())
+        self.assertTrue(self.page.locator('#nextOnline').is_visible())
+        self.page.locator('#enterScore').dispatch_event('click')
+        self.assertEqual(self.state(), 'gameover'); self.assertEqual(self.scores, [])
+    def test_local_to_next_online_and_daily_restart_prepare_new_tokens(self):
+        self.online(); self.clock(); self.game('/game.html?mode=daily')
+        self.end_run(online=False)
+        self.assertEqual(self.starts, []); self.assertEqual(self.scores, [])
+        self.page.locator('#nextOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000)
+        self.assertEqual(self.starts[0]['mode'], 'daily')
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('DailyLocalTest'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'gameover'")
+        self.assertIn('Eintragung bestätigt', self.page.locator('#submitStatus').inner_text())
+        self.assertEqual(len(self.scores), 1)
+        token = self.scores[0]['token']
+        self.page.locator('#again').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000)
+        self.assertEqual(len(self.starts), 2)
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('SecondLocalTest'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'gameover'")
+        self.assertNotEqual(self.scores[1]['token'], token)
+    def test_server_expiry_response_stops_fresh_publication(self):
+        self.online(); self.clock(); self.game(); self.end_run()
+        self.submit_status = 410
+        self.page.locator('#enterScore').click(); self.page.locator('#alias').fill('ExpiredTest'); self.page.locator('#publish').click()
+        self.page.wait_for_function("document.querySelector('#submitStatus').textContent.includes('neuen Run')")
+        self.assertTrue(self.page.locator('#publish').is_disabled())
+        self.page.locator('#cancelEntry').click()
         self.assertTrue(self.page.locator('#enterScore').is_disabled())
-        self.assertEqual(len(self.scores), 0); self.assertIn('nur lokal', self.page.locator('#publishQuestion').inner_text())
+        self.assertIn('nicht mehr verfügbar', self.page.locator('#publishQuestion').inner_text())
+        self.assertEqual(len(self.scores), 1)
+    def test_timeout_and_invalid_start_response_do_not_fall_back(self):
+        self.online(); self.clock(); self.game()
+        held=[]
+        self.context.route('https://packet-flight.test/api/run/start', lambda route: held.append(route) if route.request.method == 'POST' else route.fallback())
+        self.page.locator('#startOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'starting'")
+        self.assertTrue(self.page.locator('#start').is_disabled())
+        self.page.clock.run_for(4100)
+        self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+        self.assertIn('TIMEOUT', self.page.locator('#startFailure').inner_text())
+        self.assertEqual(self.scores, [])
+        for route in held: route.abort()
+        self.context.unroute('https://packet-flight.test/api/run/start')
+        self.start_override = {'seed':0}
+        self.page.locator('#startOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+        self.assertIn('Ungültige Run-Antwort', self.page.locator('#startFailure').inner_text())
+        self.assertEqual(self.scores, [])
+        now = self.page.evaluate('Date.now()')
+        self.start_override = {'startedAt':now-1800001,'expiresAt':now-1}
+        self.page.locator('#startOnline').click()
+        self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+        self.assertIn('bereits abgelaufen', self.page.locator('#startFailure').inner_text())
+        self.assertEqual(self.scores, [])
+    def test_surface_requires_choice_and_buttons_work_with_tab_enter_space(self):
+        self.online(); self.clock(); self.game()
+        self.page.locator('#flightCanvas').focus(); self.page.keyboard.press('Space')
+        self.assertEqual(self.state(), 'ready'); self.assertEqual(self.starts, [])
+        self.assertEqual(self.page.evaluate('document.activeElement.id'), 'startOnline')
+        self.page.keyboard.press('Tab'); self.assertEqual(self.page.evaluate('document.activeElement.id'), 'start')
+        self.page.keyboard.press('Space'); self.page.clock.run_for(6000)
+        self.assertTrue(self.page.locator('#nextOnline').is_visible())
+        self.page.locator('#nextOnline').focus(); self.page.keyboard.press('Enter')
+        self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+        self.page.clock.run_for(6000)
+        self.assertTrue(self.page.locator('#enterScore').is_enabled())
+        self.page.locator('#enterScore').focus(); self.page.keyboard.press('Space')
+        self.assertEqual(self.state(), 'entry'); self.assertEqual(self.scores, [])
+    def test_mobile_two_choices_error_and_next_online_normal_and_daily(self):
+        for width in [320, 390]:
+            for mode in ['normal', 'daily']:
+                with self.subTest(width=width, mode=mode):
+                    self.context.close()
+                    self.context = self.browser.new_context(viewport={'width':width,'height':844}, is_mobile=True, has_touch=True, reduced_motion='reduce', service_workers='block')
+                    self.page = self.context.new_page()
+                    self.page.on('pageerror', lambda e: self.errors.append(str(e)))
+                    self.online(); self.clock(); self.game('/game.html?mode='+mode)
+                    self.assertEqual(self.page.locator('#onlineRun').count(), 0)
+                    self.assertIn('Server-Run', self.page.locator('#onlineNotice').inner_text())
+                    self.assertIn('freiwillig', self.page.locator('#onlineNotice').inner_text())
+                    for selector in ['#startOnline','#start']:
+                        box=self.page.locator(selector).bounding_box()
+                        self.assertGreaterEqual(box['height'],44)
+                        self.assertGreaterEqual(box['width'],44)
+                        self.assertLessEqual(box['x']+box['width'],width)
+                    self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+                    self.page.locator('#flightCanvas').tap()
+                    self.assertEqual(self.state(),'ready'); self.assertEqual(self.starts,[])
+                    self.assertNotIn(self.page.evaluate('document.activeElement.tagName'),['INPUT','TEXTAREA'])
+                    self.page.locator('.flight-actions').screenshot(path=str(ARTIFACTS/f'start-choices-{mode}-{width}.png'))
+                    self.page.locator('#start').tap(); self.page.clock.run_for(6000)
+                    self.assertTrue(self.page.locator('#enterScore').is_hidden())
+                    self.assertIn('nur lokal',self.page.locator('#publishQuestion').inner_text())
+                    self.page.locator('#resultDialog').screenshot(path=str(ARTIFACTS/f'local-result-{mode}-{width}.png'))
+                    self.start_failure=True; self.page.locator('#nextOnline').tap()
+                    self.page.wait_for_function("document.body.dataset.gameState === 'start-error'")
+                    self.page.clock.run_for(6000); self.assertEqual(self.state(),'start-error')
+                    self.assertTrue(self.page.locator('#startFailure').is_visible())
+                    self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+                    self.assertNotIn(self.page.evaluate('document.activeElement.tagName'),['INPUT','TEXTAREA'])
+                    self.start_failure=False; self.page.locator('#startOnline').tap()
+                    self.page.wait_for_function("document.body.dataset.gameState === 'countdown'")
+                    self.page.clock.run_for(6000)
+                    self.assertTrue(self.page.locator('#enterScore').is_enabled())
+                    self.page.locator('#enterScore').tap()
+                    self.assertEqual(self.state(),'entry'); self.assertEqual(self.scores,[])
+                    self.page.locator('#cancelEntry').tap()
+                    self.assertEqual(len(self.starts),2)
     def test_offline_reload(self):
         # Separate context explicitly enables the real game-only service worker.
         ctx = self.browser.new_context(reduced_motion='reduce')

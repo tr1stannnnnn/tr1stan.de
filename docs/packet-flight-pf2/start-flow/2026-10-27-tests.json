@@ -1,0 +1,157 @@
+{
+  "checked_at_utc": "2026-10-27T13:02:58.823034+00:00",
+  "base_commit": "7ab097c7258178cf4ec58afe87f81234bdad696a",
+  "tests": {
+    "unit": {
+      "passed": 24,
+      "log_sha256": "ee4a07a79ef814962813d2a0cf625942aa52a9c6712dbd643ed263c369236ec3"
+    },
+    "backend": {
+      "passed": 17,
+      "log_sha256": "879cadf258af86bef43834fad520732406c1d1803e138225eadf95d3815877d5"
+    },
+    "site": {
+      "passed": 2,
+      "log_sha256": "ace996322b82fde139c0b5ea1547c767b8580ee7cc69f08d0ea75b55efdeb529"
+    },
+    "browser": {
+      "passed": 20,
+      "log_sha256": "249bd27c79787214e831665d0caae5c06eb9a8013f44dde6aa5dbf1ea28f7126"
+    },
+    "visual": {
+      "passed": 8,
+      "log_sha256": "7667efc6642b680b09380ff7ded6dd02e8b91ca691efb6ce472d7d2fb2a6e4c3"
+    },
+    "escape": {
+      "passed": 2,
+      "log_sha256": "4aa871cdb6180bd697a47a3a8b44db87d776fb99f0dc8372f9154caea827ce6f"
+    },
+    "metrics": {
+      "passed": 7,
+      "log_sha256": "54ea8b96df5abfad213360efdbab6fd905b61704aea7ff28e184c6c1a78b6055"
+    },
+    "privacy": {
+      "passed": 6,
+      "log_sha256": "4b374b938bc50f2ea59de79b3cafc8c45281e535f8591ad8cdd1e9bc2a9980d3"
+    },
+    "integration": {
+      "passed": 2,
+      "log_sha256": "e502a136eeb8bcacddd2996caabfc6d789b0653ba1c15a41f8ef1edad1735c30"
+    }
+  },
+  "total_passed": 88,
+  "html_all_five_pages": true,
+  "html_log_sha256": "45342ca54fc3787657ce6eb4dbe6d4510cbf68d24318d44416c0176ab31ebf4b",
+  "node_syntax_and_git_diff_check": true,
+  "mobile_widths": [
+    320,
+    390
+  ],
+  "mobile_modes": [
+    "normal",
+    "daily"
+  ],
+  "keyboard": [
+    "Tab",
+    "Shift+Tab",
+    "Enter",
+    "Space"
+  ],
+  "test_backend": "real workerd + ephemeral D1; both migrations; fake test-only keys; no production/GitHub credentials in subprocess",
+  "real_browser_integration": "Normal and Daily, real wall-clock run termination, signed token, explicit voluntary submit, actual receipt/readback, new token on restart; no forged gameplay/score/time and no production score writes",
+  "failure_paths": [
+    "HTTP 503 before countdown; no local fallback",
+    "timeout before countdown; no local fallback",
+    "malformed start response",
+    "already expired start token",
+    "client expiry before publication",
+    "server HTTP 410 stops new publication",
+    "lost response keeps identical manual retry after expiry; no automatic retry"
+  ],
+  "cache": "tr1stan-packet-flight-pf-2-shell-5",
+  "assets": "pf2-start2 (app, API, game CSS)",
+  "upgrade_test": "actual published shell4/client from 7ab097c upgraded to shell5; old records preserved; offline reload/start succeeds; no-consent old-worker revocation also passes",
+  "production_before": {
+    "checked_at_utc": "2026-10-27T12:59:21.728432+00:00",
+    "deployment_id": "3ac7ed52-e103-4c09-9975-dd6dcd8a0bd4",
+    "versions": [
+      {
+        "version_id": "04ffc5cb-5519-4966-8bbe-f3a834f9b6b7",
+        "percentage": 100
+      }
+    ],
+    "script_etag": "a2299103df32194e959ab935aa0fb510420e20ec3ad748a1c9bc90fa98f873fa",
+    "enabled": "true",
+    "secret_binding_names": [
+      "PSEUDONYM_KEY",
+      "RATE_KEY",
+      "SIGNING_KEY"
+    ],
+    "d1": [
+      {
+        "rows": [
+          {
+            "mode": "daily",
+            "day": "2026-10-27",
+            "alias": "Release_Check",
+            "score": 0,
+            "gates": 0,
+            "fragments": 0,
+            "bonus_points": 0,
+            "achieved_at": 1793096763781
+          },
+          {
+            "mode": "normal",
+            "day": "",
+            "alias": "Release_Check",
+            "score": 10,
+            "gates": 1,
+            "fragments": 0,
+            "bonus_points": 0,
+            "achieved_at": 1793092811119
+          }
+        ],
+        "rows_written": 0,
+        "changed_db": false
+      },
+      {
+        "rows": [
+          {
+            "old_runs": 0,
+            "old_scores": 0,
+            "pf2_runs": 2,
+            "pf2_scores": 2
+          }
+        ],
+        "rows_written": 0,
+        "changed_db": false
+      },
+      {
+        "rows": [
+          {
+            "name": "0001_initial.sql"
+          },
+          {
+            "name": "0002_escape_pf2.sql"
+          }
+        ],
+        "rows_written": 0,
+        "changed_db": false
+      }
+    ]
+  },
+  "public_worker_requests_in_this_change": 0,
+  "new_public_test_entries": 0,
+  "previous_controlled_release_budget": {
+    "used": 30,
+    "maximum": 30,
+    "new_runs_or_scores_not_allowed": true
+  },
+  "unchanged_backend_and_gameplay": true,
+  "limitations": [
+    "Physical devices and Safari untested",
+    "Native Chromium TLS at cloud proxy unverified; live page checks use CA-validating Python transport",
+    "Earlier release CPU evidence is historical sampled telemetry, not new CPU measurements for this UI change"
+  ],
+  "after_merge_evidence": "Exact final source/CI/Worker/Pages IDs recorded in the associated PR description and final report to avoid self-triggering metadata commits"
+}

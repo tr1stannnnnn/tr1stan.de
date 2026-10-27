@@ -81,7 +81,7 @@ class EscapeBrowserTests(unittest.TestCase):
             page.clock.install(time=datetime(2026,10,11,12,tzinfo=timezone.utc))
             page.goto(BASE+'/game.html?mode=daily'); page.wait_for_selector('#gameUI:not([hidden])')
             page.clock.pause_at(datetime.fromtimestamp((page.evaluate('Date.now()')+100)/1000,timezone.utc))
-            if touch: page.locator('#flightCanvas').tap()
+            if touch: page.locator('#start').tap()
             else: page.locator('#start').click()
             page.clock.run_for(1700)
             result=fly(page,goal=30,touch=touch,pause_phases=not touch)

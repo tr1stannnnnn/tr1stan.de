@@ -2,12 +2,15 @@
 
 GitHub Pages remains the static host. The existing Cloudflare Worker/D1 backend
 is active; the approved workers.dev API is connected in game/config.mjs.
-Online run is unchecked by default and no board request is sent on page load.
+The client has explicit leaderboard/local start actions. A failed server start
+never silently starts local play; no board request is sent on page load.
 Workers Free / Current plan / 0 USD was manually confirmed by the operator;
 D1 allowance follows the official Workers-Free pricing table. No upgrade.
 
 Current release evidence, source/deployment IDs, controlled rollback and the
-remaining manual Builds-API-403 step: [release log](../docs/PF2-RELEASE-2026-10-27.md).
+manually restored Builds settings (plus successful automatic build): [release log](../docs/PF2-RELEASE-2026-10-27.md).
+The follow-up UI/cache release and isolated browser-to-workerd tests are documented
+in [start flow](../docs/PF2-START-FLOW-2026-10-27.md).
 Both additive migrations are applied. Existing data and the three runtime secret
 bindings are preserved. Normal and Daily Release_Check entries were confirmed
 and re-read; no more test runs are authorized by the two-run release budget.

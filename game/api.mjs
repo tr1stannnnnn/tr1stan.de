@@ -9,7 +9,11 @@ export class LeaderboardAPI {
     try {
       const response = await this.fetcher(this.base + path, { ...options, signal: controller.signal, credentials: 'omit', cache: 'no-store' });
       const data = await response.json();
-      if (!response.ok) throw Error(data.message || `API-Fehler ${response.status}`);
+      if (!response.ok) {
+        const error = Error(data.message || `API-Fehler ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
       return data;
     } catch (error) {
       if (controller.signal.aborted) throw Error('TIMEOUT — das Backend antwortet nicht.');
@@ -18,7 +22,7 @@ export class LeaderboardAPI {
   }
   async start(mode, playerId) {
     const data = await this.request('/api/run/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode, version: VERSION, playerId }) });
-    if (data.version !== VERSION || data.mode !== mode || typeof data.token !== 'string' || data.token.length > 1024 || !Number.isInteger(data.seed) || data.seed < 1 || data.seed > 4294967295 || !Number.isSafeInteger(data.startedAt) || data.expiresAt !== data.startedAt + RULES.tokenTtlMs || (mode === 'daily' && (typeof data.day !== 'string' || data.seed !== dailySeed(data.day) || !/^\d{4}-\d{2}-\d{2}$/.test(data.day)))) throw Error('Ungültige Run-Antwort; Run bleibt lokal.');
+    if (data.version !== VERSION || data.mode !== mode || typeof data.token !== 'string' || data.token.length > 1024 || !Number.isInteger(data.seed) || data.seed < 1 || data.seed > 4294967295 || !Number.isSafeInteger(data.startedAt) || data.expiresAt !== data.startedAt + RULES.tokenTtlMs || (mode === 'daily' && (typeof data.day !== 'string' || data.seed !== dailySeed(data.day) || !/^\d{4}-\d{2}-\d{2}$/.test(data.day)))) throw Error('Ungültige Run-Antwort; kein Spiel gestartet.');
     return data;
   }
   async submit(payload) {
