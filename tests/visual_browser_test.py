@@ -195,9 +195,9 @@ class VisualBrowserTests(unittest.TestCase):
         page.locator('#keepStorage').check()
         page.wait_for_function("document.querySelector('#offlineReady').textContent.includes('für Offline-Nutzung gespeichert')")
         self.assertNotIn('tr1stan-packet-flight-pf-2-shell-1', page.evaluate('caches.keys()'))
-        self.assertEqual(page.evaluate('caches.keys()'), ['tr1stan-packet-flight-pf-2-shell-5'])
-        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-5')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
-        for asset in ['/game/effects.mjs?v=pf2-privacy1','/game/render.mjs?v=pf2-privacy1','/game/app.mjs?v=pf2-start2','/game/api.mjs?v=pf2-start2','/game/game.css?v=pf2-start2','/style.css?v=31','/script.js?v=31']:
+        self.assertEqual(page.evaluate('caches.keys()'), ['tr1stan-packet-flight-pf-2-shell-6'])
+        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-6')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
+        for asset in ['/game/effects.mjs?v=pf2-privacy1','/game/render.mjs?v=pf2-privacy1','/game/app.mjs?v=pf2-ui3','/game/api.mjs?v=pf2-start2','/game/game.css?v=pf2-ui3','/style.css?v=31','/script.js?v=31']:
             self.assertIn(asset, paths)
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')

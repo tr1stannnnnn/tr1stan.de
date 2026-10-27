@@ -31,7 +31,7 @@ class StartIntegrationTests(unittest.TestCase):
     def run_mode(self,mode):
         ctx=self.browser.new_context(reduced_motion='reduce',service_workers='block')
         ctx.route('**/game/config.mjs*',lambda route:route.fulfill(content_type='text/javascript',body="export const API_URL='https://packet-flight.test';"))
-        page=ctx.new_page();errors=[];starts=[];scores=[];statuses=[]
+        page=ctx.new_page();errors=[];starts=[];scores=[];statuses=[];held_scores=[]
         page.on('pageerror',lambda e:errors.append(str(e)))
         def bridge(route):
             req=route.request; url=urlsplit(req.url)
@@ -42,7 +42,8 @@ class StartIntegrationTests(unittest.TestCase):
             body=response.read(); status=response.status
             statuses.append(status)
             if req.method=='POST' and url.path=='/api/run/start': starts.append(json.loads(body))
-            if req.method=='POST' and url.path=='/api/score': scores.append(json.loads(body))
+            if req.method=='POST' and url.path=='/api/score':
+                scores.append(json.loads(body));held_scores.append((route,status,dict(response.headers),body));return
             route.fulfill(status=status,headers=dict(response.headers),body=body)
         ctx.route('https://packet-flight.test/**',bridge)
         # Any accidental production API request fails the test before network I/O.
@@ -50,16 +51,42 @@ class StartIntegrationTests(unittest.TestCase):
         try:
             page.goto(BASE+'/game.html?mode='+mode);page.wait_for_selector('#gameUI:not([hidden])')
             self.assertEqual(starts,[]);self.assertEqual(scores,[])
+            # Manual board override is allowed, but does not load before explicit intent.
+            page.locator('#todayBoard' if mode=='normal' else '#alltimeBoard').click()
             page.locator('#startOnline').click()
             page.wait_for_selector('#resultDialog[open]',timeout=15000)
             self.assertEqual(len(starts),1);self.assertEqual(starts[0]['mode'],mode)
             self.assertTrue(starts[0]['token'].startswith('pf2.'))
             self.assertEqual(scores,[]);self.assertTrue(page.locator('#enterScore').is_enabled())
+            # An unrelated close cannot discard a still-valid unsubmitted result.
+            page.evaluate("document.querySelector('#resultDialog').close()")
+            page.wait_for_function("document.querySelector('#resultDialog').open")
+            self.assertTrue(page.locator('#enterScore').is_enabled())
             page.locator('#enterScore').click();page.locator('#alias').fill('Isolated_Browser');page.locator('#publish').click()
+            page.wait_for_timeout(100)
+            self.assertEqual(len(held_scores),1)
+            self.assertEqual(page.locator('body').get_attribute('data-game-state'),'entry')
+            self.assertTrue(page.locator('[name=mode][value=normal]').is_disabled())
+            # Simulate unrelated native close/change/click events during a lost reply.
+            page.evaluate("document.querySelector('#resultDialog').close()")
+            page.wait_for_function("document.querySelector('#resultDialog').open")
+            page.locator('[name=mode][value='+('daily' if mode=='normal' else 'normal')+']').evaluate("e=>{e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}))}")
+            page.locator('#skipScore').dispatch_event('click')
+            page.locator('#cancelEntry').dispatch_event('click')
+            self.assertEqual(page.locator('body').get_attribute('data-game-state'),'entry')
+            self.assertTrue(page.locator('[name=mode][value='+mode+']').is_checked())
+            self.assertEqual(page.locator('#alias').input_value(),'Isolated_Browser')
+            route,status,headers,body=held_scores.pop();route.fulfill(status=status,headers=headers,body=body)
             page.wait_for_function("document.querySelector('#submitStatus').textContent.includes('Eintragung bestätigt')",timeout=15000)
             self.assertEqual(len(scores),1);self.assertTrue(scores[0]['accepted'])
             self.assertEqual(scores[0]['mode'],mode)
             page.wait_for_function("document.querySelector('#ownPosition').textContent.includes('Dein Bestwert')")
+            daily=mode=='daily'
+            self.assertEqual(page.locator('#todayBoard').get_attribute('aria-pressed'),str(daily).lower())
+            self.assertEqual(page.locator('#alltimeBoard').get_attribute('aria-pressed'),str(not daily).lower())
+            self.assertIn('DAILY · HEUTE' if daily else 'NORMAL · ALLZEIT',page.locator('#boardStatus').inner_text())
+            self.assertEqual(page.locator('#boardDate').is_visible(),daily)
+            if daily:self.assertIn(starts[0]['day'],page.locator('#boardDate').inner_text())
             first_token=starts[0]['token']
             page.locator('#again').click();page.wait_for_function("document.body.dataset.gameState === 'countdown'")
             self.assertEqual(len(starts),2);self.assertNotEqual(starts[1]['token'],first_token)

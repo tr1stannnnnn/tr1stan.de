@@ -146,7 +146,7 @@ class BrowserTests(unittest.TestCase):
             else:
                 entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':250,'gates':25,'fragments':0,'bonusPoints':0,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
                 requested = 'daily' if 'mode=daily' in req.url else 'alltime'
-                data = {'version':'pf-2','mode':requested,'day':self.run_day if requested == 'daily' else '','entries':entries,'ownEntry':self.own_entry}
+                data = {'version':'pf-2','mode':requested,'day':datetime.fromtimestamp(self.page.evaluate('Date.now()')/1000,timezone.utc).date().isoformat() if requested == 'daily' else '','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
     def test_enabled_api_stays_unused_until_explicit_online_action(self):

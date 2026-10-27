@@ -26,6 +26,7 @@ let mode = new URLSearchParams(location.search).get('mode') === 'daily' ? 'daily
 let state = 'ready', flight = new Flight(dailySeed(utcDay())), run = null, result = null;
 let countdownUntil = 0, lastFrame = 0, generation = 0, pendingPause = false, currentDay = utcDay();
 let boardMode = mode === 'daily' ? 'daily' : 'alltime', boardGeneration = 0, boardBusy = false, boardPending = false, lastBoardAt = -Infinity;
+let boardRequested = false, boardDay = currentDay;
 let submitting = false, pendingSubmission = null;
 let startError = '';
 let redraw = true;
@@ -77,18 +78,31 @@ function setState(next) {
   $('stateBadge').textContent = { ready: 'BEREIT', 'start-error': 'START GESCHEITERT', starting: 'VERBINDEN', countdown: 'COUNTDOWN', running: 'LÄUFT', paused: 'PAUSIERT', gameover: 'BEENDET', entry: 'EINTRAGUNG' }[state];
   $('keepStorage').disabled = ['starting','countdown','running','paused','entry'].includes(next) || !!(result && !result.submitted && result.run.online);
   const active = ['starting', 'countdown', 'running', 'paused'].includes(state);
-  document.querySelectorAll('[name="mode"]').forEach(el => { el.disabled = active; });
+  document.querySelectorAll('[name="mode"]').forEach(el => { el.disabled = active || state === 'entry' || submitting || canSubmit(); });
   $('start').disabled = active && state !== 'paused';
   $('start').textContent = state === 'paused' ? 'FORTSETZEN' : 'NUR LOKAL SPIELEN';
   $('startOnline').disabled = active || !api.enabled;
   $('startOnline').hidden = state === 'paused';
-  $('startOnline').textContent = startError ? 'ERNEUT VERSUCHEN' : 'MIT RANGLISTE STARTEN';
+  $('startOnline').textContent = startError ? 'ERNEUT VERSUCHEN' : 'MIT RANGLISTE STARTEN · EMPFOHLEN';
   $('pause').disabled = !['countdown', 'running'].includes(state);
   $('surfaceOverlay').hidden = state === 'running' || state === 'gameover';
   const labels = { ready: ['BEREIT', 'Unten mit Rangliste oder nur lokal starten'], 'start-error': ['NICHT GESTARTET', 'Erneut versuchen oder bewusst lokal spielen'], starting: ['VERBINDEN', 'Server-Run vorbereiten …'], countdown: ['2', 'Gleich geht es los'], paused: ['PAUSIERT', 'Bewusst fortsetzen · danach Countdown'], gameover: [flight.reason, 'Run beendet'], entry: ['EINTRAGUNG', 'Dein Score bleibt bis zum Absenden lokal'] };
   if (labels[state]) { $('overlayLabel').textContent = labels[state][0]; $('overlayHint').textContent = labels[state][1]; }
 }
 function randomSeed() { return crypto.getRandomValues(new Uint32Array(1))[0] || 1; }
+function resetFlight(seed = dailySeed(utcDay())) {
+  clock.reset(); lastFrame = 0; countdownUntil = 0;
+  flight = new Flight(seed); effects.reset();
+  $('score').textContent = String(flight.score); updateRoute(); redraw = true;
+}
+function ready() {
+  if (submitting) return false;
+  generation++; run = null; result = null; pendingSubmission = null; pendingPause = false;
+  if ($('resultDialog').open) $('resultDialog').close();
+  startError = ''; $('startFailure').hidden = true; $('startFailure').textContent = '';
+  resetFlight(); resetEntryForm(); setState('ready'); best(); dayInfo();
+  return true;
+}
 function beginCountdown() {
   sound.unlock(); clock.reset(); lastFrame = 0;
   countdownUntil = performance.now() + RULES.countdownMs;
@@ -102,6 +116,7 @@ async function start(withLeaderboard = false) {
   const attempt = ++generation;
   sound.unlock(); pendingPause = document.hidden;
   result = null; pendingSubmission = null; run = null; resetEntryForm();
+  resetFlight();
   startError = ''; $('startFailure').hidden = true; $('startFailure').textContent = '';
   $('submitStatus').textContent = ''; $('publishQuestion').textContent = '';
   setState('starting'); announce('COUNTDOWN — Route wird vorbereitet.');
@@ -124,7 +139,7 @@ async function start(withLeaderboard = false) {
   }
   if (attempt !== generation) return;
   run = { mode, playerId, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason: 'Bewusst lokaler Run — keine öffentliche Eintragung möglich.' };
-  flight = new Flight(run.seed); effects.reset(); $('score').textContent = '0'; updateRoute(); best(); dayInfo();
+  resetFlight(run.seed); best(); dayInfo();
   if (pendingPause || document.hidden) { setState('paused'); announce('PAUSIERT — zum Start bewusst fortsetzen.'); }
   else beginCountdown();
 }
@@ -182,10 +197,10 @@ function finish() {
   showResultActions();
   announce(`GAME OVER — ${result.score} Punkte, ${rank(result.gates)}.`);
 }
-function action() {
+function action(preventScroll = false) {
   if (state === 'ready' || state === 'start-error') {
     announce('Startart wählen: MIT RANGLISTE STARTEN oder NUR LOKAL SPIELEN.');
-    (api.enabled ? $('startOnline') : $('start')).focus();
+    (api.enabled ? $('startOnline') : $('start')).focus({ preventScroll });
     return;
   }
   if (state === 'paused') { beginCountdown(); return; }
@@ -194,7 +209,7 @@ function action() {
 }
 canvas.addEventListener('pointerdown', event => {
   if (event.button !== 0 || !event.isPrimary) return;
-  event.preventDefault(); canvas.focus({ preventScroll: true }); action();
+  event.preventDefault(); canvas.focus({ preventScroll: true }); action(true);
 });
 canvas.addEventListener('keydown', event => {
   if (event.target !== canvas || event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
@@ -212,9 +227,12 @@ document.querySelectorAll('[name="mode"]').forEach(el => {
   el.checked = el.value === mode;
   el.addEventListener('change', () => {
     if (!el.checked) return;
-    mode = el.value; run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset(); updateRoute();
-    startError = ''; $('startFailure').hidden = true; $('startFailure').textContent = '';
-    setState('ready'); best(); dayInfo();
+    if (el.disabled || submitting || canSubmit() || !['ready', 'start-error', 'gameover'].includes(state)) {
+      document.querySelectorAll('[name="mode"]').forEach(input => { input.checked = input.value === mode; });
+      return;
+    }
+    mode = el.value;
+    ready(); selectBoard(mode === 'daily' ? 'daily' : 'alltime');
     const url = new URL(location.href);
     if (mode === 'daily') url.searchParams.set('mode', 'daily'); else url.searchParams.delete('mode');
     history.replaceState(null, '', url);
@@ -229,12 +247,20 @@ $('again').addEventListener('click', () => start(!!result?.run.online));
 $('nextOnline').addEventListener('click', () => start(true));
 function skip() {
   if (submitting) return;
-  $('resultDialog').close(); showResultActions(); run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset(); updateRoute(); setState('ready'); dayInfo(); best();
-  announce(pendingSubmission ? 'Keine weitere Anfrage. Eine zuvor gesendete Eintragung kann bereits verarbeitet worden sein.' : 'Score bleibt lokal. Bereit für einen neuen Run.');
+  const uncertain = !!pendingSubmission;
+  $('resultDialog').close(); ready();
+  announce(uncertain ? 'Keine weitere Anfrage. Eine zuvor gesendete Eintragung kann bereits verarbeitet worden sein.' : 'Score bleibt lokal. Bereit für einen neuen Run.');
   $('start').focus();
 }
 $('skipScore').addEventListener('click', skip);
 $('resultDialog').addEventListener('cancel', event => { event.preventDefault(); if (state === 'entry') cancelEntry(); else skip(); });
+$('resultDialog').addEventListener('close', () => {
+  if (!result || !['gameover', 'entry'].includes(state)) return;
+  // Start/skip have already left the result state. An unrelated close must not
+  // erase an in-flight submission, its retry payload or a still valid entry.
+  if (submitting || canSubmit() || state === 'entry') $('resultDialog').showModal();
+  else skip();
+});
 $('enterScore').addEventListener('click', () => {
   if (!canSubmit()) { $('submitStatus').textContent = 'Run abgelaufen oder nicht öffentlich einreichbar.'; $('enterScore').disabled = true; return; }
   resetEntryForm(); setState('entry'); $('resultActions').hidden = true; $('aliasForm').hidden = false;
@@ -264,7 +290,8 @@ $('aliasForm').addEventListener('submit', async event => {
     setState('gameover'); showResultActions(); $('again').focus();
     $('publishQuestion').textContent = 'Freiwillige Eintragung bestätigt. Ein schlechterer Score ersetzt keinen besseren.';
     $('submitStatus').textContent = `Eintragung bestätigt. Dein Bestwert: ${placement(response.ownEntry)} · ${response.mode === 'daily' ? `${response.day} UTC` : 'ALLZEIT'}. Position bei Bestätigung (${timestamp(response.positionAsOf)}); spätere Einträge können sie verändern.`;
-    boardMode = response.mode === 'daily' ? 'daily' : 'alltime'; boardGeneration++; lastBoardAt = -Infinity; loadBoard();
+    boardRequested = true;
+    selectBoard(response.mode === 'daily' ? 'daily' : 'alltime', { force: true });
   } catch (error) {
     if (error.status === 410) {
       pendingSubmission = null; result.expired = true;
@@ -287,19 +314,39 @@ $('copyScore').addEventListener('click', async () => {
     $('copyFallback').focus(); $('copyFallback').select(); $('submitStatus').textContent = 'Kopieren hier nicht möglich. Der Text ist zum manuellen Kopieren ausgewählt.';
   }
 });
-async function loadBoard() {
+function boardLabel() { return boardMode === 'daily' ? 'DAILY · HEUTE' : 'NORMAL · ALLZEIT'; }
+function updateBoardSelection() {
   $('todayBoard').setAttribute('aria-pressed', String(boardMode === 'daily'));
   $('alltimeBoard').setAttribute('aria-pressed', String(boardMode === 'alltime'));
+  $('boardDescription').textContent = boardMode === 'daily'
+    ? 'Nur Daily-Runs des angezeigten UTC-Tages. Normale Runs stehen getrennt unter NORMAL · ALLZEIT.'
+    : 'Normale Runs aller Tage. Daily-Runs stehen getrennt unter DAILY · HEUTE.';
+  $('boardDate').hidden = boardMode !== 'daily';
+  $('boardDate').textContent = boardMode === 'daily' ? `${boardDay} (UTC) · Tageswechsel um 00:00 UTC.` : '';
+}
+function clearBoard() { $('boardEntries').replaceChildren(); $('ownPosition').textContent = ''; }
+function selectBoard(next, { load = boardRequested, force = false } = {}) {
+  if (next === boardMode && !force) return;
+  boardMode = next; boardDay = currentDay; boardGeneration++; boardPending = false; lastBoardAt = -Infinity;
+  clearBoard(); updateBoardSelection();
+  $('boardStatus').textContent = api.enabled ? 'Rangliste erst mit AKTUALISIEREN laden. Bis dahin bleibt die Kennung lokal.' : 'LEADERBOARD OFFLINE';
+  if (load) loadBoard();
+}
+async function loadBoard() {
+  updateBoardSelection();
   if (!api.enabled) { $('boardStatus').textContent = 'LEADERBOARD OFFLINE'; return; }
-  if (boardBusy) { boardPending = true; return; }
+  if (!boardRequested) return;
+  if (boardBusy) { boardPending = true; $('boardStatus').textContent = `${boardLabel()} lädt …`; return; }
   if (Date.now() - lastBoardAt < 5000) return;
-  const request = ++boardGeneration, requestedMode = boardMode;
+  const request = ++boardGeneration, requestedMode = boardMode, requestedDay = currentDay;
   boardBusy = true; lastBoardAt = Date.now(); $('refreshBoard').disabled = true;
-  $('boardStatus').textContent = 'Rangliste lädt …'; $('boardEntries').replaceChildren(); $('ownPosition').textContent = '';
+  $('boardStatus').textContent = `${boardLabel()} lädt …`; clearBoard();
   try {
     const data = await api.list(requestedMode, records.data.playerId);
-    if (request !== boardGeneration || requestedMode !== boardMode) return;
-    $('boardStatus').textContent = data.entries.length ? `${requestedMode === 'daily' ? `${data.day} UTC` : 'ALLZEIT'} · ${VERSION}` : 'Noch keine Einträge in diesem Bereich.';
+    if (request !== boardGeneration || requestedMode !== boardMode || (requestedMode === 'daily' && requestedDay !== currentDay)) return;
+    if (requestedMode === 'daily') boardDay = data.day;
+    updateBoardSelection();
+    $('boardStatus').textContent = data.entries.length ? `${boardLabel()} · ${VERSION}` : `Noch keine Einträge in ${boardLabel()}.`;
     for (const entry of data.entries) {
       const li = document.createElement('li');
       li.classList.toggle('own', entry.own === true);
@@ -319,17 +366,19 @@ async function loadBoard() {
   }
 }
 for (const [id, value] of [['todayBoard', 'daily'], ['alltimeBoard', 'alltime']]) $(id).addEventListener('click', () => {
-  if (boardMode === value) return;
-  boardMode = value; boardGeneration++; lastBoardAt = -Infinity; loadBoard();
+  selectBoard(value);
 });
-$('refreshBoard').addEventListener('click', loadBoard);
+$('refreshBoard').addEventListener('click', () => { boardRequested = true; loadBoard(); });
 function frame(time) {
   const delta = lastFrame ? (time - lastFrame) / 1000 : 0; lastFrame = time;
   const today = utcDay();
   if (result && !result.submitted && $('enterScore').disabled === canSubmit()) updateResultAvailability();
   if (today !== currentDay) {
     currentDay = today; dayInfo(); best();
-    if (boardMode === 'daily') { boardGeneration++; $('boardEntries').replaceChildren(); $('ownPosition').textContent = ''; $('boardStatus').textContent = 'Neuer UTC-Tag — Rangliste bitte aktualisieren.'; }
+    if (boardMode === 'daily') {
+      selectBoard('daily', { load: false, force: true });
+      $('boardStatus').textContent = 'Neuer UTC-Tag — Rangliste mit AKTUALISIEREN laden.';
+    }
     if (state === 'ready') announce('Neuer UTC-Tag — der nächste Daily Run verwendet die neue Route.');
   }
   let alpha = 1;
@@ -366,7 +415,7 @@ function frame(time) {
   }
   requestAnimationFrame(frame);
 }
-skins(); muteLabel(); dayInfo(); best(); updateRoute(); setState('ready');
+skins(); muteLabel(); dayInfo(); best(); updateRoute(); setState('ready'); updateBoardSelection();
 function archiveLabel() {
   $('legacyRecords').hidden = !records.data.legacy;
   if (!records.data.legacy) return;
@@ -400,7 +449,7 @@ async function syncOffline(enabled) {
   }
   if (!registration) registration = await navigator.serviceWorker.register('/game-sw.js', { updateViaCache: 'none' });
   else try { await registration.update(); } catch {
-    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-5' })) return;
+    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-6' })) return;
     // Revocation must work with an already installed worker while offline.
   }
   // Upgrade pre-consent workers too: they must stop intercepting/caching requests.

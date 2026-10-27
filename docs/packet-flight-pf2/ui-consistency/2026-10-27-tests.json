@@ -1,0 +1,179 @@
+{
+  "checked_at_utc": "2026-10-27T13:49:41.971790+00:00",
+  "baseline_source": "d018eef141b8689444fe5c5839eec4e536f71b0a",
+  "tests": {
+    "unit": {
+      "passed": 24,
+      "log_sha256": "1094423e430ebf45479916eb0ddb0ccc7938851492e0a8aa4459d00aba018612"
+    },
+    "backend": {
+      "passed": 17,
+      "log_sha256": "70fa8e105e7903a255d70487ab439a60abcb568b571a55f1800d2c11afa41467"
+    },
+    "site": {
+      "passed": 2,
+      "log_sha256": "5b3b8743511ed9c5944f80faf2361b88a2bb53b66328a8126d230f019b38af63"
+    },
+    "browser": {
+      "passed": 20,
+      "log_sha256": "fe4b0f990208ded552d6189e619cf285f00a4ee019812ca4104986c9de6685f6"
+    },
+    "visual": {
+      "passed": 8,
+      "log_sha256": "d99554e71eb58c321beae110a6dea9c377307efabff4031783799fadf2eccb01"
+    },
+    "escape": {
+      "passed": 2,
+      "log_sha256": "b7adfee99e49d58a83cce31c33573a0632f0e876d5c521c4ca559351590990a4"
+    },
+    "metrics": {
+      "passed": 7,
+      "log_sha256": "54ea8b96df5abfad213360efdbab6fd905b61704aea7ff28e184c6c1a78b6055"
+    },
+    "privacy": {
+      "passed": 7,
+      "log_sha256": "990923f567ab8784502fb62040f0389c0e87d84c5f4b41d7c0e42df6ccce2e34"
+    },
+    "integration": {
+      "passed": 2,
+      "log_sha256": "4ae108172bcbf41a63dd10e54fe928e38e023fcd38e7ff65c94c89d47848f74d"
+    },
+    "ui": {
+      "passed": 10,
+      "log_sha256": "171909920b5acfae65b08e55ac32d7a8e28c71365ee19bfe3c98dfa9d0ef5c1a"
+    }
+  },
+  "total_passed": 99,
+  "html_all_five_pages": true,
+  "node_syntax_and_git_diff_check": true,
+  "unchanged_source_sha256": {
+    "cloudflare-worker/src/index.mjs": "cea732902437599b563817f60a87bf9591383d691c6596c7d176675424ee7c9a",
+    "cloudflare-worker/wrangler.toml": "d40b632b2e72eab512b025337a2f9c7d4bf43e55daa5919fbdd5929e7d14ff2f",
+    "cloudflare-worker/migrations/0001_initial.sql": "9f71bee02af068e0ace993dc749a6c7f235d88f39ba0a3b14457fa02ceb791f0",
+    "cloudflare-worker/migrations/0002_escape_pf2.sql": "2ef4c2df6379ef3ca64743679117671f546a7c72f2c4d1ecc382fb179703b3c0",
+    "cloudflare-worker/package-lock.json": "d1b885ef42c47d112ce320fa9134ecee31298a06bb603278fc7d9ae87c0ed7d4",
+    "game/rules.mjs": "8656ab02d07cbd1c06e3be4a89447473047a5582b7ea79d8959c892d5239436d",
+    "game/world.mjs": "f0f04c6307c6eac2823ae9a520d42f16698bf5d5ece9fff57556fc32f412eb17",
+    "game/physics.mjs": "3ae6d53f0e7b98f36201b5358be01b831c3cf16aa196f07ebc3177419f960e13",
+    "game/api.mjs": "a17e6a5b718bb7fd5444f5c33565a01c66102a93bdce7e7377970ba1ad354107",
+    "game/storage.mjs": "d5a68e9f85ee16d8b5e98a28419bac1b2c45e657fa93724fa204494bf0313d34",
+    "game/effects.mjs": "77fd18d9947ee28cb2228935d23c3cbf2453c049ba9eba0cc2a10fe5d67ecbe2"
+  },
+  "source_diff_reviewed": true,
+  "ui_192_fixture": "Explicit synthetic LOCAL score192,18 gates,3 fragments,12 bonus points; never an online submission or real192 gameplay proof. No production hooks shipped. Real input/game mechanics and authenticated submissions covered separately.",
+  "readiness_assertions": [
+    "Score0/best192 after skip,Escape and unrelated close of local result",
+    "Score0 on mode change and restart; separate Normal/Daily bests,highest50,Root skin and settings preserved",
+    "Zero gates/combo/alarm,ticks0,no hazard,no death,all effect arrays empty,fresh Flight",
+    "Pause/resume preserves ongoing Flight/Effects"
+  ],
+  "leaderboard_assertions": [
+    "NORMAL · ALLZEIT and DAILY · HEUTE with selected-scope explanation",
+    "Direct Daily URL initializes pressed state,description,date without API request",
+    "Game mode changes select matching board; manual override remains available",
+    "First load only via AKTUALISIEREN or confirmed voluntary submission",
+    "After explicit request, scope change reloads; no score copying or normal daily board",
+    "Delayed replies cannot paint under later selection; final request wins",
+    "UTC rollover clears old entries/date and discards late old-day reply"
+  ],
+  "isolated_integration": "Real-time Normal/Daily runs, genuine signed token, voluntary submit/readback and new-token restart in workerd/ephemeral D1; fake keys, no production/GitHub credentials. Unrelated close/mode/skip/cancel during withheld real score response preserves pending entry and exact result; successful receipt selects correct board.",
+  "display": [
+    "320/390 touch",
+    "desktop1440",
+    "200percent CSS reflow",
+    "200percent Chromium page scale (existing suite)",
+    "Tab/Shift+Tab/Enter/Space",
+    "44px buttons,no horizontal overflow,no input focus on start choice"
+  ],
+  "storage": [
+    "initial unchecked",
+    "existing yes/no respected",
+    "opt-in,revocation,re-enable,records retained",
+    "blocked storage falls back to RAM",
+    "real shell4/shell5 upgrade to shell6 and offline reload"
+  ],
+  "cache": "tr1stan-packet-flight-pf-2-shell-6",
+  "assets": "pf2-ui3 (app and game CSS; unchanged API remains pf2-start2)",
+  "production_baseline": {
+    "checked_at_utc": "2026-10-27T13:45:59.707241+00:00",
+    "deployment_id": "1baab896-a636-412b-b79e-d2fed3e2208c",
+    "deployment_created_on": "2026-10-27T13:05:49.001311Z",
+    "versions": [
+      {
+        "version_id": "d02a3b85-aab4-43be-bb95-f3bfaf88b91b",
+        "percentage": 100,
+        "etag": "a2299103df32194e959ab935aa0fb510420e20ec3ad748a1c9bc90fa98f873fa",
+        "runtime": {
+          "compatibility_date": "2026-06-11",
+          "usage_model": "standard"
+        }
+      }
+    ],
+    "enabled": "true",
+    "environment": "production",
+    "secret_binding_names": [
+      "PSEUDONYM_KEY",
+      "RATE_KEY",
+      "SIGNING_KEY"
+    ],
+    "d1_binding_ids": [
+      "bc462466-1ed9-41d9-ab75-dc0197d50502"
+    ],
+    "public_scores_count": 3,
+    "public_scores_sha256": "48b0b91bd09d73e574c817a880f9b4f1e9359f38d599b536e961788e0ca63abe",
+    "public_row_fingerprints": [
+      "d7c92554bcef97c20ffae41160f64f23004ce33617caf853de9eee57a743ba75",
+      "7539a0e52fa3986ee571019f58d9a86b7ec622813c6f28ce27d8d89f20193dff",
+      "d161b7ea867b020708d58c418af17f9427fb1eac1ac5a3541fe3d8313350b1ea"
+    ],
+    "counts": [
+      {
+        "old_runs": 0,
+        "old_scores": 0,
+        "pf2_runs": 3,
+        "pf2_scores": 3
+      }
+    ],
+    "migrations": [
+      {
+        "name": "0001_initial.sql"
+      },
+      {
+        "name": "0002_escape_pf2.sql"
+      }
+    ],
+    "query_meta": [
+      {
+        "rows_written": 0,
+        "changed_db": false
+      },
+      {
+        "rows_written": 0,
+        "changed_db": false
+      },
+      {
+        "rows_written": 0,
+        "changed_db": false
+      }
+    ]
+  },
+  "baseline_live_files": {
+    "checked_at": "2026-10-27T13:33:04.402792+00:00",
+    "source": "d018eef141b8689444fe5c5839eec4e536f71b0a",
+    "files": {
+      "game.html": "5bbeefbf70befc87bbd2f56f96c542d46d28f6f2e6607c83fc8cd58d16ef7208",
+      "game/app.mjs": "dcff3c4caa0b2e3c114ef41b4770ebb6ab4c4f9f45c4c8e11e2dcbd5a22b172b",
+      "game/game.css": "8253b08d10e58555cb4c36454196a2d91826c5ca82e2d22354d4f2d69f6cc935",
+      "game-sw.js": "79f861ce818f8458c2014b7c1aa9f5daaa9acdb5d32a798ad847353e2c3fd0c1",
+      "datenschutz.html": "6d251c8196bb432abf104e49b52f7d25fe6609823aba2b40acb404e213ed84cf"
+    }
+  },
+  "public_worker_test_requests": 0,
+  "new_public_test_entries": 0,
+  "limitations": [
+    "Physical devices and Safari untested",
+    "Native Chromium TLS at cloud proxy unverified; final live-browser transport uses actual responses via CA-validating Python",
+    "No new production score test or CPU measurement; Worker logic unchanged"
+  ],
+  "after_publication_evidence": "Exact merge/build/deployment IDs and live verification recorded in the release PR description and final report to avoid self-triggering metadata commits."
+}
