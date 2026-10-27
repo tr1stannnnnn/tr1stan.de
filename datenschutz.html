@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Datenschutzhinweise nach Art. 13 DSGVO für die statische Website tr1stan.de — ohne Cookies, ohne Tracking, ohne Kontaktformular." />
+  <meta name="description" content="Datenschutzhinweise nach Art. 13 DSGVO für tr1stan.de und PACKET//FLIGHT: lokales Spielen, freiwillige Rangliste und Speicherwahl." />
   <meta name="theme-color" content="#06020C" />
   <meta name="color-scheme" content="dark" />
   <title>Datenschutz · tr1stan.de</title>
@@ -12,7 +12,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tr1stan.de" />
   <meta property="og:title" content="Datenschutz · tr1stan.de" />
-  <meta property="og:description" content="Datenschutzhinweise nach Art. 13 DSGVO für die statische Website tr1stan.de — ohne Cookies, ohne Tracking, ohne Kontaktformular." />
+  <meta property="og:description" content="Datenschutzhinweise nach Art. 13 DSGVO für tr1stan.de und PACKET//FLIGHT: lokales Spielen, freiwillige Rangliste und Speicherwahl." />
   <meta property="og:url" content="https://tr1stan.de/datenschutz.html" />
   <meta property="og:locale" content="de_DE" />
 
@@ -56,8 +56,9 @@
       <h1 class="page-title">Datenschutz</h1>
       <p class="page-lead">
         Informationen zur Verarbeitung personenbezogener Daten nach Art. 13 DSGVO beim Aufruf
-        von <strong>tr1stan.de</strong>. Diese Website ist statisch: kein Tracking, keine
-        Analyse-Tools, keine Cookies, kein Kontaktformular und kein Newsletter.
+        von <strong>tr1stan.de</strong> einschließlich PACKET//FLIGHT. Die Website wird statisch
+        ausgeliefert; das Spiel bietet freiwillige Online-Funktionen. Kein Werbetracking,
+        keine Spiel-Cookies, kein Kontaktformular und kein Newsletter.
       </p>
     </div>
 
@@ -75,7 +76,10 @@
           <li><a href="#rechte">Deine Rechte</a></li>
           <li><a href="#widerspruch">Widerspruchsrecht</a></li>
           <li><a href="#stand">Stand</a></li>
-          <li><a href="#spielspeicher">Lokaler Spielspeicher</a></li>
+          <li><a href="#spielspeicher">Spiel und lokale Speicherwahl</a></li>
+          <li><a href="#rangliste">Freiwillige Rangliste</a></li>
+          <li><a href="#spielbetrieb">Betrieb und Aufbewahrung</a></li>
+          <li><a href="#cloudflare">Cloudflare und Übermittlungen</a></li>
         </ol>
       </nav>
 
@@ -95,19 +99,21 @@
         <section id="ueberblick">
           <h2><span>02</span>Allgemeine Hinweise</h2>
           <p>
-            Diese Website ist eine statische Website. Sie nutzt aktuell keine Cookies, kein
-            Tracking, keine Analyse-Tools, keinen Newsletter und kein Kontaktformular.
+            Diese Website wird statisch über GitHub Pages ausgeliefert. PACKET//FLIGHT kann lokal
+            gespielt werden und bietet freiwillige Online-Runs und eine öffentliche Rangliste.
+            Wir verwenden kein Werbetracking, keinen Newsletter und kein Kontaktformular.
           </p>
           <p>Konkret bedeutet das:</p>
           <ul>
             <li>Es werden keine Cookies gesetzt, die nicht technisch notwendig sind.</li>
-            <li>Es sind keine Analyse-, Werbe- oder Social-Media-Dienste eingebunden.</li>
+            <li>Es sind keine Werbe- oder Social-Media-Tracker eingebunden. Für den technischen Betrieb nutzen wir zusammengefasste Cloudflare-Leistungs- und Quotenanalysen.</li>
             <li>Es werden keine externen Schriftarten oder externen Skripte nachgeladen.</li>
-            <li>Es findet keine Profilbildung und keine automatisierte Entscheidungsfindung statt.</li>
+            <li>Es findet keine Profilbildung zu Werbezwecken und keine automatisierte Entscheidung mit rechtlicher Wirkung statt.</li>
           </ul>
           <p>
-            Aus diesem Grund wird auf dieser Website kein Cookie-Banner angezeigt: Es werden keine
-            einwilligungspflichtigen Cookies oder Tracker eingesetzt.
+            Es gibt kein allgemeines Tracking-Banner. Die aktualisierte Spielseite fragt separat nach
+            der freiwilligen dauerhaften Speicherung von Spielständen und Offline-Dateien.
+            Diese Auswahl ist von der Einwilligung in öffentliche Scoreeinträge unabhängig.
           </p>
         </section>
 
@@ -227,30 +233,126 @@
             Werden künftig weitere Dienste eingebunden, werden die Hinweise entsprechend angepasst.
           </p>
           <div class="legal-note">
-            <p><strong>Stand:</strong> 09.08.2026</p>
+            <p><strong>Stand:</strong> 26.10.2026</p>
           </div>
         </section>
 
         <section id="spielspeicher">
-          <h2><span>11</span>Lokaler Spielspeicher — PACKET//FLIGHT</h2>
-          <p>Das optionale Arcade-Spiel speichert im Browserprofil lokale Rekorde, die
-            Sound-Einstellung, freigeschaltete und ausgewählte Skins sowie eine zufällige
-            pseudonyme Spielerkennung. Dafür wird localStorage verwendet; es werden keine
-            Spiel-Cookies gesetzt. Normale Rekorde und Skin-Fortschritt bleiben bis zur
-            Löschung der Website-Daten erhalten; lokale Daily-Rekorde werden auf die letzten
-            90 gespeicherten Tageswerte begrenzt. Bei blockiertem Speicher bleiben die Werte
-            im Sitzungsspeicher oder im Arbeitsspeicher der geöffneten Seite; das Spiel weist
-            darauf hin.</p>
-          <p>Ein Service Worker speichert ausschließlich Spieldateien und benötigte lokale
-            Assets im Browser-Cache, damit eine bereits geladene Spielseite auch offline
-            erreichbar ist. Browser-Einstellungen zum Löschen der Website-Daten entfernen
-            Spielspeicher und Offline-Cache.</p>
-          <p>Die öffentliche Rangliste und ihr Cloudflare-Backend sind derzeit deaktiviert.
-            Das Spiel sendet weder Scores noch die Spielerkennung an Cloudflare. Es gibt
-            keine automatische Eintragung und keine spätere Upload-Warteschlange. Eine
-            Aktivierung würde erst nach Ergänzung dieser Datenschutzhinweise erfolgen.</p>
-          <p><strong>Ergänzung zum Spiel:</strong> 11.10.2026. Die bestehenden Hinweise zum
-            Hosting und zum E-Mail-Kontakt gelten weiterhin.</p>
+          <h2><span>11</span>Spiel und lokale Speicherwahl</h2>
+          <p>PACKET//FLIGHT kann ohne Online-Run und ohne Laden der Rangliste lokal ohne Anfrage
+            an Cloudflare gespielt werden. Die Auslieferung der Dateien über GitHub Pages
+            bleibt davon unberührt. Der Browser nutzt dabei seinen üblichen HTTP-Dateicache.</p>
+          <p>In der aktualisierten Spielversion bleiben Rekorde, zufällige pseudonyme
+            Browserkennung, Sound-Einstellung, Skins und Spielstatistiken (Runs, Gates,
+            Fragmente, Punkte) zunächst nur im Arbeitsspeicher der geöffneten Seite.
+            Erst die bewusste Auswahl „Rekorde und Offline-Nutzung auf diesem Gerät behalten“
+            erlaubt uns, diese Werte in localStorage und Spieldateien/Fonts mit einem Service
+            Worker im Offline-Cache dauerhaft zu speichern. Rechtsgrundlage für den optionalen
+            Speicherzugriff ist deine Einwilligung nach § 25 Abs. 1 TDDDG, für die damit
+            verbundene Verarbeitung Art. 6 Abs. 1 lit. a DSGVO.</p>
+          <p>Die Auswahl ist auf der Spielseite änderbar und wird als technische Speicherpräferenz
+            gemerkt. Bei Abwahl schreiben wir keine weiteren Spielwerte dauerhaft; der
+            Spiel-Offline-Cache wird entfernt und der Service Worker abgemeldet. Vorhandene
+            Rekorde werden erhalten, ohne neue Zustimmung nicht gelesen und bei erneuter
+            Auswahl mit neuen Rekorden zusammengeführt. Du kannst gespeicherte Rekorde über
+            die Website-Daten-Einstellungen deines Browsers selbst löschen. Normale Rekorde,
+            Skins und das getrennte Archiv früherer Versionen bleiben andernfalls erhalten;
+            höchstens 90 lokale Daily-Tageswerte werden gespeichert. Ohne verfügbare dauerhafte
+            Speicherung bleibt das Spiel im Arbeitsspeicher nutzbar; kein Sitzungsspeicher-Ersatz.</p>
+          <p>Die Umstellung erfolgt schrittweise. Ältere Spielfassungen haben Spielwerte und
+            Offline-Dateien automatisch gespeichert. Bei erreichbarem Netz aktualisiert die neue
+            Spielseite einen bestehenden Spiel-Service-Worker und entfernt dessen alten Cache,
+            wenn keine bewusste Auswahl vorliegt. Bereits vollständig offline geöffnete alte
+            Fassungen können erst nach einer Online-Aktualisierung umgestellt werden. Bei einer
+            fehlgeschlagenen Abschaltung zeigt das Spiel einen Hinweis zum Schließen alter Tabs
+            und Entfernen des Offline-Caches. Bestehende Rekorde werden dabei nicht automatisch
+            gelöscht. Die Anwendung setzt keine Spiel-Cookies.</p>
+        </section>
+
+        <section id="rangliste">
+          <h2><span>12</span>Freiwillige Online-Runs und öffentliche Rangliste</h2>
+          <p>Auch bei aktiviertem Backend lädt ein Seitenaufruf die Rangliste nicht automatisch.
+            Erst AKTUALISIEREN oder ein bewusst ausgewählter Ranglistenmodus sendet die zufällige
+            Browserkennung an den Cloudflare-Worker, um deinen eigenen Bestwert zuzuordnen.
+            Bei ausgewähltem Online-Run sendet START Kennung, Modus und Spielversion bereits
+            vor einer möglichen Scoreeintragung. Der Server speichert einen HMAC der Kennung,
+            Seed, Version, Modus, UTC-Tag, Start-/Ablaufzeit und Verbrauchsstatus des signierten
+            Run-Tokens. Lokale Runs werden nicht nachträglich hochgeladen; es gibt keine
+            versteckte Upload-Warteschlange. Online-Funktionen können technisch deaktiviert sein.</p>
+          <p>SCORE EINTRAGEN öffnet zunächst nur ein Formular. Mit ÖFFENTLICH EINTRAGEN willigst
+            du ausdrücklich nach Art. 6 Abs. 1 lit. a DSGVO in die freiwillige Veröffentlichung
+            deines Alias, Scores, deiner Gate-/Fragment-/Bonuspunkte, deines Rangs, deiner Position
+            und des serverseitigen Bestwert-Zeitpunkts (UTC) ein. Dabei werden zusätzlich aktive
+            Spielzeit, Run-Token und Browserkennung zur Prüfung übertragen. Abbrechen vor dem
+            Absenden sendet keinen Score. Nach verlorener Antwort erfolgt keine automatische
+            Wiederholung; eine bereits verarbeitete Eintragung kann trotzdem öffentlich sein.
+            Nur eine bewusst ausgelöste identische Wiederholung ist möglich.</p>
+          <p>Die öffentliche Liste zeigt die Top 20; dein Browser erhält zusätzlich deinen eigenen
+            Bestwert und deine Position auch außerhalb der Top 20. Positionen sind Momentaufnahmen.
+            Kennungen, HMAC-Werte, IP-Adressen, Tokens und interne Eintrags-IDs sind nicht öffentlich.
+            Ein Bestwert je Version/Modus/UTC-Tag und Browserprofil ersetzt keine Identitätsprüfung.
+            Es gibt kein Konto, keine Pflicht-E-Mail und kein Fingerprinting. Aliase und
+            pseudonymisierte Werte sind nicht pauschal anonym.</p>
+          <p>Du kannst deine Einwilligung jederzeit mit Wirkung für die Zukunft über
+            <a href="mailto:chef@tr1stan.de">chef@tr1stan.de</a> widerrufen und die Löschung verlangen.
+            Der Widerruf berührt die Rechtmäßigkeit der bisherigen Verarbeitung nicht. Bitte
+            übermittle Zuordnungsbelege nur privat und niemals als öffentlichen Alias. Bereits
+            von anderen Personen kopierte öffentliche Inhalte lassen sich nicht zurückholen.</p>
+        </section>
+
+        <section id="spielbetrieb">
+          <h2><span>13</span>Technischer Betrieb, Missbrauchsschutz und Aufbewahrung</h2>
+          <p>Die sichere Bereitstellung, Token-/Scoreprüfung und Begrenzung manipulierter oder
+            übermäßiger Anfragen beruhen getrennt von der Veröffentlichung auf Art. 6 Abs. 1
+            lit. f DSGVO. Unser berechtigtes Interesse ist ein sicherer, funktionsfähiger und
+            ressourcenschonender Spielbetrieb. Dafür wird die IP-Adresse vorübergehend verarbeitet
+            und für anwendungsseitige Ratenbegrenzung mit Datum/Scope zu täglich wechselnden
+            HMAC-Werten verarbeitet; die Anwendung speichert keine rohen IP-Adressen. Minuten-Buckets
+            laufen nach zwei Minuten, Tages-Buckets nach 48 Stunden ab. Das globale Tageslimit
+            enthält keine Profilkennung. Notwendige Netzwerk-/Sicherheitsdaten beim Anbieter
+            werden zusätzlich nach dessen Datenschutzhinweisen verarbeitet.</p>
+          <ul>
+            <li>Daily-Bestwerte bleiben für den aktuellen UTC-Tag und 29 frühere UTC-Tage gespeichert.</li>
+            <li>Normal-Bestwerte werden nach 365 Tagen ab Erreichen des Bestwerts zur Löschung fällig. Ein schlechterer oder gleicher Score erneuert diese Frist nicht.</li>
+            <li>Run-Tokens sind 30 Minuten gültig; Run-Datensätze einschließlich Komponenten und Retry-Bestätigung werden 48 Stunden nach Tokenablauf zur Löschung fällig.</li>
+            <li>Die tägliche Bereinigung läuft um 03:17 UTC. Zwischen Fälligkeit und erfolgreicher Bereinigung können bis zu weitere 24 Stunden liegen. Ausfälle oder ein deaktivierter Worker verzögern die Löschung zusätzlich und werden als Betriebsfehler behandelt.</li>
+          </ul>
+          <p>Ein täglicher technischer Statuscheck überwacht überfällige Löschung mit einer
+            zusätzlichen täglichen Bereinigungsfrist und meldet Fehler beziehungsweise eine
+            pausierte Bereinigung. Der Check liest ausschließlich einen Statuswert, keine
+            personenbezogenen Datensätze. Er ersetzt keine garantierte sekundengenaue Löschung.
+            Die Anwendung legt keine Request-Body-/Token-Logs an; zusätzliche Logexporte wurden
+            nicht eingerichtet. Zusammengefasste Leistungs-/Quotenanalysen und Anbieterprotokolle
+            sind davon zu unterscheiden.</p>
+          <p>Die Löschung aus Anwendungstabellen ist kein sofortiger Löschungsnachweis für
+            Wiederherstellungsstände. D1 Time Travel hält je Tarif Wiederherstellungsmöglichkeiten
+            für sieben Tage (Free) beziehungsweise 30 Tage (Paid) vor. D1-Analysen werden laut
+            Anbieter 31 Tage vorgehalten; Query Insights enthalten SQL-Texte, keine gebundenen
+            Parameterwerte. Für dieses Projekt werden keine kostenpflichtigen Dienste neu
+            eingerichtet und keine personenbezogenen Request-Logs zur Leistungsmessung aktiviert.</p>
+        </section>
+
+        <section id="cloudflare">
+          <h2><span>14</span>Cloudflare, Auftragsverarbeitung und Übermittlungen</h2>
+          <p>Für die bewusst aufgerufenen Online-Funktionen nutzen wir Cloudflare Workers und D1
+            von Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA. Cloudflare
+            erhält dabei insbesondere IP-Adresse und HTTPS-Anfragedaten sowie die oben genannten
+            Spiel-/Ranglistendaten. Die öffentliche Rangliste ist weltweit abrufbar.</p>
+          <p>Der Betreiber nutzt den normalen Self-Service-Account ohne Sondervereinbarungen.
+            Maßgeblich sind die offiziellen <a href="https://www.cloudflare.com/terms/" rel="noopener noreferrer">Cloudflare-Standardbedingungen</a>
+            und das <a href="https://www.cloudflare.com/cloudflare-customer-dpa/" rel="noopener noreferrer">Customer Data Processing Addendum (DPA)</a>
+            zur Auftragsverarbeitung nach Art. 28 DSGVO. Für erforderliche Übermittlungen in
+            Drittländer enthält das DPA die EU-Standardvertragsklauseln gemäß Beschluss
+            (EU) 2021/914 als Garantie nach Art. 46 Abs. 2 lit. c DSGVO; die Einzelheiten
+            einschließlich Unterauftragsverarbeitung und ergänzender Maßnahmen stehen im
+            verlinkten Standard-DPA. Informationen und eine Kopie der anwendbaren Garantien
+            können auch über den oben genannten Kontakt angefordert werden.</p>
+          <p>Eine ausschließliche Verarbeitung in der EU wird nicht zugesichert. Der aktuell
+            beobachtete D1-Standort in Westeuropa ist keine EU-Jurisdiktionsbindung und begrenzt
+            nicht sämtliche Netzwerk-, Sicherheits-, Analyse- oder Auftragsverarbeitung des Anbieters.
+            Weitere Informationen zu dessen eigener Verarbeitung stehen in der
+            <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener noreferrer">Cloudflare-Datenschutzerklärung</a>.
+            Die übrigen Rechte und Beschwerdemöglichkeiten dieser Hinweise gelten auch für das Spiel.</p>
         </section>
 
         <div class="legal-meta">
