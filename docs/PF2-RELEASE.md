@@ -1,3 +1,8 @@
+> **Aktueller Release 27.10.2026:** Builds-Sperre und leere Job-Warteschlange
+> sind vom Betreiber bestätigt. Notice live, additive Migration erfolgreich;
+> tatsächlichen Fortschritt ausschließlich in [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md)
+> lesen. Ältere Kennungen/Blocker unten sind historisch und vor Nutzung neu zu prüfen.
+
 > **Freigabe 26.10.2026:** Der Betreiber hat die vier Datenschutzentscheidungen und
 > den kontrollierten Ablauf einschließlich begrenzter Tests und dokumentierter
 > Rücknahmen ausdrücklich freigegeben. Keine weitere Zwischenfreigabe erforderlich.
