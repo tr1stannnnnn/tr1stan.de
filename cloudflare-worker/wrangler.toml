@@ -4,7 +4,7 @@ compatibility_date = "2026-06-11"
 workers_dev = true
 
 [vars]
-ENABLED = "true"
+ENABLED = "false"
 ENVIRONMENT = "production"
 
 [[d1_databases]]

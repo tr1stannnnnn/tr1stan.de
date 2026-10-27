@@ -279,3 +279,22 @@ test('Read-only retention monitor detects delayed cleanup and clears only after 
   assert.equal(await retentionOverdue(env, now), true); await cleanup(env, now);
   assert.equal(await retentionOverdue(env, now), false);
 });
+
+test('Concurrent requests increment minute, day and global rate counters once and keep exact rejection threshold', async () => {
+  const ip = '203.0.113.123';
+  const results = await Promise.all(Array.from({ length: 10 }, () => request('/api/run/start', {
+    method: 'POST', ip, body: { mode: 'normal', version: VERSION, playerId: player() },
+  })));
+  assert(results.every(result => result.status === 200));
+  assert.equal((await request('/api/run/start', { method: 'POST', ip, body: { mode: 'normal', version: VERSION, playerId: player() } })).status, 429);
+  const counters = (await DB.prepare('SELECT bucket,hits FROM rate_buckets').all()).results;
+  assert.equal(counters.length, 3);
+  assert(counters.every(row => row.hits === 11));
+  assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM runs_v2').first()).n, 10, 'rejected request cannot create a run');
+  assert.equal((await request('/api/leaderboard?mode=alltime', { ip })).status, 200);
+  const after = (await DB.prepare('SELECT bucket,hits FROM rate_buckets').all()).results;
+  assert.equal(after.length, 5);
+  assert.equal(after.find(row => row.bucket.startsWith('global:')).hits, 12);
+  assert(after.filter(row => row.bucket.startsWith('start:')).every(row => row.hits === 11));
+  assert(after.filter(row => row.bucket.startsWith('board:')).every(row => row.hits === 1));
+});

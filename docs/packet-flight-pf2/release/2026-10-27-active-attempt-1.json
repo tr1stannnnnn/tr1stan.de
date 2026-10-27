@@ -1,0 +1,126 @@
+{
+  "active_worker_version": "776ffcb5-74b5-48fd-a5a8-53de2a3806e9",
+  "metrics": {
+    "since": "2026-10-27T09:17:49.525742+00:00",
+    "until": "2026-10-27T09:21:00.200146+00:00",
+    "cpu_unit": "microseconds",
+    "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+    "metrics": {
+      "accountD1": [
+        {
+          "sum": {
+            "rowsRead": 98,
+            "rowsWritten": 21
+          }
+        }
+      ],
+      "accountRequests": [
+        {
+          "sum": {
+            "errors": 0,
+            "requests": 20
+          }
+        }
+      ],
+      "project": [
+        {
+          "dimensions": {
+            "status": "success"
+          },
+          "quantiles": {
+            "cpuTimeP50": 4112,
+            "cpuTimeP99": 9676
+          },
+          "sum": {
+            "errors": 0,
+            "requests": 6
+          }
+        }
+      ],
+      "projectD1": [
+        {
+          "sum": {
+            "readQueries": 48,
+            "rowsRead": 98,
+            "rowsWritten": 21,
+            "writeQueries": 8
+          }
+        }
+      ]
+    },
+    "gate_failures": [
+      "missing CPU or p99 >= 8000 microseconds"
+    ]
+  },
+  "normal_public_proof": {
+    "mode": "normal",
+    "day": "",
+    "payload_public": {
+      "alias": "Release_Check",
+      "score": 10,
+      "gates": 1,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "activeMs": 4075
+    },
+    "receipt_public": {
+      "accepted": true,
+      "score": 10,
+      "gates": 1,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "mode": "normal",
+      "day": "",
+      "version": "pf-2",
+      "positionAsOf": 1793092811119,
+      "ownEntry": {
+        "position": 1,
+        "alias": "Release_Check",
+        "score": 10,
+        "achievedAt": 1793092811119,
+        "gates": 1,
+        "fragments": 0,
+        "bonusPoints": 0,
+        "rank": "SCRIPT KIDDIE",
+        "own": true
+      }
+    },
+    "first_readback": {
+      "position": 1,
+      "alias": "Release_Check",
+      "score": 10,
+      "rank": "SCRIPT KIDDIE",
+      "gates": 1,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "achievedAt": 1793092811119,
+      "own": true
+    },
+    "reload_readback": {
+      "position": 1,
+      "alias": "Release_Check",
+      "score": 10,
+      "rank": "SCRIPT KIDDIE",
+      "gates": 1,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "achievedAt": 1793092811119,
+      "own": true
+    },
+    "own_ui": "Dein Bestwert: Platz 1 \u00b7 10 Punkte \u00b7 SCRIPT KIDDIE \u00b7 27.10.2026, 09:20 UTC",
+    "input": "four real Space key presses with wall-clock waits; unmodified game modules",
+    "transport": "real HTTPS responses with normal CA verification; only config.mjs overridden in isolated profile",
+    "total_controlled_operations": 16
+  },
+  "rollback_health": {
+    "ok": true,
+    "enabled": false,
+    "configured": true,
+    "schemaReady": true,
+    "retentionOverdue": false,
+    "version": "pf-2"
+  },
+  "retention_monitor": "https://github.com/tr1stannnnnn/tr1stan.de/actions/runs/40479780587",
+  "operations_accounted": 17,
+  "daily_started": false
+}
