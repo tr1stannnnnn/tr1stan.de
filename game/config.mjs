@@ -1,2 +1,2 @@
-// Disabled by default. After separate deployment/privacy approval, enter the HTTPS workers.dev origin here.
-export const API_URL = '';
+// Approved existing backend. Online actions remain a deliberate visitor choice.
+export const API_URL = 'https://packet-flight-leaderboard.polished-frost-d1f8.workers.dev';
