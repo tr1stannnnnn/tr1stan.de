@@ -1,12 +1,20 @@
-# PACKET//FLIGHT pf-2 backend — release pending
+# PACKET//FLIGHT pf-2 backend
 
-GitHub Pages remains the static host. This separate Cloudflare Worker/D1 backend
-uses only Free-compatible services. `game/config.mjs` still has an empty API_URL,
-and production configuration keeps `ENABLED="false"`. No automatic deployment
-workflow is present. This branch must not be merged or deployed without a later
-explicit release instruction.
+GitHub Pages remains the static host. The existing Cloudflare Worker/D1 backend
+is active; the approved workers.dev API is connected in game/config.mjs.
+Online run is unchecked by default and no board request is sent on page load.
+Workers Free / Current plan / 0 USD was manually confirmed by the operator;
+D1 allowance follows the official Workers-Free pricing table. No upgrade.
 
-## Current production evidence (26 October 2026)
+Current release evidence, source/deployment IDs, controlled rollback and the
+remaining manual Builds-API-403 step: [release log](../docs/PF2-RELEASE-2026-10-27.md).
+Both additive migrations are applied. Existing data and the three runtime secret
+bindings are preserved. Normal and Daily Release_Check entries were confirmed
+and re-read; no more test runs are authorized by the two-run release budget.
+The active CPU P99 is below the unchanged 8-ms gate in the observed sample;
+telemetry count discrepancy and platform limits are explicitly documented.
+
+## Historical pre-release evidence (26 October 2026)
 
 Authenticated read-only queries confirmed the existing Worker and D1 binding
 `bc462466-1ed9-41d9-ab75-dc0197d50502`. Public health reports **pf-1**, disabled,
@@ -43,7 +51,8 @@ For interactive local development only, use `wrangler dev --local --env local`
 with ignored `.dev.vars.local` containing three distinct disposable test keys of
 at least 32 characters. Never copy production keys into a local file. Loopback
 CORS origins are allowed only in that development environment. Browser tests
-route a mocked HTTPS API inside isolated profiles; shipping API_URL stays empty.
+route mocked HTTPS APIs inside isolated profiles. Local runs keep online selection
+off; never submit local test data to production.
 
 ## pf-2 contract
 
@@ -117,7 +126,12 @@ SQL as part of development checks. Key rotation is a separate reviewed operation
 SIGNING_KEY invalidates tokens, PSEUDONYM_KEY changes identity linkage, RATE_KEY
 changes rate-digest linkage. Preserve all existing keys for this release work.
 
-## Later release order — not authorized by this branch task
+## Historical staged release checklist
+
+The controlled release and rollback were explicitly authorized and executed as
+recorded in the dated release log. The old preparation checklist below is
+historical, not a new approval requirement; current versions/state and remaining
+CI action must be read from that log.
 
 1. Complete the concrete provider/contract/log/backup/retention and legal review
    in docs/leaderboard-privacy-draft.md; publish accurate notices first. Keep

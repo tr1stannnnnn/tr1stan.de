@@ -296,26 +296,29 @@ möglich; keine unterschiedlichen Hitboxen oder Physik für Skins/Reduced Motion
 Lokale Daten: `tr1stan.packet-flight.pf-2.storage-1`, getrenntes pf-1-Archiv,
 Browserkennung, Sound, Skins, Gate-Fortschritt und kumulative Statistiken. Alte
 Rekorde/Skins/Kennung bleiben erhalten. Daily enthält höchstens 90 pf-2-Tageswerte.
-Bei blockiertem localStorage greift Sitzungs-/Arbeitsspeicher mit Hinweis. Der
-Service Worker hält nur die Spielhülle/Assets offline, keine API-Antworten.
+Dauerhafte Werte und Offline-Cache werden erst nach bewusster Speicherwahl verwendet;
+ohne Auswahl oder bei blockiertem Speicher nur Arbeitsspeicher. Vorhandene Rekorde
+bleiben erhalten und werden erst nach Zustimmung gelesen. Der Service Worker hält
+nur die Spielhülle/Assets offline, keine API-Antworten.
 
-API_URL bleibt **leer**, Worker ENABLED=false. Selbst bei später gesetzter API
-werden ohne bewusstes Online-START oder Laden der Rangliste keine Cloudflare-
+Der bestehende pf-2-Worker ist aktiviert und die API verbunden. Online-Run ist
+standardmäßig abgewählt. Ohne bewusstes Online-START oder Laden der Rangliste werden keine Cloudflare-
 Requests ausgelöst. Online-Start übermittelt bereits Kennung, Modus und Version;
 Alias und Score erst nach ausdrücklichem Absenden. Kein nachträgliches Hochladen
 lokaler Runs, keine versteckte Warteschlange, keine automatischen Retries.
 
 Der Worker prüft signierte Runs und berechnet Scores aus Komponenten selbst;
 Plausibilitätskontrollen sind kein Beweis ehrlichen Spiels. Eine Browserkennung
-ist keine Personenidentität. Neue Tabellen `runs_v2`/`scores_v2` entstehen nur
-durch eine später separat freizugebende additive Migration. Produktionsdaten und
+ist keine Personenidentität. Die additiven Tabellen `runs_v2`/`scores_v2` und beide Migrationen sind
+produktiv vorhanden; alte Tabellen bleiben erhalten. Produktionsdaten und
 bestehende Worker-Secrets bleiben erhalten. Bestehendes GitHub-Pages-Hosting,
 DNS und Mail bleiben unverändert.
 
 - [Testanleitung](tests/README.md)
 - [Prüfbericht und Spielaufnahmen](docs/PF2-REVIEW.md)
 - [Konkreter Veröffentlichungs- und Rückkehrplan](docs/PF2-RELEASE.md)
-- [Backendvertrag und spätere Freigabeschritte](cloudflare-worker/README.md)
-- [Datenschutzentwurf mit noch offenen Betreiberangaben](docs/leaderboard-privacy-draft.md)
+- [Backendvertrag und Betrieb](cloudflare-worker/README.md)
+- [Bestätigte Datenschutzentscheidungen und Quellen](docs/leaderboard-privacy-draft.md)
 
-Kein Merge, keine produktive Migration und kein Deployment durch diese Arbeit.
+Tatsächliche Veröffentlichung, CPU-Gates, Rücknahmen und verbleibende Build-Rückführung:
+[Releaseprotokoll vom 27.10.2026](docs/PF2-RELEASE-2026-10-27.md).

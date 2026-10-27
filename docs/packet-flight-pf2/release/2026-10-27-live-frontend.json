@@ -1,0 +1,73 @@
+{
+  "published_commit": "fda22ad32f380cea76074757b0ceecf2d5527274",
+  "file_sha256": {
+    "index.html": "c505a4bc360675a78fc98c27391990bc75282cba2b61ee038989f0e7f4ecade0",
+    "game.html": "3622c41a8989c1b03f5e1e2c4c789fa536388aa7d16be296e44e7f9c0a1424d6",
+    "script.js": "f9decb217f3cc981324d947948b54496ea91a6292ab92dad93d1e76750a31dc8",
+    "style.css": "8892a62b4fb1ae903ce99b6a963e4cb7e14a4e291557473400d2a287568b4390",
+    "game/app.mjs": "3220624a8313a263d2dde0bff19ca05ea13b64ca7f08460c1b787192d22db694",
+    "game/config.mjs": "034e93590ffaeed48cd5b40db487edb1e335443be8b71e5607f23cab0a119714",
+    "game-sw.js": "ee658378018147ae691f97e122f99d445edf8146b11f1c3d0a6faed221795ed2",
+    "datenschutz.html": "57e1b2a52f335f49a87590bd39949179b1c1b4117214a2ccd03d58b83b5a0068"
+  },
+  "mobile": [
+    {
+      "width": 320,
+      "command": "play",
+      "url": "https://tr1stan.de/game.html",
+      "no_automatic_backend_request": true
+    },
+    {
+      "width": 320,
+      "command": "play --daily",
+      "url": "https://tr1stan.de/game.html?mode=daily",
+      "no_automatic_backend_request": true
+    },
+    {
+      "width": 320,
+      "command": "leaderboard",
+      "url": "https://tr1stan.de/game.html#leaderboard",
+      "no_automatic_backend_request": true
+    },
+    {
+      "width": 390,
+      "command": "play",
+      "url": "https://tr1stan.de/game.html",
+      "no_automatic_backend_request": true
+    },
+    {
+      "width": 390,
+      "command": "play --daily",
+      "url": "https://tr1stan.de/game.html?mode=daily",
+      "no_automatic_backend_request": true
+    },
+    {
+      "width": 390,
+      "command": "leaderboard",
+      "url": "https://tr1stan.de/game.html#leaderboard",
+      "no_automatic_backend_request": true
+    }
+  ],
+  "explicit_board_response": {
+    "version": "pf-2",
+    "mode": "alltime",
+    "day": "",
+    "entries": [
+      {
+        "position": 1,
+        "alias": "Release_Check",
+        "score": 10,
+        "rank": "SCRIPT KIDDIE",
+        "gates": 1,
+        "fragments": 0,
+        "bonusPoints": 0,
+        "achievedAt": 1793092811119,
+        "own": false
+      }
+    ],
+    "ownEntry": null
+  },
+  "operations_accounted": 29,
+  "cache": "pf-2-shell-4",
+  "transport": "unmodified real HTTPS responses via CA-validating Python; native Chromium TLS and physical devices/Safari unverified"
+}

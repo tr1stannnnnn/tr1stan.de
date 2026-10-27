@@ -1,3 +1,10 @@
+> **Aktuell nach Wiederherstellung:** Alle 79 Tests neu bestanden; aktive CPU-
+> Prüfung mit unverändertem 8-ms-Gate besteht. Beide freigegebenen Testeinträge
+> mit Reload-Readback erhalten. Frontend/API und Cache 4 sind live. 29/30
+> Operationen verbraucht; Build-Rückführung wegen Builds-API-403 noch manuell
+> auszuführen. Maßgeblicher Stand: [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md).
+> Ältere Zahlen und Pausen unten sind historische Zwischenstände.
+
 > **Aktueller Release 27.10.2026:** Builds-Sperre und leere Job-Warteschlange
 > sind vom Betreiber bestätigt. Notice und Spiel live, additive Migration erfolgreich, Worker pf-2 deaktiviert;
 > tatsächlichen Fortschritt ausschließlich in [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md)
