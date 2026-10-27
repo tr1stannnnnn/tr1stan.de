@@ -5,7 +5,7 @@ import { Records, CHOICE_KEY, memoryStorage, mergeRecords } from './storage.mjs?
 import { Sound } from './audio.mjs?v=pf2-privacy1';
 import { Renderer } from './render.mjs?v=pf2-privacy1';
 import { Effects } from './effects.mjs?v=pf2-privacy1';
-import { LeaderboardAPI } from './api.mjs?v=pf2-privacy1';
+import { LeaderboardAPI } from './api.mjs?v=pf2-start2';
 import { API_URL } from './config.mjs?v=pf2-online1';
 
 const $ = id => document.getElementById(id);
@@ -27,6 +27,7 @@ let state = 'ready', flight = new Flight(dailySeed(utcDay())), run = null, resul
 let countdownUntil = 0, lastFrame = 0, generation = 0, pendingPause = false, currentDay = utcDay();
 let boardMode = mode === 'daily' ? 'daily' : 'alltime', boardGeneration = 0, boardBusy = false, boardPending = false, lastBoardAt = -Infinity;
 let submitting = false, pendingSubmission = null;
+let startError = '';
 let redraw = true;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -73,16 +74,18 @@ function muteLabel() {
 function setState(next) {
   redraw = true;
   state = next; document.body.dataset.gameState = state;
-  $('stateBadge').textContent = { ready: 'BEREIT', starting: 'VERBINDEN', countdown: 'COUNTDOWN', running: 'LÄUFT', paused: 'PAUSIERT', gameover: 'BEENDET', entry: 'EINTRAGUNG' }[state];
+  $('stateBadge').textContent = { ready: 'BEREIT', 'start-error': 'START GESCHEITERT', starting: 'VERBINDEN', countdown: 'COUNTDOWN', running: 'LÄUFT', paused: 'PAUSIERT', gameover: 'BEENDET', entry: 'EINTRAGUNG' }[state];
   $('keepStorage').disabled = ['starting','countdown','running','paused','entry'].includes(next) || !!(result && !result.submitted && result.run.online);
-  $('onlineRun').disabled = ['starting','countdown','running','paused'].includes(next) || !api.enabled;
   const active = ['starting', 'countdown', 'running', 'paused'].includes(state);
   document.querySelectorAll('[name="mode"]').forEach(el => { el.disabled = active; });
   $('start').disabled = active && state !== 'paused';
-  $('start').textContent = state === 'paused' ? 'FORTSETZEN' : 'START';
+  $('start').textContent = state === 'paused' ? 'FORTSETZEN' : 'NUR LOKAL SPIELEN';
+  $('startOnline').disabled = active || !api.enabled;
+  $('startOnline').hidden = state === 'paused';
+  $('startOnline').textContent = startError ? 'ERNEUT VERSUCHEN' : 'MIT RANGLISTE STARTEN';
   $('pause').disabled = !['countdown', 'running'].includes(state);
   $('surfaceOverlay').hidden = state === 'running' || state === 'gameover';
-  const labels = { ready: ['BEREIT', 'Tap oder START zum Verbinden'], starting: ['COUNTDOWN', 'Route vorbereiten …'], countdown: ['2', 'Gleich geht es los'], paused: ['PAUSIERT', 'Bewusst fortsetzen · danach Countdown'], gameover: [flight.reason, 'Run beendet'], entry: ['EINTRAGUNG', 'Dein Score bleibt bis zum Absenden lokal'] };
+  const labels = { ready: ['BEREIT', 'Unten mit Rangliste oder nur lokal starten'], 'start-error': ['NICHT GESTARTET', 'Erneut versuchen oder bewusst lokal spielen'], starting: ['VERBINDEN', 'Server-Run vorbereiten …'], countdown: ['2', 'Gleich geht es los'], paused: ['PAUSIERT', 'Bewusst fortsetzen · danach Countdown'], gameover: [flight.reason, 'Run beendet'], entry: ['EINTRAGUNG', 'Dein Score bleibt bis zum Absenden lokal'] };
   if (labels[state]) { $('overlayLabel').textContent = labels[state][0]; $('overlayHint').textContent = labels[state][1]; }
 }
 function randomSeed() { return crypto.getRandomValues(new Uint32Array(1))[0] || 1; }
@@ -92,24 +95,35 @@ function beginCountdown() {
   setState('countdown'); announce('COUNTDOWN — startet nach kurzem Countdown.'); canvas.focus({ preventScroll: true });
   canvas.scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
 }
-async function start() {
+async function start(withLeaderboard = false) {
   if (state === 'paused') { beginCountdown(); return; }
-  if (submitting || !['ready', 'gameover'].includes(state)) return;
+  if (submitting || !['ready', 'start-error', 'gameover'].includes(state)) return;
   if ($('resultDialog').open) $('resultDialog').close();
   const attempt = ++generation;
   sound.unlock(); pendingPause = document.hidden;
   result = null; pendingSubmission = null; run = null; resetEntryForm();
+  startError = ''; $('startFailure').hidden = true; $('startFailure').textContent = '';
   $('submitStatus').textContent = ''; $('publishQuestion').textContent = '';
   setState('starting'); announce('COUNTDOWN — Route wird vorbereitet.');
   const day = utcDay();
   const playerId = records.data.playerId;
-  let online = null, offlineReason = api.enabled ? 'Dieser Run ist nur lokal.' : 'Backend deaktiviert — nur lokaler Run.';
-  if (api.enabled && $('onlineRun').checked) {
-    try { online = await api.start(mode, playerId); }
-    catch (error) { offlineReason = `${error.message} Dieser Run ist nur lokal und später nicht einreichbar.`; }
+  let online = null;
+  if (withLeaderboard) {
+    try {
+      online = await api.start(mode, playerId);
+      if (Date.now() >= online.expiresAt) throw Error('Der vorbereitete Server-Run ist bereits abgelaufen.');
+    } catch (error) {
+      if (attempt !== generation) return;
+      startError = `Ranglistenstart fehlgeschlagen: ${error.message} Es wurde kein Spiel gestartet. Erneut versuchen oder NUR LOKAL SPIELEN wählen.`;
+      $('startFailure').textContent = startError; $('startFailure').hidden = false;
+      setState('start-error'); announce('NICHT GESTARTET — Ranglistenstart fehlgeschlagen.');
+      $('startFailure').focus({ preventScroll: true });
+      $('startFailure').scrollIntoView({ block: 'center', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+      return;
+    }
   }
   if (attempt !== generation) return;
-  run = { mode, playerId, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason };
+  run = { mode, playerId, day: online?.day || day, seed: online?.seed ?? (mode === 'daily' ? dailySeed(day) : randomSeed()), online, offlineReason: 'Bewusst lokaler Run — keine öffentliche Eintragung möglich.' };
   flight = new Flight(run.seed); effects.reset(); $('score').textContent = '0'; updateRoute(); best(); dayInfo();
   if (pendingPause || document.hidden) { setState('paused'); announce('PAUSIERT — zum Start bewusst fortsetzen.'); }
   else beginCountdown();
@@ -119,7 +133,7 @@ function pause() {
   if (!['countdown', 'running'].includes(state)) return;
   clock.reset(); setState('paused'); announce('PAUSIERT — Rückkehr startet nicht automatisch. Fortsetzen beginnt mit Countdown.');
 }
-function canSubmitNew() { return !!(result?.run.online && !result.submitted && Date.now() < result.run.online.expiresAt); }
+function canSubmitNew() { return !!(result?.run.online && !result.submitted && !result.expired && Date.now() < result.run.online.expiresAt); }
 function canSubmit() { return !!(result && !result.submitted && (pendingSubmission || canSubmitNew())); }
 function resetEntryForm() {
   $('aliasForm').reset(); $('aliasForm').hidden = true; $('resultActions').hidden = false;
@@ -135,7 +149,23 @@ function timestamp(ms) {
 function placement(entry) { return `Platz ${entry.position} · ${entry.score} Punkte · ${entry.rank}`; }
 function showResultActions() {
   $('aliasForm').hidden = true; $('resultActions').hidden = false;
+  updateResultAvailability();
+}
+function updateResultAvailability() {
   $('enterScore').disabled = !canSubmit();
+  $('enterScore').hidden = !result?.run.online;
+  $('nextOnline').hidden = !result || !!result.run.online;
+  $('nextOnline').disabled = !api.enabled;
+  $('again').textContent = result?.run.online ? 'NOCHMAL MIT RANGLISTE STARTEN' : 'NOCHMAL LOKAL SPIELEN';
+  if (!result || result.submitted) return;
+  $('publishQuestion').textContent = canSubmit()
+    ? 'Möchtest du diesen Score öffentlich mit einem Alias veröffentlichen? Erst SCORE EINTRAGEN öffnet die Eingabe; die Veröffentlichung bleibt freiwillig.'
+    : result.run.online ? 'Server-Run abgelaufen oder nicht mehr verfügbar. Dieser Score bleibt lokal. Für eine Eintragung einen neuen Run mit Rangliste starten.'
+      : 'Du hast nur lokal gespielt. Dieser Score kann nicht nachträglich als verifizierter Online-Score eingetragen werden. Starte den nächsten Run mit Rangliste; die spätere Veröffentlichung bleibt freiwillig.';
+  if (state === 'entry' && !canSubmit()) {
+    $('publish').disabled = true;
+    $('aliasError').textContent = 'Server-Run abgelaufen oder nicht mehr verfügbar. Keine neue Eintragung möglich; der Score bleibt lokal.';
+  }
 }
 function finish() {
   if (state !== 'running') return;
@@ -148,13 +178,17 @@ function finish() {
   $('resultParts').textContent = `${result.gates} Gates × 10 = ${result.gates * 10} · ${result.fragments} Fragmente · ${result.bonusPoints} Bonuspunkte`;
   $('resultRank').textContent = rank(result.gates);
   $('resultSummary').textContent = `${run.mode === 'daily' ? `Daily ${run.day} UTC` : 'Normal'} · Rekord ${local.best}${local.newRecord ? ' · Neuer Rekord!' : ''}${local.unlocked.length ? ` · Skin freigeschaltet: ${local.unlocked.join(', ')}` : ''}`;
-  $('publishQuestion').textContent = canSubmit() ? 'Möchtest du diesen Score öffentlich mit einem Alias veröffentlichen? Erst SCORE EINTRAGEN öffnet die Eingabe.' : `${run.online ? 'Server-Run abgelaufen; Score bleibt lokal.' : run.offlineReason} Keine öffentliche Eintragung möglich.`;
   $('submitStatus').textContent = ''; $('copyFallback').hidden = true; $('copyLabel').hidden = true;
   showResultActions();
   announce(`GAME OVER — ${result.score} Punkte, ${rank(result.gates)}.`);
 }
 function action() {
-  if (state === 'ready' || state === 'paused') { start(); return; }
+  if (state === 'ready' || state === 'start-error') {
+    announce('Startart wählen: MIT RANGLISTE STARTEN oder NUR LOKAL SPIELEN.');
+    (api.enabled ? $('startOnline') : $('start')).focus();
+    return;
+  }
+  if (state === 'paused') { beginCountdown(); return; }
   if (state !== 'running') return;
   flight.flap(); effects.flap(flight, records.data.skin, reduceMotion.matches); redraw = true; sound.play('flap');
 }
@@ -167,7 +201,8 @@ canvas.addEventListener('keydown', event => {
   if (['Space', 'ArrowUp', 'KeyW', 'Enter'].includes(event.code)) { event.preventDefault(); action(); }
   if (event.code === 'Escape') pause();
 });
-$('start').addEventListener('click', start);
+$('start').addEventListener('click', () => start(false));
+$('startOnline').addEventListener('click', () => start(true));
 $('pause').addEventListener('click', pause);
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 window.addEventListener('pagehide', pause);
@@ -178,18 +213,20 @@ document.querySelectorAll('[name="mode"]').forEach(el => {
   el.addEventListener('change', () => {
     if (!el.checked) return;
     mode = el.value; run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset(); updateRoute();
+    startError = ''; $('startFailure').hidden = true; $('startFailure').textContent = '';
     setState('ready'); best(); dayInfo();
     const url = new URL(location.href);
     if (mode === 'daily') url.searchParams.set('mode', 'daily'); else url.searchParams.delete('mode');
     history.replaceState(null, '', url);
-    announce('BEREIT — Modus gewählt. START beginnt einen neuen Run.');
+    announce('BEREIT — Modus gewählt. Mit Rangliste oder nur lokal starten.');
   });
 });
 $('mute').addEventListener('click', () => {
   records.setMuted(!records.data.muted); sound.muted = records.data.muted; sound.unlock(); muteLabel();
 });
 $('skin').addEventListener('change', () => { records.selectSkin($('skin').value); redraw = true; });
-$('again').addEventListener('click', () => { $('resultDialog').close(); start(); });
+$('again').addEventListener('click', () => start(!!result?.run.online));
+$('nextOnline').addEventListener('click', () => start(true));
 function skip() {
   if (submitting) return;
   $('resultDialog').close(); showResultActions(); run = null; result = null; flight = new Flight(dailySeed(utcDay())); effects.reset(); updateRoute(); setState('ready'); dayInfo(); best();
@@ -229,9 +266,15 @@ $('aliasForm').addEventListener('submit', async event => {
     $('submitStatus').textContent = `Eintragung bestätigt. Dein Bestwert: ${placement(response.ownEntry)} · ${response.mode === 'daily' ? `${response.day} UTC` : 'ALLZEIT'}. Position bei Bestätigung (${timestamp(response.positionAsOf)}); spätere Einträge können sie verändern.`;
     boardMode = response.mode === 'daily' ? 'daily' : 'alltime'; boardGeneration++; lastBoardAt = -Infinity; loadBoard();
   } catch (error) {
-    $('submitStatus').textContent = `${error.message} Keine automatische Wiederholung. Bei verlorener Antwort dieselbe Eintragung erneut senden.`;
-    $('publish').textContent = 'GLEICHE EINTRAGUNG ERNEUT SENDEN';
-  } finally { submitting = false; $('publish').disabled = false; $('cancelEntry').disabled = false; }
+    if (error.status === 410) {
+      pendingSubmission = null; result.expired = true;
+      $('submitStatus').textContent = `${error.message} Dieser Score bleibt lokal. Einen neuen Run mit Rangliste starten.`;
+      updateResultAvailability();
+    } else {
+      $('submitStatus').textContent = `${error.message} Keine automatische Wiederholung. Bei verlorener Antwort dieselbe Eintragung erneut senden.`;
+      $('publish').textContent = 'GLEICHE EINTRAGUNG ERNEUT SENDEN';
+    }
+  } finally { submitting = false; $('publish').disabled = !canSubmit(); $('cancelEntry').disabled = false; }
 });
 $('copyScore').addEventListener('click', async () => {
   if (!result) return;
@@ -283,6 +326,7 @@ $('refreshBoard').addEventListener('click', loadBoard);
 function frame(time) {
   const delta = lastFrame ? (time - lastFrame) / 1000 : 0; lastFrame = time;
   const today = utcDay();
+  if (result && !result.submitted && $('enterScore').disabled === canSubmit()) updateResultAvailability();
   if (today !== currentDay) {
     currentDay = today; dayInfo(); best();
     if (boardMode === 'daily') { boardGeneration++; $('boardEntries').replaceChildren(); $('ownPosition').textContent = ''; $('boardStatus').textContent = 'Neuer UTC-Tag — Rangliste bitte aktualisieren.'; }
@@ -331,14 +375,16 @@ function archiveLabel() {
 }
 archiveLabel();
 if (renderer.ctx) { $('gameUI').hidden = false; renderer.resize(); requestAnimationFrame(frame); }
-else { $('runStatus').textContent = 'Canvas ist nicht verfügbar; das Spiel kann hier nicht starten.'; $('gameUI').hidden = false; $('start').disabled = true; }
+else { $('runStatus').textContent = 'Canvas ist nicht verfügbar; das Spiel kann hier nicht starten.'; $('gameUI').hidden = false; $('start').disabled = true; $('startOnline').disabled = true; }
 if (api.enabled) {
-  $('onlineNotice').textContent = 'Online-START sendet Browserkennung, Modus und Version an Cloudflare. Auch bewusstes Laden der Rangliste übermittelt die Kennung für deine eigene Position. Alias und Score erst nach freiwilliger Eintragung. Ohne diese Online-Aktionen spielst du lokal.';
-  announce('BEREIT — beim Online-Start gehen Spielerkennung, Version und Modus an Cloudflare. Score-Veröffentlichung bleibt freiwillig.');
+  announce('BEREIT — mit Rangliste oder nur lokal starten. Eine öffentliche Eintragung bleibt freiwillig.');
   $('boardExplanation').textContent = 'Online-Runs fragen beim Start das Backend an. Alias und Score werden erst nach deiner ausdrücklichen Eintragung veröffentlicht. Ein Bestwert pro Browserprofil ist keine Identitätsprüfung.';
   $('refreshBoard').disabled = false;
   $('boardStatus').textContent = 'Rangliste erst mit AKTUALISIEREN laden. Bis dahin bleibt die Kennung lokal.';
-} else loadBoard();
+} else {
+  $('onlineNotice').textContent += ' Ranglistenstart derzeit nicht verfügbar. Nur lokales Spielen ist möglich.';
+  loadBoard();
+}
 // Storage and offline persistence share one deliberate, reversible visitor choice.
 let storageTask = Promise.resolve();
 async function syncOffline(enabled) {
@@ -354,7 +400,7 @@ async function syncOffline(enabled) {
   }
   if (!registration) registration = await navigator.serviceWorker.register('/game-sw.js', { updateViaCache: 'none' });
   else try { await registration.update(); } catch {
-    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-4' })) return;
+    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-5' })) return;
     // Revocation must work with an already installed worker while offline.
   }
   // Upgrade pre-consent workers too: they must stop intercepting/caching requests.

@@ -152,3 +152,32 @@ Der Backendtest prüft jetzt zusätzlich lesende Retention-Erkennung, erhaltene
 Zeilen trotz Health-Aufruf und das Zurückkehren zu unauffälligem Status nach
 wirklicher isolierter Bereinigung. Die GitHub-Überwachung ist kein lokal
 nachgewiesener produktiver Actions-Lauf; dessen Erfolg ist ein Release-Gate.
+
+
+## Eindeutiger Ranglistenstart (27.10.2026)
+
+`browser_test.py` prüft jetzt 20 Szenarien: zwei native Startaktionen, bewusste
+Wahl nach Canvas-Tap, lokale Ergebnisse mit nächstem Ranglistenstart, Normal/
+Daily/Neustart, Fehler vor Spielbeginn (503, Timeout, ungültige oder abgelaufene
+Antwort), Client-Ablauf und HTTP 410, weiterhin identische freiwillige Retries.
+Touch bei 320/390 und Tab/Shift+Tab/Enter/Space sind enthalten. Keine öffentlichen
+Testeinträge. `privacy_navigation_test.py` prüft sechs Szenarien inklusive Upgrade
+vom tatsächlich veröffentlichten Client/Cache 4 auf Cache 5 mit erhaltenen Rekorden
+und echter Offline-Neuladung.
+
+Nach dem vorhandenen Backend-Build und bei laufendem statischen Server:
+
+```sh
+python3 tests/start_integration_test.py
+python3 tests/privacy_navigation_test.py
+python3 tests/release_metrics_test.py
+```
+
+`start_integration_test.py` startet `local_leaderboard.mjs` mit entferntem
+Cloudflare-/GitHub-Token, echtem workerd und flüchtiger D1. Die beiden Migrationen
+und ausschließlich falsche Testschlüssel gelten nur dort. Normal und Daily
+laufen in echter Zeit bis Game Over; das echte signierte Token wird nach
+freiwilliger Testeintragung akzeptiert, der Bestwert gelesen und ein neuer
+Server-Run beim Neustart bestätigt. Kein Eingriff in Physik/Score/Zeit; kein
+Produktions-Run oder öffentlicher Eintrag. Alle 88 Prüfungen einschließlich
+unveränderter Backend-/Spieltests wurden für diese Änderung erneut bestanden.

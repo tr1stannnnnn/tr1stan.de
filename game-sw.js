@@ -1,6 +1,6 @@
 // Cache only the game shell. No API requests, legal pages or home page are intercepted.
-const CACHE = 'tr1stan-packet-flight-pf-2-shell-4';
-const FILES = ['/game.html', '/game/game.css?v=pf2-privacy1', '/game/api.mjs?v=pf2-privacy1', '/game/app.mjs?v=pf2-online1', '/game/audio.mjs?v=pf2-privacy1', '/game/config.mjs?v=pf2-online1', '/game/effects.mjs?v=pf2-privacy1', '/game/physics.mjs?v=pf2-privacy1', '/game/render.mjs?v=pf2-privacy1', '/game/rules.mjs?v=pf2-privacy1', '/game/security-render.mjs?v=pf2-privacy1', '/game/storage.mjs?v=pf2-privacy1', '/game/world.mjs?v=pf2-privacy1', '/style.css?v=31', '/script.js?v=31', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
+const CACHE = 'tr1stan-packet-flight-pf-2-shell-5';
+const FILES = ['/game.html', '/game/game.css?v=pf2-start2', '/game/api.mjs?v=pf2-start2', '/game/app.mjs?v=pf2-start2', '/game/audio.mjs?v=pf2-privacy1', '/game/config.mjs?v=pf2-online1', '/game/effects.mjs?v=pf2-privacy1', '/game/physics.mjs?v=pf2-privacy1', '/game/render.mjs?v=pf2-privacy1', '/game/rules.mjs?v=pf2-privacy1', '/game/security-render.mjs?v=pf2-privacy1', '/game/storage.mjs?v=pf2-privacy1', '/game/world.mjs?v=pf2-privacy1', '/style.css?v=31', '/script.js?v=31', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
 const PATHS = new Set(FILES.map(path => new URL(path, self.location.origin).pathname));
 const MARKER = new URL('/game/.offline-choice', self.location.origin).href;
 const consented = () => caches.match(MARKER, { cacheName: CACHE }).then(Boolean);

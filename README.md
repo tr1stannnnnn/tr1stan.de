@@ -301,9 +301,13 @@ ohne Auswahl oder bei blockiertem Speicher nur Arbeitsspeicher. Vorhandene Rekor
 bleiben erhalten und werden erst nach Zustimmung gelesen. Der Service Worker hält
 nur die Spielhülle/Assets offline, keine API-Antworten.
 
-Der bestehende pf-2-Worker ist aktiviert und die API verbunden. Online-Run ist
-standardmäßig abgewählt. Ohne bewusstes Online-START oder Laden der Rangliste werden keine Cloudflare-
-Requests ausgelöst. Online-Start übermittelt bereits Kennung, Modus und Version;
+Der bestehende pf-2-Worker ist aktiviert und die API verbunden. Zwei eindeutige
+Aktionen ersetzen das Online-Häkchen: MIT RANGLISTE STARTEN bereitet vor dem
+Countdown einen Server-Run vor; NUR LOKAL SPIELEN beginnt ohne Server-Anfrage.
+Ein gescheiterter Ranglistenstart startet nicht automatisch lokal. Ein lokales
+Ergebnis bietet stattdessen den nächsten Ranglisten-Run an. Ohne bewussten
+Ranglistenstart oder Laden der Rangliste werden keine Cloudflare-Requests
+ausgelöst. Ranglistenstart übermittelt bereits Kennung, Modus und Version;
 Alias und Score erst nach ausdrücklichem Absenden. Kein nachträgliches Hochladen
 lokaler Runs, keine versteckte Warteschlange, keine automatischen Retries.
 
