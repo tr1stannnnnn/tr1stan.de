@@ -21,7 +21,7 @@ jobs:
           request = urllib.request.Request(url, headers={'User-Agent': 'packet-flight-retention-monitor'})
           with urllib.request.urlopen(request, timeout=30) as response:
               health = json.load(response)
-          assert health.get('version') == 'pf-2' and health.get('schemaReady') is True, 'Unexpected version/schema'
+          assert health.get('version') in ('pf-2', 'pf-3') and health.get('schemaReady') is True, 'Unexpected version/schema'
           assert health.get('configured') is True, 'Backend not configured'
           if health.get('enabled') is not True:
               raise SystemExit('::error::Worker disabled; scheduled deletion is paused. Investigate retention.')
