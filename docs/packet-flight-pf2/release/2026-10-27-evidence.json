@@ -1,0 +1,187 @@
+{
+  "date": "2026-10-27",
+  "notice_merge": "e5848a58d2421d0ee5725b125a8f2dd352b55544",
+  "feature_merge": "82afd6ab15d87167d70df747dffc28ebcb45de47",
+  "disabled_worker_checks": {
+    "health": {
+      "status": 200,
+      "cors": null,
+      "body": {
+        "ok": true,
+        "enabled": false,
+        "configured": true,
+        "schemaReady": true,
+        "retentionOverdue": false,
+        "version": "pf-2"
+      }
+    },
+    "preflight": {
+      "status": 204,
+      "cors": "https://tr1stan.de",
+      "body": null
+    },
+    "foreign": {
+      "status": 403,
+      "cors": null,
+      "body": {
+        "message": "Origin nicht freigegeben."
+      }
+    },
+    "disabled_start": {
+      "status": 503,
+      "cors": "https://tr1stan.de",
+      "body": {
+        "message": "Backend nicht verf\u00fcgbar oder noch nicht aktiviert."
+      }
+    },
+    "disabled_board": {
+      "status": 503,
+      "cors": "https://tr1stan.de",
+      "body": {
+        "message": "Backend nicht verf\u00fcgbar oder noch nicht aktiviert."
+      }
+    },
+    "counts": {
+      "runs": 0,
+      "scores": 0,
+      "rate_buckets": 0,
+      "runs_v2": 0,
+      "scores_v2": 0
+    },
+    "bindings": {
+      "DB": "d1",
+      "ENABLED": "plain_text",
+      "ENVIRONMENT": "plain_text",
+      "PSEUDONYM_KEY": "secret_text",
+      "RATE_KEY": "secret_text",
+      "SIGNING_KEY": "secret_text"
+    },
+    "observability": {
+      "http": 200,
+      "success": true,
+      "requested": {
+        "observability": {
+          "enabled": false
+        }
+      },
+      "reported": {
+        "observability": null,
+        "logpush": false,
+        "tail_consumers": null
+      }
+    },
+    "deployment": {
+      "id": "079dae73-14d7-45a2-941d-047c82e394bf",
+      "source": "wrangler",
+      "strategy": "percentage",
+      "annotations": {
+        "workers/triggered_by": "deployment"
+      },
+      "versions": [
+        {
+          "version_id": "785a9175-1b87-4681-84e6-ec6e3eca8938",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-10-27T07:46:22.949559Z"
+    },
+    "worker_operations": 10
+  },
+  "disabled_cpu_quota": {
+    "since": "2026-10-27T07:46:22+00:00",
+    "until": "2026-10-27T08:00:02.872355+00:00",
+    "cpu_unit": "microseconds",
+    "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+    "metrics": {
+      "accountD1": [
+        {
+          "sum": {
+            "rowsRead": 78,
+            "rowsWritten": 21
+          }
+        }
+      ],
+      "accountRequests": [
+        {
+          "sum": {
+            "errors": 0,
+            "requests": 12
+          }
+        }
+      ],
+      "project": [
+        {
+          "dimensions": {
+            "status": "success"
+          },
+          "quantiles": {
+            "cpuTimeP50": 726,
+            "cpuTimeP99": 4235
+          },
+          "sum": {
+            "errors": 0,
+            "requests": 10
+          }
+        }
+      ],
+      "projectD1": [
+        {
+          "sum": {
+            "readQueries": 23,
+            "rowsRead": 78,
+            "rowsWritten": 21,
+            "writeQueries": 8
+          }
+        }
+      ]
+    },
+    "gate_failures": []
+  },
+  "live_mobile": {
+    "mobile": [
+      {
+        "width": 320,
+        "command": "play",
+        "url": "https://tr1stan.de/game.html"
+      },
+      {
+        "width": 320,
+        "command": "play --daily",
+        "url": "https://tr1stan.de/game.html?mode=daily"
+      },
+      {
+        "width": 320,
+        "command": "leaderboard",
+        "url": "https://tr1stan.de/game.html#leaderboard"
+      },
+      {
+        "width": 390,
+        "command": "play",
+        "url": "https://tr1stan.de/game.html"
+      },
+      {
+        "width": 390,
+        "command": "play --daily",
+        "url": "https://tr1stan.de/game.html?mode=daily"
+      },
+      {
+        "width": 390,
+        "command": "leaderboard",
+        "url": "https://tr1stan.de/game.html#leaderboard"
+      }
+    ],
+    "backend_requests_without_online_action": 0,
+    "transport": "real HTTPS via Python with normal CA validation; Chromium TLS trust unchanged",
+    "offline": "tested locally with exact shipped files"
+  },
+  "tests_passed": 77,
+  "free_plan": "unknown; subscriptions API HTTP 403; operator confirmation pending",
+  "release_check_entries": 0,
+  "remaining_controlled_operations": 20,
+  "cloud_build_hold": "manually confirmed by operator; remains enabled; previews disabled",
+  "limitations": [
+    "Physical devices and Safari untested",
+    "Native Chromium TLS through cloud proxy untested; live browser uses TLS-validating Python transport",
+    "Active scores/readback and retention Actions run pending activation"
+  ]
+}

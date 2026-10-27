@@ -1,5 +1,5 @@
 > **Aktueller Release 27.10.2026:** Builds-Sperre und leere Job-Warteschlange
-> sind vom Betreiber bestätigt. Notice live, additive Migration erfolgreich;
+> sind vom Betreiber bestätigt. Notice und Spiel live, additive Migration erfolgreich, Worker pf-2 deaktiviert;
 > tatsächlichen Fortschritt ausschließlich in [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md)
 > lesen. Ältere Kennungen/Blocker unten sind historisch und vor Nutzung neu zu prüfen.
 
