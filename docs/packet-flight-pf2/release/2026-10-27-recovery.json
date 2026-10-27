@@ -1,0 +1,83 @@
+{
+  "verified_at_utc": "2026-10-27T10:17:09.043292+00:00",
+  "recovered_code_commit": "7743123cb9e026db546af5e7f12c920d4d5825e4",
+  "original_workspace_recovered": true,
+  "reimplemented_changes": [],
+  "backup_patch_sha256": "a08c47d828810a7800ddc9dcff6f396ea722c0107ab37ec8b5de454b0948ca64",
+  "test_counts": {
+    "unit": 24,
+    "backend": 17,
+    "static": 2,
+    "browser": 14,
+    "visual": 8,
+    "escape": 2,
+    "metrics": 7,
+    "privacy": 5
+  },
+  "total_passed": 79,
+  "all_test_process_exit_codes": 0,
+  "html_validation": true,
+  "diff_check": true,
+  "log_sha256": {
+    "unit": "9d706aa4fb52707f0d21518ea9fe203995106511a88928daffe1281ebbe9de3b",
+    "backend": "df21530c4a9c8ae5b6a9efde82e567c9d16cddb571c018ce1a0e0806f8d71511",
+    "static": "f8ab1ece5f85e965875974b313746f2a61124268d9ef1024c5779226512d73e9",
+    "browser": "ab20d367a497e74622647c9cb576d3135bd9926a0baff328247b5601fe91bc19",
+    "visual": "f90b19949c05021cdf8fcbc41694bf201d1ad11a188c523bf4e7564b4ad18a39",
+    "escape": "cedb859e10ac433d8feb9810cea784f260c5833032a955989a16cfd2bc1cbb1c",
+    "metrics": "9ca6eb6f1cb1da73cda22c133a6ce24b9fde2ca0c4454a7339816a3572122c80",
+    "privacy": "f87da0f6f2de06603ad2ce3444d5ea84456d7b7c75f76feeabb2924904c82793",
+    "html": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "operations_used": 18,
+  "operations_remaining": 12,
+  "normal_runs_used": 1,
+  "daily_runs_used": 0,
+  "production_readonly_check": {
+    "deployment": {
+      "id": "fc16bf9b-12f6-40cb-886c-7dc320486067",
+      "source": "wrangler",
+      "strategy": "percentage",
+      "annotations": {
+        "workers/triggered_by": "deployment"
+      },
+      "versions": [
+        {
+          "version_id": "f57eaff7-0e68-4c5c-a51c-bcbe2f743529",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-10-27T09:32:53.714964Z"
+    },
+    "enabled": false,
+    "secret_bindings_preserved": true,
+    "counts": [
+      {
+        "old_runs": 0,
+        "old_scores": 0,
+        "runs_v2": 1,
+        "scores_v2": 1
+      }
+    ],
+    "normal_public_record": [
+      {
+        "mode": "normal",
+        "day": "",
+        "alias": "Release_Check",
+        "score": 10,
+        "gates": 1,
+        "fragments": 0,
+        "bonus_points": 0,
+        "achieved_at": 1793092811119
+      }
+    ],
+    "migrations": [
+      {
+        "name": "0001_initial.sql"
+      },
+      {
+        "name": "0002_escape_pf2.sql"
+      }
+    ]
+  }
+}
