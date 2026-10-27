@@ -1,0 +1,331 @@
+{
+  "verified_at_utc": "2026-10-27T10:39:43.753761+00:00",
+  "fresh_frontend_tests": {
+    "unit": 24,
+    "backend": 17,
+    "static": 2,
+    "browser": 14,
+    "visual": 8,
+    "escape": 2,
+    "metrics": 7,
+    "privacy": 5
+  },
+  "total_passed": 79,
+  "all_new_test_exit_codes": 0,
+  "html_validation": true,
+  "log_sha256": {
+    "unit": "98e0b27c085720810446ac51abb4ecec2054d92f8510fd6bb983fc3cc8162952",
+    "backend": "4a3eeec89963f44166226c6e410da999d7a16c6a6a8bc6dba5a5e5a0defb1220",
+    "static": "81d3f9c2ddc08c0ed0de3d3e5b921f909d33ac5d2b841e690bd78c7be6f13c79",
+    "browser": "6591114b59d77aa3c224ef1255ff912e7fda223ec2764c5322ddc84e3fc67ffb",
+    "visual": "76f4c7c967575026ce0615ed1bca7e1d8abdb098ddc8c44aa49e031290975188",
+    "escape": "c321b4bb0d2a2faa6655b578daede7a431bf34071a9a57e05d32e735f782d265",
+    "metrics": "54ea8b96df5abfad213360efdbab6fd905b61704aea7ff28e184c6c1a78b6055",
+    "privacy": "92663b72f3d7c3507773a3feb82d69a9c133c0b0198de8f20dd9926987ed1534",
+    "html": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "active_worker": {
+    "id": "fc6ceecc-28b7-4025-adf7-6f66030de8db",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "663ffc76-bb8b-4a40-94ac-a1d21563130f",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-27T10:22:14.159457Z"
+  },
+  "rollback_worker": {
+    "id": "12d35273-bfcf-4a16-b470-dbd3f54f2013",
+    "source": "wrangler",
+    "strategy": "percentage",
+    "annotations": {
+      "workers/triggered_by": "deployment"
+    },
+    "versions": [
+      {
+        "version_id": "1b3027aa-56f7-4a79-97a5-b693eabf4c8d",
+        "percentage": 100
+      }
+    ],
+    "created_on": "2026-10-27T10:19:07.839386Z"
+  },
+  "retention_monitor": "https://github.com/tr1stannnnnn/tr1stan.de/actions/runs/40487924609",
+  "existing_normal_after_optimization": {
+    "existing_normal_retained": true,
+    "normal_readbacks": [
+      {
+        "version": "pf-2",
+        "mode": "alltime",
+        "day": "",
+        "entries": [
+          {
+            "position": 1,
+            "alias": "Release_Check",
+            "score": 10,
+            "rank": "SCRIPT KIDDIE",
+            "gates": 1,
+            "fragments": 0,
+            "bonusPoints": 0,
+            "achievedAt": 1793092811119,
+            "own": true
+          }
+        ],
+        "ownEntry": {
+          "position": 1,
+          "alias": "Release_Check",
+          "score": 10,
+          "rank": "SCRIPT KIDDIE",
+          "gates": 1,
+          "fragments": 0,
+          "bonusPoints": 0,
+          "achievedAt": 1793092811119,
+          "own": true
+        }
+      },
+      {
+        "version": "pf-2",
+        "mode": "alltime",
+        "day": "",
+        "entries": [
+          {
+            "position": 1,
+            "alias": "Release_Check",
+            "score": 10,
+            "rank": "SCRIPT KIDDIE",
+            "gates": 1,
+            "fragments": 0,
+            "bonusPoints": 0,
+            "achievedAt": 1793092811119,
+            "own": true
+          }
+        ],
+        "ownEntry": {
+          "position": 1,
+          "alias": "Release_Check",
+          "score": 10,
+          "rank": "SCRIPT KIDDIE",
+          "gates": 1,
+          "fragments": 0,
+          "bonusPoints": 0,
+          "achievedAt": 1793092811119,
+          "own": true
+        }
+      }
+    ],
+    "daily_before_second_run": {
+      "version": "pf-2",
+      "mode": "daily",
+      "day": "2026-10-27",
+      "entries": [],
+      "ownEntry": null
+    },
+    "operations_accounted": 24
+  },
+  "daily_public_result": {
+    "mode": "daily",
+    "day": "2026-10-27",
+    "payload_public": {
+      "alias": "Release_Check",
+      "score": 0,
+      "gates": 0,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "activeMs": 1900
+    },
+    "receipt_public": {
+      "accepted": true,
+      "score": 0,
+      "gates": 0,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "mode": "daily",
+      "day": "2026-10-27",
+      "version": "pf-2",
+      "positionAsOf": 1793096763781,
+      "ownEntry": {
+        "position": 1,
+        "alias": "Release_Check",
+        "score": 0,
+        "achievedAt": 1793096763781,
+        "gates": 0,
+        "fragments": 0,
+        "bonusPoints": 0,
+        "rank": "SCRIPT KIDDIE",
+        "own": true
+      }
+    },
+    "first_readback": {
+      "position": 1,
+      "alias": "Release_Check",
+      "score": 0,
+      "rank": "SCRIPT KIDDIE",
+      "gates": 0,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "achievedAt": 1793096763781,
+      "own": true
+    },
+    "reload_readback": {
+      "position": 1,
+      "alias": "Release_Check",
+      "score": 0,
+      "rank": "SCRIPT KIDDIE",
+      "gates": 0,
+      "fragments": 0,
+      "bonusPoints": 0,
+      "achievedAt": 1793096763781,
+      "own": true
+    },
+    "own_ui": "Dein Bestwert: Platz 1 \u00b7 0 Punkte \u00b7 SCRIPT KIDDIE \u00b7 27.10.2026, 10:26 UTC",
+    "input": "Real wall-clock keyboard inputs; up to four Space presses, stopping when the run ends. No physics, seed, time or score writes.",
+    "transport": "real HTTPS responses with normal CA verification; only config.mjs overridden in isolated profile",
+    "total_controlled_operations": 28
+  },
+  "defined_gate": {
+    "since": "2026-10-27T10:22:11.336087+00:00",
+    "until": "2026-10-27T10:36:31.025374+00:00",
+    "cpu_unit": "microseconds",
+    "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+    "metrics": {
+      "accountD1": [
+        {
+          "sum": {
+            "rowsRead": 250,
+            "rowsWritten": 98
+          }
+        }
+      ],
+      "accountRequests": [
+        {
+          "sum": {
+            "errors": 0,
+            "requests": 31
+          }
+        }
+      ],
+      "project": [
+        {
+          "dimensions": {
+            "status": "success"
+          },
+          "quantiles": {
+            "cpuTimeP50": 4067,
+            "cpuTimeP99": 6291
+          },
+          "sum": {
+            "errors": 0,
+            "requests": 8
+          }
+        }
+      ],
+      "projectD1": [
+        {
+          "sum": {
+            "readQueries": 86,
+            "rowsRead": 250,
+            "rowsWritten": 98,
+            "writeQueries": 35
+          }
+        }
+      ]
+    },
+    "gate_failures": []
+  },
+  "exact_count_diagnostic": {
+    "since": "2026-10-27T10:22:11.336087+00:00",
+    "until": "2026-10-27T10:33:27.120946+00:00",
+    "cpu_unit": "microseconds",
+    "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+    "metrics": {
+      "accountD1": [
+        {
+          "sum": {
+            "rowsRead": 250,
+            "rowsWritten": 98
+          }
+        }
+      ],
+      "accountRequests": [
+        {
+          "sum": {
+            "errors": 0,
+            "requests": 31
+          }
+        }
+      ],
+      "project": [
+        {
+          "dimensions": {
+            "status": "success"
+          },
+          "quantiles": {
+            "cpuTimeP50": 4067,
+            "cpuTimeP99": 6291
+          },
+          "sum": {
+            "errors": 0,
+            "requests": 8
+          }
+        }
+      ],
+      "projectD1": [
+        {
+          "sum": {
+            "readQueries": 86,
+            "rowsRead": 250,
+            "rowsWritten": 98,
+            "writeQueries": 35
+          }
+        }
+      ]
+    },
+    "gate_failures": [
+      "insufficient project request samples"
+    ]
+  },
+  "score_time_window": {
+    "since": "2026-10-27T10:26:02.781000+00:00",
+    "until": "2026-10-27T10:26:04.781000+00:00",
+    "result": {
+      "data": {
+        "viewer": {
+          "accounts": [
+            {
+              "samples": [
+                {
+                  "dimensions": {
+                    "status": "success"
+                  },
+                  "quantiles": {
+                    "cpuTimeP50": 4067,
+                    "cpuTimeP99": 5763
+                  },
+                  "sum": {
+                    "errors": 0,
+                    "requests": 2
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "errors": null
+    }
+  },
+  "telemetry_note": "8 invocations reported for 9 logged active calls; exact-count diagnostic unresolved. Original min-5/8000us gate unchanged and passed. No missing value treated as zero; no claim of complete per-request CPU coverage. CPU quantiles use sampling.",
+  "operations_used": 28,
+  "operations_remaining": 2,
+  "real_runs": [
+    "normal",
+    "daily"
+  ],
+  "new_normal_runs": 0,
+  "frontend_publication": "pending exact live verification",
+  "automatic_builds": "held; previews off; restore only after consistency and final checks"
+}
