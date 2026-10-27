@@ -16,6 +16,8 @@
 [data-alarm="2"] #alertPhase, [data-alarm="3"] #alertPhase { color: #efb29f; }
 .online-choice { display: flex; align-items: center; gap: .65rem; min-height: 44px; font: .68rem/1.5 var(--font-mono); margin-top: .75rem; }
 .online-choice input { min-width: 20px; min-height: 20px; accent-color: #78dfe5; }
+.online-choice > span { min-width: 0; }
+.storage-recommendation { color: #9eb3c9; font-size: inherit; white-space: nowrap; }
 #onlineNotice { font-size: .75rem; margin: .8rem 0 .35rem; }
 #startFailure { border-left: 2px solid #e4a1c1; padding-left: .7rem; }
 .mode-picker { display: flex; flex-wrap: wrap; min-inline-size: 0; padding: 0; border: 0; gap: .5rem; margin: 0; }
@@ -40,6 +42,8 @@
 .flight-actions { display: flex; flex-wrap: wrap; gap: .65rem; padding-top: .75rem; }
 .flight-actions .arcade-button { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
 .flight-actions #pause { flex: 1 1 100%; }
+.flight-actions #startOnline { flex-basis: 100%; }
+#startRecommendation { flex: 1 1 100%; margin: 0 0 .3rem; }
 .arcade-small { font-size: .78rem; line-height: 1.75; color: #E3D3F1; }
 .arcade-notice { font: .72rem/1.7 var(--font-mono); color: #F5D0FE; overflow-wrap: anywhere; }
 .arcade-side section { margin-bottom: 2.5rem; min-width: 0; overflow-wrap: anywhere; }

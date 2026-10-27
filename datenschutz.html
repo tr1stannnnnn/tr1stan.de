@@ -272,8 +272,11 @@
         <section id="rangliste">
           <h2><span>12</span>Freiwillige Online-Runs und öffentliche Rangliste</h2>
           <p>Auch bei aktiviertem Backend lädt ein Seitenaufruf die Rangliste nicht automatisch.
-            Erst AKTUALISIEREN oder ein bewusst ausgewählter Ranglistenmodus sendet die zufällige
-            Browserkennung an den Cloudflare-Worker, um deinen eigenen Bestwert zuzuordnen.
+            AKTUALISIEREN lädt den ausgewählten Bereich bewusst. Wurde die Rangliste bereits
+            angefordert, lädt ein Bereichswechsel den passenden Bereich nach. Nach bestätigter
+            freiwilliger Eintragung wird der passende Bereich ebenfalls aktualisiert. Dabei
+            wird die zufällige Browserkennung an den Cloudflare-Worker gesendet, um deinen
+            eigenen Bestwert zuzuordnen.
             MIT RANGLISTE STARTEN bereitet vor Spielbeginn einen Server-Run vor und sendet dafür
             Kennung, Modus und Spielversion an Cloudflare. Alias und öffentliche Scoreeintragung
             bleiben nach Game Over freiwillig. NUR LOKAL SPIELEN startet ohne Server-Run.

@@ -181,3 +181,30 @@ freiwilliger Testeintragung akzeptiert, der Bestwert gelesen und ein neuer
 Server-Run beim Neustart bestätigt. Kein Eingriff in Physik/Score/Zeit; kein
 Produktions-Run oder öffentlicher Eintrag. Alle 88 Prüfungen einschließlich
 unveränderter Backend-/Spieltests wurden für diese Änderung erneut bestanden.
+
+
+## Ranglisten-/Zustandsregressionen (27.10.2026, pf2-ui3 / Cache6)
+
+Aktueller kompletter Lauf: **99 bestanden**. Zusätzlich zu den bisherigen
+Spiel-/Backend-/Browserprüfungen enthält `ui_consistency_test.py` zehn gezielte
+Prüfungen für Score192 → Score0/Rekord192, Moduswechsel, Dialogende, Neustart,
+Pause/Fortsetzen, getrennte Bestwerte/Skins, Daily-URL, explizites Laden,
+verzögerte Gegenbereichs-Antworten, UTC-Mitternacht, Empfehlungen, bestehende
+Ablehnung, blockierten Speicher, 320/390/Desktop und 200-Prozent-Reflow.
+Die 192-Punkte-Situation ist eine ausdrücklich synthetische lokale UI-Fixture;
+keine tatsächliche192-Punkte-Spielleistung oder Online-Eintragung behaupten.
+Die Fixture lebt nur im abgefangenen Testmodul, nicht im ausgelieferten Client.
+
+```sh
+python3 tests/ui_consistency_test.py
+python3 tests/start_integration_test.py
+python3 tests/privacy_navigation_test.py
+```
+
+Die beiden echten workerd-/D1-Browserintegrationen halten jetzt die tatsächlich
+verarbeitete Scoreantwort zurück. Schließen/Modusereignis/Skip/Abbruch während
+dieser Übertragung verlieren weder Resultat noch Bestätigung; Normal und Daily
+wählen nach Erfolg jeweils den korrekten Bereich. Alle Eintragungen bleiben
+in flüchtiger Test-D1. Die sieben Datenschutz-/Workerprüfungen umfassen beide
+real zuvor veröffentlichten Clients/Cache4 und Cache5, Upgrade zu Cache6,
+vorhandene Zustimmung und Offline-Neuladen bei erhaltenen Rekorden.

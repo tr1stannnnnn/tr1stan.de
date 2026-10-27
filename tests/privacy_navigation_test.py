@@ -110,9 +110,9 @@ class PrivacyNavigationTests(unittest.TestCase):
             self.assertEqual(self.page.evaluate('navigator.serviceWorker.getRegistrations().then(r=>r.length)'),0)
             self.assertEqual(self.page.evaluate('(k)=>JSON.parse(localStorage.getItem(k)).normal',LEGACY),73)
         finally: server.shutdown();server.server_close()
-    def test_published_shell4_upgrades_to_two_start_actions_and_offline_shell5(self):
+    def upgrade_published_shell(self,ref,shell,old_checkbox):
         # Serve the actual previously published client/worker first, then this checkout.
-        old = {name: subprocess.check_output(['git','show',f'7ab097c:{name}'],cwd=ROOT)
+        old = {name: subprocess.check_output(['git','show',f'{ref}:{name}'],cwd=ROOT)
                for name in ['game.html','game-sw.js','game/app.mjs','game/api.mjs','game/game.css']}
         class Handler(SimpleHTTPRequestHandler):
             live=False
@@ -131,21 +131,25 @@ class PrivacyNavigationTests(unittest.TestCase):
             self.page.goto(url+'/index.html')
             self.page.evaluate('([k,v])=>localStorage.setItem(k,v)',[LEGACY,'{"normal":73,"daily":{}}'])
             self.page.goto(url+'/game.html');self.page.locator('#keepStorage').check();self.ready_cache()
-            self.assertIn('tr1stan-packet-flight-pf-2-shell-4',self.page.evaluate('caches.keys()'))
-            self.assertEqual(self.page.locator('#onlineRun').count(),1)
+            self.assertIn(f'tr1stan-packet-flight-pf-2-shell-{shell}',self.page.evaluate('caches.keys()'))
+            self.assertEqual(self.page.locator('#onlineRun').count(),old_checkbox)
             Handler.live=True
             self.page.reload();self.ready_cache()
             self.assertEqual(self.page.locator('#onlineRun').count(),0)
-            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN')
-            self.assertEqual(self.page.evaluate('caches.keys()'),['tr1stan-packet-flight-pf-2-shell-5'])
+            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN · EMPFOHLEN')
+            self.assertEqual(self.page.evaluate('caches.keys()'),['tr1stan-packet-flight-pf-2-shell-6'])
             self.assertEqual(self.page.evaluate('(k)=>JSON.parse(localStorage.getItem(k)).legacy.normal',KEY),73)
             self.ctx.set_offline(True);self.page.reload(wait_until='load')
             self.page.wait_for_selector('#gameUI:not([hidden])')
             self.assertEqual(self.page.locator('#onlineRun').count(),0)
-            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN')
+            self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN · EMPFOHLEN')
             self.page.locator('#start').click()
             self.assertEqual(self.page.locator('body').get_attribute('data-game-state'),'countdown')
         finally: server.shutdown();server.server_close()
+    def test_published_shell4_upgrades_with_records_and_offline_shell6(self):
+        self.upgrade_published_shell('7ab097c',4,1)
+    def test_published_shell5_upgrades_with_records_and_offline_shell6(self):
+        self.upgrade_published_shell('d018eef',5,0)
     def test_terminal_touch_reflow_targets_and_keyboard(self):
         out=Path('/tmp/packet-flight-review');out.mkdir(exist_ok=True)
         for width in [320,390]:

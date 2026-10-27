@@ -311,6 +311,18 @@ ausgelöst. Ranglistenstart übermittelt bereits Kennung, Modus und Version;
 Alias und Score erst nach ausdrücklichem Absenden. Kein nachträgliches Hochladen
 lokaler Runs, keine versteckte Warteschlange, keine automatischen Retries.
 
+Die Ranglisten heißen NORMAL · ALLZEIT und DAILY · HEUTE. Normal umfasst alle
+normalen Runs, Daily ausschließlich den angezeigten UTC-Tag (Wechsel 00:00 UTC).
+Spielmodus und direkte Daily-URL wählen den passenden Bereich. Vor dem ersten
+AKTUALISIEREN werden nur Auswahl und Erklärung geändert; nach bewusstem Laden
+können Bereichswechsel nachladen. Eine bestätigte freiwillige Eintragung wählt
+ihren Bereich. Alte Antworten können keine fremden Einträge darunter anzeigen.
+
+Ranglistenstart und Gerätespeicherung werden empfohlen; beide bleiben bewusst
+wählbar. Eine neue Speicherwahl ist nicht vorausgewählt. Nach dem Verlassen
+eines Ergebnisses sind aktueller Score/Gates/Combo/Gefahren/Effekte wieder leer,
+Rekorde und Skins bleiben erhalten. Pause/Fortsetzen setzt den Run nicht zurück.
+
 Der Worker prüft signierte Runs und berechnet Scores aus Komponenten selbst;
 Plausibilitätskontrollen sind kein Beweis ehrlichen Spiels. Eine Browserkennung
 ist keine Personenidentität. Die additiven Tabellen `runs_v2`/`scores_v2` und beide Migrationen sind

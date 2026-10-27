@@ -1,3 +1,9 @@
+> **Aktuelle Folgeänderung pf2-ui3 / Cache6 (27.10.2026):** Eindeutige
+> Normal-/Daily-Bereiche, passende Auswahl ohne Seitenaufruf-API, gemeinsame
+> Bereitschaftsrücksetzung und freiwillige Empfehlungen. 99 Prüfungen bestanden.
+> Aktueller Ablauf und Nachweise: [PF2-UX-2026-10-27.md](PF2-UX-2026-10-27.md).
+> Die folgenden Meldungen sind vorherige Veröffentlichungsstände.
+
 > **Folgeänderung: eindeutige Startwahl (27.10.2026):** MIT RANGLISTE STARTEN
 > oder NUR LOKAL SPIELEN statt Online-Häkchen; kein stiller lokaler Ersatzstart.
 > 88 Prüfungen erneut bestanden, Cache5/pf2-start2 und passende Datenschutzhinweise.

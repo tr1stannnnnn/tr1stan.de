@@ -27,7 +27,7 @@
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/style.css?v=31" />
-  <link rel="stylesheet" href="/game/game.css?v=pf2-start2" />
+  <link rel="stylesheet" href="/game/game.css?v=pf2-ui3" />
 </head>
 <body class="arcade-page">
   <a class="skip" href="#content">Zum Spiel springen</a>
@@ -71,15 +71,16 @@
         <p id="onlineNotice" class="arcade-small">MIT RANGLISTE STARTEN bereitet vor Spielbeginn einen Server-Run vor. Alias und öffentliche Scoreeintragung bleiben nach Game Over freiwillig. NUR LOKAL SPIELEN startet ohne Server-Run; dieser Score ist nicht öffentlich einreichbar.</p>
         <p id="startFailure" class="arcade-notice" role="alert" tabindex="-1" hidden></p>
         <div class="flight-actions">
-          <button type="button" class="arcade-button primary" id="startOnline" aria-describedby="onlineNotice">MIT RANGLISTE STARTEN</button>
+          <button type="button" class="arcade-button primary" id="startOnline" aria-describedby="startRecommendation onlineNotice">MIT RANGLISTE STARTEN · EMPFOHLEN</button>
+          <p id="startRecommendation" class="arcade-small">Damit kannst du deinen Score nach dem Spiel freiwillig in die Rangliste eintragen. Ohne Anmeldung.</p>
           <button type="button" class="arcade-button" id="start" aria-describedby="onlineNotice">NUR LOKAL SPIELEN</button>
           <button type="button" class="arcade-button" id="pause" disabled>PAUSE</button>
         </div>
         <p id="threatStatus" class="arcade-notice" role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="controls" class="arcade-small">Zuerst mit Rangliste oder nur lokal starten. Nach dem Countdown: Leertaste · ↑ · W · Tap auf das Spielfeld. Tastatursteuerung bei Fokus im Spielfeld; Tab verlässt es. Scrollen und Zoom bleiben möglich.</p>
         <p id="runStatus" class="arcade-notice" role="status">BEREIT — lokale Rekorde, kein Upload.</p>
-        <label class="online-choice"><input type="checkbox" id="keepStorage" aria-describedby="storageChoiceHint" /> Rekorde und Offline-Nutzung auf diesem Gerät behalten</label>
-        <p id="storageChoiceHint" class="arcade-small">Ohne Auswahl nur Arbeitsspeicher. Auswahl hier änderbar; vorhandene Rekorde werden nicht gelöscht und erst nach Zustimmung wieder gelesen. Während eines Runs oder einer offenen Online-Eintragung ist die Auswahl gesperrt. <a href="/datenschutz.html#spielspeicher">Datenschutz</a></p>
+        <label class="online-choice"><input type="checkbox" id="keepStorage" aria-describedby="storageChoiceHint" /> <span>Rekorde und Offline-Nutzung auf diesem Gerät behalten <small class="storage-recommendation">· empfohlen</small></span></label>
+        <p id="storageChoiceHint" class="arcade-small">Damit können persönliche Rekorde, freigeschaltete Skins und Einstellungen nach dem Schließen erhalten bleiben. Das veröffentlicht keine Scores. Ohne Auswahl nur Arbeitsspeicher. Auswahl hier änderbar; vorhandene Rekorde werden nicht gelöscht und erst nach Zustimmung wieder gelesen. Während eines Runs oder einer offenen Online-Eintragung ist die Auswahl gesperrt. <a href="/datenschutz.html#spielspeicher">Datenschutz</a></p>
         <p id="storageNotice" class="arcade-small" hidden></p>
         <p id="offlineReady" class="arcade-small"></p>
       </section>
@@ -98,10 +99,12 @@
         </section>
         <section id="leaderboard" tabindex="-1" aria-labelledby="leaderboardTitle">
           <p class="arcade-kicker">PUBLIC ROUTES</p><h2 id="leaderboardTitle">Top 20</h2>
-          <div class="board-tabs" role="group" aria-label="Ranglistenbereich">
-            <button class="arcade-button" type="button" id="todayBoard" aria-pressed="false">HEUTE</button>
-            <button class="arcade-button" type="button" id="alltimeBoard" aria-pressed="true">ALLZEIT</button>
+          <div class="board-tabs" role="group" aria-label="Ranglistenbereich" aria-describedby="boardDescription">
+            <button class="arcade-button" type="button" id="alltimeBoard" aria-pressed="true">NORMAL · ALLZEIT</button>
+            <button class="arcade-button" type="button" id="todayBoard" aria-pressed="false">DAILY · HEUTE</button>
           </div>
+          <p id="boardDescription" class="arcade-small">Normale Runs aller Tage. Daily-Runs stehen getrennt unter DAILY · HEUTE.</p>
+          <p id="boardDate" class="arcade-small" hidden></p>
           <p id="boardStatus" class="arcade-notice" role="status">LEADERBOARD OFFLINE</p>
           <ol id="boardEntries" class="board-entries"></ol>
           <p id="ownPosition" class="arcade-notice"></p>
@@ -143,6 +146,6 @@
   </dialog>
   <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-2</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
   <script src="/script.js?v=31" defer></script>
-  <script type="module" src="/game/app.mjs?v=pf2-start2"></script>
+  <script type="module" src="/game/app.mjs?v=pf2-ui3"></script>
 </body>
 </html>
