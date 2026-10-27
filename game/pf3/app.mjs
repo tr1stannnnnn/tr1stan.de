@@ -43,7 +43,7 @@ function updateRoute() {
     'trace:tracking': 'Ziel wird verfolgt. Erst nach LOCKED die Höhe wechseln.',
     'trace:locked': 'LOCKED: Zielhöhe bleibt fest. Jetzt nach oben oder unten ausweichen.',
     'trace:active': 'Schuss auf die feste Zielhöhe. Halte Abstand zur Markierung.',
-    'laser:warning': 'LASER: Die markierte Zone verlassen. Der breite Korridor bleibt frei.',
+    'laser:warning': 'LASER: Die markierte Zone verlassen. Die gezeigte sichere Seite nutzen.',
     'laser:charging': 'LASER lädt. Bleibe auf der angezeigten sicheren Seite.',
     'laser:active': 'LASER aktiv. Sichere Seite halten.',
     'laser:fading': 'LASER klingt ab. Die Route wird wieder frei.',
@@ -421,6 +421,7 @@ function archiveLabel() {
   if(records.data.legacy)archives['pf-1']=records.data.legacy;
   const host=$('legacyRecords');host.replaceChildren();host.hidden=!Object.keys(archives).length;
   for(const [version,old]of Object.entries(archives)) {
+    if(!old)continue;
     const details=document.createElement('details'),title=document.createElement('summary');
     title.textContent=`Lokale alte Wertung ${version} · Normal ${old.normal}`;details.append(title);
     const list=document.createElement('ul');

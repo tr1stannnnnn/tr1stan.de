@@ -7,7 +7,7 @@ new implementation lives in game/pf3 to keep cached clients and valid pf-2
 tokens usable. New migration0003 only adds pf-3 tables, because existing v2
 CHECK constraints enforce pf-2. Existing rows/secrets unchanged.
 
-Prototype: speed190→225→270→310, gap210→185→160→145, target interval
+Prototype: speed190→225→270→310, gap210→185→160→150, target interval
 1.65→1.45→1.30→1.15, gates0/5/12/25, continuous acceleration12 units/s².
 Gravity/flap/hitbox unchanged. Spatial spawn schedule preserves tempo-dependent
 distance and permits a version-specific O(1) minimum-time bound. Route motifs,
@@ -43,3 +43,5 @@ Use a backend-compatibility PR before the final frontend PR because Pages and
 Worker builds run independently. Old module URLs must stay byte-identical.
 Do not claim historical pf-2 tests as fresh pf-3 tests. Never weaken the8ms
 CPU gate or atomic limits. No extra public score entries or production loadtest.
+
+Checkpoint update: final target gap150. New backend27/27; browser20/20; UI10/10; visual8/8; privacy8/8; keyboard+touch2/2; isolated end-to-end2/2; archive4/4 have passed during development and require final aggregate rerun. Formal1000×150 seeds now all have≥10-unit witnesses with120ms anticipation, minimum120–200ms taps. Six1000-gate runs also replayed with≥10-unit clearance using bounded policy backtracking. These are input-automated reachability proofs, not human play studies. Video capture still being repaired, no valid video claimed. Production remains unchanged.

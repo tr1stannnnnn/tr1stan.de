@@ -25,7 +25,7 @@ class Document(HTMLParser):
 
 class SiteTests(unittest.TestCase):
     def test_html_links_ids_labels_assets(self):
-        for path in ROOT.glob('*.html'):
+        for path in [*ROOT.glob('*.html'),ROOT/'game/archive.html']:
             doc=Document(path.read_text())
             self.assertEqual(len(doc.ids),len(set(doc.ids)),path.name)
             self.assertEqual(doc.h1,1,path.name)
@@ -44,7 +44,7 @@ class SiteTests(unittest.TestCase):
             # Every label with a for attribute has a real target.
             for label in re.findall(r'<label\b[^>]*\bfor="([^"]+)"',path.read_text()): self.assertIn(label,doc.ids)
     def test_modules_css_fonts_social_and_hosting(self):
-        for path in (ROOT/'game').glob('*.mjs'):
+        for path in (ROOT/'game').rglob('*.mjs'):
             for value in re.findall(r"from ['\"]([^'\"]+)['\"]",path.read_text()):
                 self.assertTrue((path.parent/urlparse(value).path).is_file(),value)
         for value in re.findall(r'url\(["\']?([^"\')]+)',(ROOT/'style.css').read_text()):

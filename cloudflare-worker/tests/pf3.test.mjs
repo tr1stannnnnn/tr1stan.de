@@ -79,7 +79,41 @@ test('Tampered version/prefix/seed and wrong player cannot move a run into anoth
 });
 test('Atomic rate counters are shared across versions and cannot be doubled by version switching',async()=>{
  const address='198.51.100.88';
- for(let i=0;i<10;i++)assert.equal((await request('/api/run/start',{address,body:{version:i%2?'pf-3':'pf-2',mode:'normal',playerId:player()}})).status,200);
+ const parallel=await Promise.all(Array.from({length:10},(_,i)=>request('/api/run/start',{address,body:{version:i%2?'pf-3':'pf-2',mode:'normal',playerId:player()}})));
+ assert(parallel.every(r=>r.status===200));
  assert.equal((await request('/api/run/start',{address,body:{version:'pf-3',mode:'normal',playerId:player()}})).status,429);
  assert.equal((await DB.prepare('SELECT (SELECT COUNT(*) FROM runs_v2)+(SELECT COUNT(*) FROM runs_v3) AS n').first()).n,10);
+});
+test('A golden independently signed pre-upgrade pf-2 token is accepted without enabling old starts',async()=>{
+ const id=player(),startedAt=now-120000,runId=player();
+ async function mac(secret,text){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return Buffer.from(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(text))).toString('base64url');}
+ const playerHash=await mac(secrets.PSEUDONYM_KEY,id.toLowerCase());
+ const claims={runId,playerHash,version:'pf-2',mode:'daily',day:old.utcDay(startedAt),seed:old.dailySeed(old.utcDay(startedAt)),startedAt,expiresAt:startedAt+old.RULES.tokenTtlMs};
+ await DB.prepare('INSERT INTO runs_v2(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES(?,?,?,?,?,?,?,?)').bind(runId,playerHash,claims.version,claims.mode,claims.day,claims.seed,startedAt,claims.expiresAt).run();
+ const encoded=Buffer.from(JSON.stringify(claims)).toString('base64url');
+ const token=`pf2.${encoded}.${await mac(secrets.SIGNING_KEY,'pf2.'+encoded)}`;
+ const r=await request('/api/score',{target:{...env,LEGACY_STARTS:'false'},body:score({token,playerId:id})});
+ assert.equal(r.status,200);assert.equal(r.data.version,'pf-2');assert.equal(r.data.day,claims.day);
+ assert.equal((await DB.prepare('SELECT COUNT(*) AS n FROM scores_v3').first()).n,0);
+});
+test('Old Daily archive supports retained UTC days only, without changing current Daily semantics',async()=>{
+ const oldDay=old.utcDay(now-86400000);
+ await DB.prepare('INSERT INTO scores_v2 VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind('archive-old','archive-player','pf-2','daily',oldDay,'Old_Daily',10,1,0,0,now-86400000).run();
+ const r=await request(`/api/leaderboard?mode=daily&version=pf-2&day=${oldDay}`);
+ assert.equal(r.status,200);assert.equal(r.data.day,oldDay);assert.equal(r.data.entries[0].alias,'Old_Daily');assert.equal(r.data.ownEntry,null);
+ assert.equal((await request('/api/leaderboard?mode=daily&version=pf-2')).data.day,old.utcDay(now));
+ for(const query of['mode=alltime&version=pf-2&day='+oldDay,'mode=daily&version=pf-3&day='+oldDay,'mode=daily&version=pf-2&day=2026-02-30','mode=daily&version=pf-2&day=2020-01-01','mode=daily&version=pf-2&day='+oldDay+'&day='+oldDay])assert.equal((await request('/api/leaderboard?'+query)).status,400);
+});
+test('Additive pf-3 migration preserves existing pf-2 schema, runs and scores byte-for-byte',async()=>{
+ const isolated=new Miniflare({modules:true,script:'export default{fetch(){return new Response("isolated")}}',compatibilityDate:'2026-06-11',d1Databases:{DB:'migration3-isolated'}});
+ try{
+  const db=await isolated.getD1Database('DB');
+  async function apply(file){const sql=(await readFile(new URL('../migrations/'+file,import.meta.url),'utf8')).replace(/^--.*$/gm,'');await db.batch(sql.split(';').map(s=>s.trim()).filter(Boolean).map(s=>db.prepare(s)));}
+  await apply('0001_initial.sql');await apply('0002_escape_pf2.sql');
+  await db.prepare("INSERT INTO scores_v2 VALUES('old-entry','old-player','pf-2','normal','','Preserved',192,18,3,12,?)").bind(now).run();
+  await db.prepare("INSERT INTO runs_v2(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES('old-run','old-player','pf-2','normal','',1,?,?)").bind(now,now+1800000).run();
+  const inspect=async()=> (await db.batch([db.prepare('SELECT * FROM scores_v2'),db.prepare('SELECT * FROM runs_v2'),db.prepare("SELECT name,sql FROM sqlite_master WHERE name IN('runs_v2','scores_v2') ORDER BY name")])).map(r=>r.results);
+  const before=await inspect();await apply('0003_pf3.sql');await apply('0003_pf3.sql');assert.deepEqual(await inspect(),before);
+  assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM scores_v3').first()).n,0);
+ }finally{await isolated.dispose();}
 });

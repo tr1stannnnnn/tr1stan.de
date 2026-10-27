@@ -1,6 +1,6 @@
 // Cache only the game shell. No API requests, legal pages or home page are intercepted.
-const CACHE = 'tr1stan-packet-flight-pf-2-shell-6';
-const FILES = ['/game.html', '/game/game.css?v=pf2-ui3', '/game/api.mjs?v=pf2-start2', '/game/app.mjs?v=pf2-ui3', '/game/audio.mjs?v=pf2-privacy1', '/game/config.mjs?v=pf2-online1', '/game/effects.mjs?v=pf2-privacy1', '/game/physics.mjs?v=pf2-privacy1', '/game/render.mjs?v=pf2-privacy1', '/game/rules.mjs?v=pf2-privacy1', '/game/security-render.mjs?v=pf2-privacy1', '/game/storage.mjs?v=pf2-privacy1', '/game/world.mjs?v=pf2-privacy1', '/style.css?v=31', '/script.js?v=31', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
+const CACHE = 'tr1stan-packet-flight-pf-3-shell-1';
+const FILES = ['/game.html', '/game/pf3/game.css?v=pf3-1', '/game/pf3/api.mjs?v=pf3-1', '/game/pf3/app.mjs?v=pf3-1', '/game/pf3/audio.mjs?v=pf3-1', '/game/pf3/config.mjs?v=pf3-1', '/game/pf3/effects.mjs?v=pf3-1', '/game/pf3/physics.mjs?v=pf3-1', '/game/pf3/render.mjs?v=pf3-1', '/game/pf3/rules.mjs?v=pf3-1', '/game/pf3/security-render.mjs?v=pf3-1', '/game/pf3/storage.mjs?v=pf3-1', '/game/pf3/world.mjs?v=pf3-1', '/style.css?v=31', '/script.js?v=31', '/favicon.svg?v=18', '/fonts/inter-var-latin.woff2', '/fonts/jetbrains-mono-var-latin.woff2'];
 const PATHS = new Set(FILES.map(path => new URL(path, self.location.origin).pathname));
 const MARKER = new URL('/game/.offline-choice', self.location.origin).href;
 const consented = () => caches.match(MARKER, { cacheName: CACHE }).then(Boolean);
@@ -15,7 +15,7 @@ self.addEventListener('activate', event => event.waitUntil((async () => {
 })()));
 let storageTask = Promise.resolve();
 self.addEventListener('message', event => {
-  if (event.data?.type !== 'PF2_STORAGE' || !event.ports[0]) return;
+  if (!['PF2_STORAGE','PF3_STORAGE'].includes(event.data?.type) || !event.ports[0]) return;
   storageTask = storageTask.catch(() => {}).then(async () => {
     try {
       if (event.data.enabled === true) {

@@ -8,14 +8,14 @@ const mf = new Miniflare({
   script: await readFile(new URL('../cloudflare-worker/.test-build/index.js', import.meta.url), 'utf8'),
   compatibilityDate: '2026-06-11', d1Databases: { DB: 'start-flow-isolated-test' },
   bindings: {
-    ENABLED: 'true', ENVIRONMENT: 'development', DEV_ORIGINS: 'http://127.0.0.1:8000',
+    ENABLED: 'true', PF3_STARTS:'true', LEGACY_STARTS:'true', ACTIVE_RULESET:'pf-3', ENVIRONMENT: 'development', DEV_ORIGINS: 'http://127.0.0.1:8000',
     SIGNING_KEY: 'isolated-browser-signing-not-production-000',
     PSEUDONYM_KEY: 'isolated-browser-player-not-production-111',
     RATE_KEY: 'isolated-browser-rate-not-production-222',
   },
 });
 const db = await mf.getD1Database('DB');
-const sql = (await Promise.all(['0001_initial.sql','0002_escape_pf2.sql'].map(name => readFile(new URL('../cloudflare-worker/migrations/'+name, import.meta.url), 'utf8')))).join('\n').replace(/^--.*$/gm, '');
+const sql = (await Promise.all(['0001_initial.sql','0002_escape_pf2.sql','0003_pf3.sql'].map(name => readFile(new URL('../cloudflare-worker/migrations/'+name, import.meta.url), 'utf8')))).join('\n').replace(/^--.*$/gm, '');
 await db.batch(sql.split(';').map(s => s.trim()).filter(Boolean).map(s => db.prepare(s)));
 console.log(JSON.stringify({ ready: true, url: (await mf.ready).origin }));
 process.on('SIGTERM', async () => { await mf.dispose(); process.exit(0); });

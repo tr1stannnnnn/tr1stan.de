@@ -8,7 +8,7 @@ export const RULES = Object.freeze({
   step: 1 / 120, maxCatchup: 0.1,
   gateWidth: 64, firstGateX: 560, gateInterval: 1.65,
   speed: 190, maxSpeed: 310, acceleration: 12,
-  gap: 210, minGap: 145, maxCenterChange: 170,
+  gap: 210, minGap: 150, maxCenterChange: 170,
   movingAmplitude: 22, movingPeriod: 5, closingAmplitude: 12,
   fragmentRadius: 8, fragmentBehind: 48, maxCombo: 5,
   corridorCenter: 360, corridorGap: 220,
@@ -56,7 +56,7 @@ export const DIFFICULTY = Object.freeze([
   Object.freeze({ gates: 0, speed: 190, gap: 210, interval: 1.65 }),
   Object.freeze({ gates: 5, speed: 225, gap: 185, interval: 1.45 }),
   Object.freeze({ gates: 12, speed: 270, gap: 160, interval: 1.30 }),
-  Object.freeze({ gates: 25, speed: 310, gap: 145, interval: 1.15 }),
+  Object.freeze({ gates: 25, speed: 310, gap: 150, interval: 1.15 }),
 ]);
 export function difficulty(gates) {
   const progress = Math.max(0, Math.min(25, gates));

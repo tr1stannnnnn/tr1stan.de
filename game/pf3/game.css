@@ -48,7 +48,7 @@
 .arcade-notice { font: .72rem/1.7 var(--font-mono); color: #F5D0FE; overflow-wrap: anywhere; }
 .arcade-side section { margin-bottom: 2.5rem; min-width: 0; overflow-wrap: anywhere; }
 .arcade-side h2 { font: 600 1.3rem var(--font-sans); margin-block: 0 1rem; }
-.arcade-page select, .arcade-page input[type="text"], #alias, #copyFallback { font: 1rem var(--font-mono); color: #FFF; background: #160628; border: 1px solid #9259aa; border-radius: 4px; padding: .7rem; min-height: 44px; max-width: 100%; width: 100%; }
+.arcade-page select, .arcade-page input[type="text"], .arcade-page input[type="date"], #alias, #copyFallback { font: 1rem var(--font-mono); color: #FFF; background: #160628; border: 1px solid #9259aa; border-radius: 4px; padding: .7rem; min-height: 44px; max-width: 100%; width: 100%; }
 .rank-list { display: flex; flex-direction: column; gap: .6rem; font: .65rem var(--font-mono); color: #F5D0FE; }
 .board-tabs { display: flex; flex-wrap: wrap; gap: .5rem; }
 .board-tabs button { flex: 1 1 110px; }
@@ -168,3 +168,8 @@
   .flight-actions { flex-wrap: wrap; }
   .flight-actions .arcade-button { flex: 1 1 100%; }
 }
+
+.arcade-page input[type="date"] { min-width: 0; font-size: .85rem; }
+
+.arcade-page #content { overflow-wrap: anywhere; }
+.arcade-page select { min-width: 0; }

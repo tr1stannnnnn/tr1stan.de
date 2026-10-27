@@ -30,7 +30,7 @@ class StartIntegrationTests(unittest.TestCase):
         cls.browser.close();cls.pw.stop();cls.server.terminate();cls.server.wait(timeout=15);cls.server.stdout.close();cls.log.close()
     def run_mode(self,mode):
         ctx=self.browser.new_context(reduced_motion='reduce',service_workers='block')
-        ctx.route('**/game/config.mjs*',lambda route:route.fulfill(content_type='text/javascript',body="export const API_URL='https://packet-flight.test';"))
+        ctx.route('**/game/pf3/config.mjs*',lambda route:route.fulfill(content_type='text/javascript',body="export const API_URL='https://packet-flight.test';"))
         page=ctx.new_page();errors=[];starts=[];scores=[];statuses=[];held_scores=[]
         page.on('pageerror',lambda e:errors.append(str(e)))
         def bridge(route):
@@ -56,7 +56,7 @@ class StartIntegrationTests(unittest.TestCase):
             page.locator('#startOnline').click()
             page.wait_for_selector('#resultDialog[open]',timeout=15000)
             self.assertEqual(len(starts),1);self.assertEqual(starts[0]['mode'],mode)
-            self.assertTrue(starts[0]['token'].startswith('pf2.'))
+            self.assertTrue(starts[0]['token'].startswith('pf3.'))
             self.assertEqual(scores,[]);self.assertTrue(page.locator('#enterScore').is_enabled())
             # An unrelated close cannot discard a still-valid unsubmitted result.
             page.evaluate("document.querySelector('#resultDialog').close()")

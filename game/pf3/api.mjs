@@ -32,7 +32,7 @@ export class LeaderboardAPI {
   }
   async list(mode, playerId, version=VERSION, day='') {
     const data = await this.request(`/api/leaderboard?mode=${mode}&version=${encodeURIComponent(version)}${day?'&day='+encodeURIComponent(day):''}`, { headers: playerId ? { 'X-Player-ID': playerId } : {} });
-    if (data.version !== version || data.mode !== mode || (mode === 'daily' && !/^\d{4}-\d{2}-\d{2}$/.test(data.day)) || !Array.isArray(data.entries) || data.entries.length > 20 || data.entries.some((e, i) => !validEntry(e) || e.position !== i + 1) || (data.ownEntry !== null && (!validEntry(data.ownEntry) || !data.ownEntry.own))) throw Error('Ungültige Rangliste.');
+    if (data.version !== version || data.mode !== mode || (mode === 'daily' && (!/^\d{4}-\d{2}-\d{2}$/.test(data.day) || (day && data.day!==day))) || !Array.isArray(data.entries) || data.entries.length > 20 || data.entries.some((e, i) => !validEntry(e) || e.position !== i + 1) || (data.ownEntry !== null && (!validEntry(data.ownEntry) || !data.ownEntry.own))) throw Error('Ungültige Rangliste.');
     return data;
   }
 }

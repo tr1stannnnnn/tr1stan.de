@@ -28,19 +28,21 @@ export function gatePlan(ordinal, previous, random, enemyRandom, route=new Route
   const lo=R.ceiling+baseGap/2+amplitude+margin, hi=R.floor-baseGap/2-amplitude-margin;
   let center=previous,best=-Infinity;
   for(let i=0;i<8;i++) {
-    const dir=i<4?direction:-direction, delta=100+draws[3+i]*70;
+    const dir=i<4?direction:-direction, delta=100+draws[3+i]*(R.maxCenterChange-100);
     let value=previous+dir*delta;
     if(value<lo || value>hi) value=previous-dir*delta;
     value=clamp(value,lo,hi);
     const actual=Math.sign(value-previous), recent=route.directions.slice(-4);
     const alternating=recent.length===4&&recent.every((d,j)=>j===0||d!==recent[j-1])&&actual!==recent.at(-1);
-    const desired=100+draws[3]*70;
+    const desired=100+draws[3]*(R.maxCenterChange-100);
     const score=-Math.abs(Math.abs(value-previous)-desired)-(alternating?150:0)-(actual!==direction?15:0)-i*.01;
     if(score>best) {center=value;best=score;}
   }
   route.attempts=8;
-  if(ordinal===1) center=336+draws[3]*32;
-  if(corridor===0) { center=clamp(center,240,472);route.anchor=center;route.side=enemySide;baseGap=220; }
+  if(ordinal===1) { center=336+draws[3]*32;route.earlySide=draws[0]<.5?-1:1; }
+  if(ordinal===2) center=clamp(previous+route.earlySide*(125+draws[4]*30),lo,hi);
+  if(ordinal===3||ordinal===4) center=clamp(previous-route.earlySide*(120+draws[4]*35),lo,hi);
+  if(corridor===0) { center=clamp(center,240,472);route.anchor=center;route.side=enemySide;baseGap=R.corridorGap; }
   else if(corridor!==null) {
     const kind=securityKind(ordinal-corridor);
     if(kind==='trace') {center=route.anchor;baseGap=corridor===1?210:205;}

@@ -133,7 +133,7 @@ export function mergeRecords(saved, current, baseline = {}) {
   saved.data.highest = Math.max(saved.data.highest, current.data.highest);
   for (const key of Object.keys(saved.data.stats)) saved.data.stats[key] += Math.max(0, current.data.stats[key] - (baseline[key] || 0));
   saved.data.legacy ||= current.data.legacy;
-  saved.data.archives['pf-2'] ||= current.data.archives['pf-2'];
+  if(!saved.data.archives['pf-2'] && current.data.archives['pf-2']) saved.data.archives['pf-2']=current.data.archives['pf-2'];
   saved.save();
   return saved;
 }
