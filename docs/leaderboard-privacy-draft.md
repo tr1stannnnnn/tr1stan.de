@@ -1,79 +1,90 @@
-# Prüffassung für eine spätere Ranglistenaktivierung
+# PACKET//FLIGHT: bestätigte Datenschutzentscheidungen und Quellen
 
-**Nicht die aktive Datenschutzerklärung.** Die API-URL ist leer, Cloudflare wurde
-nicht aktiviert. Diese Vorlage muss vor Aktivierung fachlich und rechtlich
-geprüft und auf den tatsächlichen Betreiber, Account, Vertrag und Betrieb
-angepasst werden. Sie behauptet keine garantierte Rechtskonformität.
+Stand 26.10.2026. Die vier Betreiberentscheidungen sind im Release-Chat ausdrücklich
+bestätigt; es gibt hierzu keinen weiteren pauschalen Freigabevorbehalt.
+Die zur separaten Veröffentlichung vorbereitete Fassung steht in
+[datenschutz.html](../datenschutz.html), Abschnitte 11–14.
 
-## Geplanter Ablauf und Daten
+- Öffentliche Eintragung: ausdrückliche, freiwillige und widerrufliche Einwilligung,
+  Art. 6 Abs. 1 lit. a DSGVO. Kontakt chef@tr1stan.de. Vor dem finalen Absenden nennt
+  das Formular Datenumfang, Widerruf und Datenschutzhinweise. Betrieb,
+  Token-/Scoreprüfung und Missbrauchsschutz werden getrennt nach Art. 6 Abs. 1
+  lit. f erläutert. Online-Start und bewusstes Board-Laden übertragen schon vor
+  einem Score Daten; keine Anfrage beim bloßen Spielseitenaufruf.
+- Fristen: Daily aktueller UTC-Tag + 29 frühere Tage, Normal 365 Tage ab Bestwert,
+  Runs 48 Stunden nach Tokenablauf. Täglicher Cron 03:17 UTC, bis zu weitere
+  24 Stunden und zusätzliche Verzögerung bei Fehlern/Abschaltung. Gleiche oder
+  schlechtere Scores erneuern Normal-Fristen nicht. Alte pf-1-Tabellen bleiben
+  erhalten; letzte lesende Bestandsprüfung: alle drei Anwendungstabellen leer.
+- Normaler Cloudflare-Self-Service-Account, keine Sondervereinbarungen oder
+  zusätzlichen Logexporte: vom Betreiber bestätigt. Keine ausschließliche
+  EU-Verarbeitung; WEUR ohne EU-Jurisdiktion ist keine EU-Verarbeitungsgarantie.
+- Optionale dauerhafte Spielstände/Offline-Dateien erst nach bewusster Auswahl,
+  ohne Auswahl nur RAM. Bestehende Rekorde werden erhalten und vorher nicht gelesen.
+  Nur die technische Speicherpräferenz wird beim Laden abgefragt. Abwahl löscht
+  den Spiel-Offline-Cache, meldet den Service Worker ab und stoppt weitere
+  Spielstand-Schreibzugriffe; gespeicherte Rekorde bleiben unangetastet. Kein
+  sessionStorage-Fallback. Gewöhnlicher Browser-HTTP-Cache bleibt Browserfunktion.
 
-Bei einem Online-Spielstart wird bereits eine Anfrage an den später benannten
-Cloudflare-Worker geschickt: zufällige pseudonyme Browserkennung, Spielversion
-und Modus. Der Server legt Run-ID, Startzeit, Ablaufzeit, Tageszuordnung und Seed
-fest. Er speichert einen mit einem geheimen Schlüssel abgeleiteten Kennungshash,
-nicht die unveränderte Browserkennung. Ein Token kehrt zum Browser zurück.
-Ein lokaler Run ohne gültigen Serverstart ist später nicht öffentlich einreichbar.
+## Nachvollziehbare Standard-Vertragsquellen
 
-**Veröffentlichung bleibt freiwillig:** Erst SCORE EINTRAGEN öffnet das Formular;
-ÖFFENTLICH EINTRAGEN sendet Alias, Score, behauptete aktive Spielzeit, Token und
-Browserkennung. Abbrechen vor Absenden sendet keine Eintragung. Der öffentliche
-Top-20-Eintrag zeigt Alias, Score, Position, Rang und den serverseitigen Zeitpunkt
-des Bestwerts (UTC). Eigene Einträge werden ohne Veröffentlichung vollständiger
-Kennungen markiert. Das anfragende Browserprofil erhält außerdem seine eigene
-Bestwertposition außerhalb der Top 20; keine zusätzlichen fremden Einträge.
-Es gibt weder Konto noch E-Mail-Abfrage noch Fingerprinting.
+Die Notice nennt den Anbieter Cloudflare, Inc., 101 Townsend Street,
+San Francisco, CA 94107, USA und verweist auf die offiziellen Standardunterlagen:
 
-Die Kennung ermöglicht einen Bestwert pro Browserprofil, nicht pro Mensch.
-Andere Geräte/Profile oder gelöschte Website-Daten ermöglichen weitere Einträge.
-Pseudonymisierung ist keine vollständige Anonymität. Weder ein Alias noch
-technische Metadaten dürfen pauschal als anonym bezeichnet werden.
+- [Self-Service-Standardbedingungen](https://www.cloudflare.com/terms/)
+- [Customer DPA / Art. 28 und EU-Standardvertragsklauseln](https://www.cloudflare.com/cloudflare-customer-dpa/)
+- [Cloudflare-Datenschutzerklärung](https://www.cloudflare.com/privacypolicy/)
+- [Offizieller Trust Hub](https://www.cloudflare.com/trust-hub/)
 
-## Anbieter und technische Verarbeitung
+Übermittlungsgrundlage in der vorbereiteten Notice sind die im Standard-DPA
+enthaltenen EU-Standardvertragsklauseln (Beschluss EU 2021/914), Art. 46 Abs. 2
+lit. c DSGVO. Es wird weder eine individuelle Vertragsannahme vorgenommen noch
+eine besondere Vertragsfassung, eine aktuell nachgelesene DPF-Zertifizierung oder
+EU-exklusive Verarbeitung behauptet. Kopien der anwendbaren Garantien können über
+den Betreiberkontakt angefordert werden.
 
-Der künftig konkret benannte Cloudflare-Account verarbeitet HTTPS-Anfragen als
-Worker-/D1-Anbieter. Dabei können IP-Adressen und weitere Netzwerkmetadaten
-verarbeitet werden. Unsere Anwendung verarbeitet eine IP vorübergehend zur
-Bildung eines täglich wechselnden HMAC für Missbrauchsbegrenzung, speichert aber
-keine rohen IP-Adressen dauerhaft und loggt keine Tokens oder Request-Bodies.
-Cloudflares eigene Logs, Aufbewahrung, Backups, Sicherheitsverarbeitung und
-gegebenenfalls internationale Übermittlungen müssen anhand des tatsächlichen
-Vertrags und der Account-Einstellungen separat beschrieben werden. Die Aussage
-„IP-Adressen werden niemals verarbeitet“ wäre falsch.
+**Grenze der Quellenprüfung:** Der direkte Abruf der Vertragsseiten von
+www.cloudflare.com wird in dieser Cloud weiterhin vom HTTPS-Proxy mit
+`Tunnel connection failed: 403 Forbidden` gesperrt. Die Links sind die offiziellen
+Standardquellen, keine Behauptung, dass deren vollständiger aktueller Wortlaut
+in dieser Sitzung abgerufen werden konnte. Der Self-Service-Vertragsstand beruht
+auf der ausdrücklichen Betreiberbestätigung. Keine Umgebungseinstellungen wurden
+für den Abruf verändert. Diese konkrete Quellenbeschränkung muss vor dem
+Notice-Merge im Release-Protokoll sichtbar bleiben; keine erfundenen Paragraphen,
+Annahmezeitpunkte oder Sonderbedingungen ergänzen.
 
-## Im Code vorgesehene Aufbewahrung
+## Technische Nachweise und Löschüberwachung
 
-- Lokaler Browser-Speicher: Rekorde/Einstellungen/Skins/Kennung bis zur Löschung
-  der Website-Daten; höchstens 90 gespeicherte Daily-Tagesrekorde. Offline-Dateien
-  im Browser-Cache bis zur Cache-/Website-Datenlöschung oder Versionsbereinigung.
-- Server-Runs: 30 Minuten Gültigkeit, Bereinigung 48 Stunden nach Ablauf beim
-  nächsten täglichen Lauf um 03:17 UTC; maximal weitere 24h Verzögerung bei
-  funktionierendem Cron. Verbrauchte Runs bewahren die Retry-Bestätigung.
-- Daily-Rangliste: aktueller UTC-Tag plus 29 vorangegangene Tage, Löschung beim
-  nächsten täglichen Bereinigungslauf.
-- Allzeit-Bestwerte: bis zur Betreiberlöschung oder einem angekündigten Reset.
-  Diese längere Frist muss vor Aktivierung ausdrücklich überprüft werden.
-- IP-bezogene HMAC-Rate-Buckets: Minuten-Buckets 2 Minuten, Tages-Buckets 48h
-  ab Anlage, jeweils Löschung beim nächsten täglichen Lauf (bis zu 24h später).
-- Anbieter-Logs und Time-Travel-/Backup-Daten: **tatsächliche Fristen ergänzen**;
-  diese werden durch unsere Tabellenbereinigung nicht automatisch gelöscht.
+- Neue Chromium-Tests lesen vor Zustimmung ausschließlich den Präferenzschlüssel,
+  schreiben keine Spielwerte und registrieren keinen neuen Service Worker.
+- Alte automatische Worker werden beim erreichbaren Online-Upgrade durch einen
+  zunächst cachefreien Worker ersetzt; ohne Auswahl werden Cache und Registrierung
+  entfernt. Vollständig offline verbliebene alte Fassungen benötigen zunächst eine
+  Online-Aktualisierung. Abwahl und erneute Auswahl, alte pf-1-Werte und Offline-
+  Reload sowie mehrere Tabs sind geprüft. Fehlgeschlagene Abschaltung zeigt eine
+  konkrete Handlung an, statt fälschlich Erfolg zu behaupten.
+- Health liefert nur `retentionOverdue: boolean|null`, keine Datensätze oder IDs.
+  Es prüft Runs, beide Score-Modi und Rate-Buckets lesend auf Überschreitung der
+  regulären Frist plus eines täglichen Bereinigungsintervalls.
+- `.github/workflows/pf2-retention.yml` liest diesen öffentlichen Status täglich
+  04:47 UTC (GitHub kann Cron-Starts verzögern) und scheitert bei Überfälligkeit,
+  deaktiviertem Worker oder unbekanntem Schema/Status. Kein Token und keine neuen
+  Secrets erforderlich. Der Betreiber muss fehlgeschlagene/ausgebliebene Läufe
+  unter GitHub Actions und Cloudflare Cron prüfen; es wird keine persönliche
+  Benachrichtigungseinstellung automatisch geändert. Vor Aktivierung prüfen,
+  dass Actions zugelassen sind und der erste manuelle Monitorlauf erfolgreich ist.
+  Das Lesen der Repository-Actionseinstellungen lieferte hier HTTP 403; daraus
+  wird nicht auf deaktivierte Actions geschlossen.
+- Anbieterfristen: D1-Analysen 31 Tage; Query Insights ohne gebundene Parameterwerte.
+  Time Travel Free sieben / Paid 30 Tage. Anwendungstabellenlöschung ist kein
+  sofortiger Backup-Löschnachweis. Worker-Observability ist für den vorgesehenen
+  Deploy explizit false; fehlende API-Angabe allein belegt keine Logfreiheit.
 
-## Vor Aktivierung konkret zu ergänzen
-
-1. Zweck und geprüfte Rechtsgrundlagen für lokalen optionalen Spielspeicher,
-   Online-Run-Start, öffentliche Eintragung und Missbrauchsschutz. Keine pauschale
-   Einwilligungsbehauptung für alle Anbieter-/Sicherheitsvorgänge.
-2. Cloudflare-Anbieteridentität, Auftragsverarbeitung, tatsächliche Datenorte,
-   Übermittlungsgrundlagen und Account-/Log-/Backup-Einstellungen.
-3. Verständlicher Online-Hinweis **vor dem Spielstart**, da Cloudflare-Anfragen
-   schon dann erfolgen, auch wenn später kein Score veröffentlicht wird.
-4. Betreiberprozess für Moderation, Auskunft, Löschung und Beschwerden, inklusive
-   Umgang mit einer vom Nutzer freiwillig übermittelten Browserkennung. Keine
-   Kennungen oder Tokens öffentlich posten lassen. Keine Identitätsprüfung
-   behaupten, die das kontolose Modell nicht bietet.
-5. Tatsächliche Aufbewahrungsfristen, Cron-Überwachung und Löschkontrolle; prüfen,
-   ob die Allzeit-Aufbewahrung begrenzt werden muss. Änderungen zuerst im Code
-   und in dieser Beschreibung konsistent vornehmen.
-
-Die vorhandene Datenschutzerklärung wird nicht ersetzt. Ihr Zusatz zum aktiven
-lokalen Spielspeicher ist davon getrennt. Impressum, GitHub Pages, DNS und
-E-Mail-Dienste werden durch diese Vorlage nicht verändert.
+Offizielle technische Quellen wurden aus cloudflare/cloudflare-docs gelesen,
+Snapshot `8c30c8b4876fd857bd049ea3525fa463a5015a02`:
+[D1 Datenorte](https://developers.cloudflare.com/d1/configuration/data-location/),
+[Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/),
+[D1 Analysen](https://developers.cloudflare.com/d1/observability/metrics-analytics/),
+[Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/),
+[Compliance-Dokumente](https://developers.cloudflare.com/fundamentals/reference/policies-compliances/compliance-docs/).
+Die technische Reihenfolge und Rückkehr stehen in [PF2-RELEASE.md](PF2-RELEASE.md).

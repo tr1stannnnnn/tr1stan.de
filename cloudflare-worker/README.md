@@ -1,252 +1,158 @@
-# PACKET//FLIGHT leaderboard — prepared, disabled
+# PACKET//FLIGHT pf-2 backend — release pending
 
-GitHub Pages serves the unchanged static hosting model. This Worker is a separate,
-optional API. No Cloudflare account, database, secret, paid plan or deployment has
-been created by this change. `ENABLED = "false"` and the frontend's empty
-`game/config.mjs` prevent activation. There is no automatic deployment workflow.
+GitHub Pages remains the static host. This separate Cloudflare Worker/D1 backend
+uses only Free-compatible services. `game/config.mjs` still has an empty API_URL,
+and production configuration keeps `ENABLED="false"`. No automatic deployment
+workflow is present. This branch must not be merged or deployed without a later
+explicit release instruction.
 
-## Official documentation used
+## Current production evidence (26 October 2026)
 
-Reviewed during implementation on 11 October 2026:
+Authenticated read-only queries confirmed the existing Worker and D1 binding
+`bc462466-1ed9-41d9-ab75-dc0197d50502`. Public health reports **pf-1**, disabled,
+configured. D1 contains `runs`, `scores`, `rate_buckets` and their pf-1 indexes;
+`runs_v2`, `scores_v2` and `d1_migrations` are absent. The schema SELECT returned
+`rows_written=0` and `changed_db=false`. Configured keys SIGNING_KEY,
+PSEUDONYM_KEY and RATE_KEY were identified by binding names/types only; values
+were not read or changed. Do not recreate the database or replace those keys.
 
-- [Workers Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/)
-- [D1 Database and transactional batch](https://developers.cloudflare.com/d1/worker-api/d1-database/)
-- [D1 prepared statements](https://developers.cloudflare.com/d1/worker-api/prepared-statements/)
-- [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)
-- [D1 limits](https://developers.cloudflare.com/d1/platform/limits/)
-- [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
-- [Wrangler secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+Logpush was reported false and observability null. This does not establish
+Cloudflare's complete logging, backup, legal or geographical configuration.
+The serving region of a single response does not establish data residency.
 
-Only Workers, Web Crypto, D1 and a daily Cron Trigger are used. All are available
-on Free. No Durable Object, paid rate-limit service, KV dependency or paid plan
-is required. Free quotas can be exhausted and then the API can fail; the game
-continues locally. D1 operations and cryptography still consume quota/CPU. Measure
-the deployed Worker's actual CPU usage before enabling the frontend; emulator
-tests cannot certify the production 10 ms Free budget. `cpu_ms = 10` is explicit.
-Wrangler 4.100.0 and its stable Miniflare 4.20260611.0 are pinned in the lockfile.
+## Isolated cloud development and checks
 
-## Cloud development and isolated tests
-
-All commands below run in a remote cloud checkout, not on the owner's computer.
-Node 22+ is required. The frontend has no build step.
+Node >=22; pinned Wrangler 4.100.0 and Miniflare 4.20260611.0. Website visitors
+need no Node, package installation or build. Work in the existing cloud checkout.
 
 ```sh
 cd /workspace/tr1stan.de/cloudflare-worker
 npm_config_cache=/tmp/packet-flight-npm npm ci --no-audit --no-fund
 XDG_CONFIG_HOME=/tmp/packet-flight-config WRANGLER_SEND_METRICS=false npm test
-XDG_CONFIG_HOME=/tmp/packet-flight-config WRANGLER_SEND_METRICS=false npx wrangler d1 migrations apply packet-flight --local --env= --persist-to /tmp/packet-flight-d1
 ```
 
-Tests use temporary Miniflare D1 and deliberately fake test keys. They run the
-actual workerd bundle for health/start and exercise the production handler with
-the real emulated D1 binding and an isolated clock for expiry/midnight tests.
-No production service receives requests. The migration is additive and applying
-it twice through Wrangler is safe.
+`npm test` bundles with **wrangler deploy --dry-run** (no upload/deployment),
+then exercises real workerd and ephemeral Miniflare D1 with fake test keys. It
+applies both SQL migrations only inside that test database. Strip Cloudflare
+credentials from the subprocess if present; local tests do not need them.
+Tests include pf-1 row preservation, repeated additive migration, missing-schema
+health, SQL constraints, score components, time bounds, retries, concurrent
+submissions, tie order, own position, limits and retention.
 
-For interactive local API development, create **ignored** `.dev.vars.local`
-with three distinct disposable test keys, each at least 32 random characters:
-`SIGNING_KEY`, `PSEUDONYM_KEY`, `RATE_KEY`. Use `wrangler dev --local --env local`.
-Only that development environment permits the separately configured loopback
-origins. Do not deploy it, reuse test keys, or commit `.dev.vars*`. Frontend browser
-tests inject a mocked HTTPS API into an isolated context without editing the
-shipping empty API URL.
+For interactive local development only, use `wrangler dev --local --env local`
+with ignored `.dev.vars.local` containing three distinct disposable test keys of
+at least 32 characters. Never copy production keys into a local file. Loopback
+CORS origins are allowed only in that development environment. Browser tests
+route a mocked HTTPS API inside isolated profiles; shipping API_URL stays empty.
 
-## Later activation — requires separate approval
+## pf-2 contract
 
-Do these steps in an authorized cloud session **only after the owner approves**:
+All replies have no-store, nosniff, no-referrer and Vary: Origin. Tokens and
+browser IDs never occur in URLs. Production CORS permits only https://tr1stan.de;
+CORS is not authentication. No cookies or credentialed browser requests.
 
-1. Review `docs/leaderboard-privacy-draft.md`, complete the legal review, and add
-   the real active processing to `datenschutz.html` before any live run-start
-   requests are enabled. Decide operator moderation/deletion procedures.
-2. Create/use a Cloudflare **Free** account and enable the Workers Free tier.
-   Do not upgrade to Workers Paid. Connect it securely in the cloud. CLI login
-   or a scoped Cloudflare API token is a separate connection, not a GitHub token.
-3. From this folder run `npx wrangler d1 create packet-flight`. Record its
-   `database_id` in the top-level D1 binding in `wrangler.toml`. Account/database
-   IDs are configuration, not secrets. The all-zero ID is a placeholder.
-4. Run `npx wrangler d1 migrations apply packet-flight --remote --env=`. Inspect
-   the additive migration before applying it. Never reset a production database.
-5. Generate three **different** cryptographically random server keys (at least
-   32 random bytes each) using the authorized secret manager. Enter them securely
-   with `npx wrangler secret put SIGNING_KEY --env=`, then `PSEUDONYM_KEY` and
-   `RATE_KEY`. Never put values in source, frontend, chat, GitHub variables,
-   logs or command arguments. For noninteractive cloud automation, use a
-   separately scoped `CLOUDFLARE_API_TOKEN` secret and a nonsecret
-   `CLOUDFLARE_ACCOUNT_ID`; no such automation is configured here.
-6. Deploy the default **production**, still disabled, configuration with
-   `npx wrangler deploy --env=`. Use its `https://…workers.dev` URL. Do not change
-   the website domain, DNS, Pages configuration, IONOS or Proton Mail.
-7. Check `/api/health`: `version` must be `pf-1`, `configured` true. Verify CORS,
-   error handling, quotas and CPU. Set only production `ENABLED = "true"` and
-   deploy again after authorization. Do not add development origins there.
-8. Put that HTTPS **origin only**, without path/query/credentials, into the single
-   `API_URL` export in `game/config.mjs`. Bump `game-sw.js`'s shell cache name and
-   review the frontend change. Publish Pages only after separate approval.
-9. In a permitted test profile, verify run-start, explicit voluntary score
-   submission, identical retry, HEUTE/ALLZEIT separation, disabled/timeout
-   fallback and the operator deletion procedure. No production abuse/load tests.
+| Endpoint | Request / response |
+| --- | --- |
+| POST /api/run/start | `{mode,version:"pf-2",playerId:UUIDv4}` → signed pf2 token, seed, start/expiry, server UTC day |
+| POST /api/score | `{token,playerId,alias,score,gates,fragments,bonusPoints,activeMs}` → stable receipt, submitted components, best-value ownEntry and placement snapshot |
+| GET /api/leaderboard?mode=daily or alltime | Top 20; optional X-Player-ID personalizes ownEntry, including positions outside Top 20 |
+| GET /api/health | version, enabled, configured, schemaReady; no key values |
+| OPTIONS | restricted CORS preflight |
 
-Disabling `API_URL` again stops every Cloudflare request from a freshly loaded
-game. Remove or replace the game service-worker cache when shipping config/rule
-changes. Existing open tabs retain their loaded version until reload/closure.
+POST requires application/json, at most 2048 streamed bytes and exact fields.
+Aliases share the browser's NFC validator: 2–16 Unicode letters/numbers, ASCII
+spaces, underscore and hyphen; no markup, control or direction characters.
 
-## API contract
+Server score = **10 × gates + bonusPoints**. Gates are integers 0–1000;
+fragments are integers 0–gates. Bonus is even and between 2 × fragments and the
+combo ramp `2+4+6+8+10`, followed by 10 per additional fragment. The integer
+score must be 0–19980. Out-of-range/malformed scores return **400**; in-range
+scores inconsistent with components return **422**. SQL independently checks
+integer values and component/score bounds. Ranks derive from gates, not points.
 
-All replies are JSON (except 204 OPTIONS), `Cache-Control: no-store`,
-`X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Vary: Origin`.
-No cookie authentication. Tokens and IDs never appear in URLs.
+19980 is the inclusive conservative aggregate/storage bound (1000 gates,
+1000 fragments, 9980 bonus), **not a promise that a timed game can reach it**.
+The API also enforces 0–1,500,000 active milliseconds, gate-derived minimum time,
+server wall time and a 30-minute signed-token TTL. At 1000 gates the minimum
+exceeds that active-time limit; a consistent maximum aggregate therefore reaches
+the time check and returns 422. Tests deliberately keep that independent check.
+Signed aggregate/time checks cannot prove honest play, optional-fragment timing,
+collision avoidance or unmodified clients. No replay verification is claimed.
 
-| Endpoint | Input | Result |
-|---|---|---|
-| `POST /api/run/start` | `{mode:"normal"|"daily", version:"pf-1", playerId:UUIDv4}` | signed token, run ID, server start/expiry, day, seed, version, mode |
-| `POST /api/score` | `{token, playerId, alias, score, activeMs}` | stable `{accepted:true, receipt, score, mode, day, version, positionAsOf, ownEntry}` |
-| `GET /api/leaderboard?mode=alltime` | optional `X-Player-ID` header | normal top 20, rank/time, `own` marker and requesting browser’s `ownEntry` |
-| `GET /api/leaderboard?mode=daily` | optional `X-Player-ID` header | current UTC day's Daily top 20 and requesting browser’s `ownEntry` |
-| `GET /api/health` | none | version, enabled/configured status; no secrets |
-| `OPTIONS` | permitted Origin/method/headers | required CORS preflight |
+HMAC-SHA-256 uses the fixed pf2 prefix. A token binds player hash, rule version,
+mode, UTC start day, seed and deadline. Daily uses escape-1, matching offline
+play. pf1 tokens are rejected as retired. New tables isolate pf-2 comparisons.
 
-POST requires `application/json`, max 2048 actual streamed bytes, strict fields
-and types. Scores are finite integers 0–1000. Active milliseconds are integers
-0–1,500,000. Run TTL is 30 minutes. Aliases use the **same imported validator**
-as the browser: NFC, trim, 2–16 Unicode codepoints, letters/numbers/ASCII spaces/
-underscore/hyphen; controls, direction marks and every other character fail.
-No HTML is returned from user data.
+A transactional D1 batch consumes the run once and conditionally improves its
+best score. An identical manually initiated retry returns the original receipt,
+including after expiry while retained. Every submitted field must remain
+identical. Competing different valid payloads return 409. Worse/equal scores do
+not replace alias/time/best. Ordering is score DESC, server timestamp ASC, stable
+entry ID ASC for both Top 20 and ownEntry. Receipts preserve their original
+position snapshot; Daily receipts preserve the server's start day over midnight.
 
-Production CORS allows only `https://tr1stan.de`. POSTs without Origin fail;
-nonbrowser clients can forge Origin, so **CORS is not authentication**. No
-credentials are sent. Unknown methods, duplicate/unknown query parameters,
-wrong versions and invalid players are rejected. Response codes distinguish
-400/401/403/409/410/413/415/422/429/503.
+## Storage, abuse limits and deletion
 
-Health checks from the authorized cloud after deployment:
+Cron at 03:17 UTC removes pf-2 runs 48 hours after token expiry, Daily rows older
+than current UTC day plus 29 previous days, Normal rows with achievement times
+older than 365 days, and expired rate buckets. A successful daily cron can add
+up to one interval to deletion times. Its success must be monitored.
 
-```sh
-curl -fsS https://YOUR-WORKER.workers.dev/api/health
-curl -i -X OPTIONS https://YOUR-WORKER.workers.dev/api/score \
-  -H 'Origin: https://tr1stan.de' \
-  -H 'Access-Control-Request-Method: POST' \
-  -H 'Access-Control-Request-Headers: content-type'
-curl -i 'https://YOUR-WORKER.workers.dev/api/leaderboard?mode=daily' \
-  -H 'Origin: https://tr1stan.de'
-```
+Legacy pf-1 tables/rows are preserved by migration and pf-2 cleanup; decide their
+retention/deletion separately with the operator before release. There is no
+silently destructive reset or migration of old scores into new comparisons.
 
-For a score test, use an isolated browser profile to start a real test run and
-choose SCORE EINTRAGEN. The cloud test suite already covers invalid tokens,
-aliases/types, score/time bounds, identical retry and concurrency. Never log
-token bodies while debugging or send fabricated scores to a public board.
+IP addresses are processed transiently into daily keyed HMAC rate buckets; raw
+IPs are not stored by this application. Cloudflare may separately process/log
+network metadata. Limits per minute/day: starts 10/200, submissions 8/200,
+board reads 40/1000; global 20,000 operations/day. Rejected requests still cost
+resources. Shared networks share limits. These controls do not guarantee
+availability or protect Free quotas against distributed traffic.
 
-## Consistency and fairness boundaries
+Moderation/deletion uses privately reviewed operator SQL, never alias string
+interpolation or a public admin endpoint. Resolve the entry/player hash privately
+and remove related pf-2 scores and runs/receipts so old retries cannot restore
+removed data. Do not post player IDs or hashes publicly. Do not execute deletion
+SQL as part of development checks. Key rotation is a separate reviewed operation:
+SIGNING_KEY invalidates tokens, PSEUDONYM_KEY changes identity linkage, RATE_KEY
+changes rate-digest linkage. Preserve all existing keys for this release work.
 
-HMAC-SHA-256 via Web Crypto is fixed in code, with a `pf1` prefix; no caller
-selects an algorithm. The signature binds a server-created run to a keyed player
-hash, mode, rule version, UTC start day, seed and deadline. Server data, not
-client-submitted dates/modes, chooses the board. Normal randomness uses server
-crypto; Daily uses the same `pf-1`/`daily-1` generator as offline play.
+## Later release order — not authorized by this branch task
 
-One transactional D1 `batch` conditionally consumes the run, inserts/upgrades
-its best score, and reads the stored confirmation. A concurrent different body
-cannot alter it. An identical retry receives that same confirmation, including
-after token expiry while the run is retained (48 hours after expiry, subject to cleanup).
-All five submitted field values must remain unchanged; even changing alias
-whitespace is conflicting reuse. An expired unused run cannot make a new entry.
-The frontend retains an immutable payload only in the current result dialog,
-lets the user resend it explicitly, and discards it on a new run or page reload.
-There is no automatic retry or hidden upload queue.
-Best values are unique per player hash/version/mode/day; a worse or equal value
-does not change alias, score or achievement time. Ties sort by earlier server
-achievement time, then stable random entry ID. That ID never leaves the backend.
+1. Complete the concrete provider/contract/log/backup/retention and legal review
+   in docs/leaderboard-privacy-draft.md; publish accurate notices first. Keep
+   API_URL empty and Worker disabled while doing so.
+2. Re-read actual production schema and inspect both additive migrations. With
+   separate approval, apply only missing schema. There is no migration ledger
+   currently: do not assume a filename is already recorded. 0001 uses IF NOT
+   EXISTS and must preserve existing pf-1 rows; 0002 adds the pf-2 namespace.
+   Use the existing D1 database; never create/reset a replacement as a shortcut.
+3. Deploy pf-2 still disabled with the existing keys and binding. Health must show
+   version pf-2, configured=true and schemaReady=true. Test CORS and error/fallback
+   behavior. Measure Free CPU/DB use; emulator tests cannot certify the Free
+   10-ms HTTP CPU budget. Do not introduce a cpu_ms block that caused error 100328,
+   upgrade a plan, or start production load tests.
+4. After separate activation approval, enable the Worker and verify authorized
+   staging behavior. Set the existing HTTPS Worker origin into API_URL only after
+   backend evidence; bump the game shell cache and publish Pages only when approved.
+5. A genuine voluntary production score submission, reload/readback, mode/rank/
+   position checks, deletion procedure and production CPU evidence remain release
+   checks. None were performed by the current task. Disable/fallback and an old
+   open tab's loaded version must be considered in rollback planning.
 
-Public entry fields are `position`, `alias`, `score`, `rank`, `achievedAt` (server
-Unix milliseconds) and `own`. Top 20 and own-position queries use the same
-ordering in a single read transaction; `ownEntry` is null without a matching
-requesting browser header. It includes the browser's best value even below the
-Top 20; it never lists extra entries or identifiers of other players.
+References: Cloudflare official Workers Web Crypto, D1 migrations/transactions,
+Workers platform limits/pricing, D1 limits, and Wrangler secrets documentation.
+No DNS, IONOS, Proton Mail, website-domain or hosting-model change is required.
 
-Submission receipts store that browser's best-value `ownEntry` and
-`positionAsOf` in the consumption/upsert transaction, retaining the original
-position on retries. It is a placement snapshot, not a promise that position
-will remain unchanged. For a lower run, it shows the preserved better value and
-its original achievement time. The receipt keeps the server's start-day scope
-over UTC midnight, while HEUTE subsequently shows only the current UTC day.
-The UI formats timestamps with an explicit UTC label and shows both confirmed
-placement and the requesting browser's current placement on the board.
+## Retention monitoring
 
-`minimumActiveMs` is derived from the fastest speed, first-gate distance,
-full-hitbox passage and minimum gate spacing in the shared physics rules.
-Both the submitted active time and server wall-time ceiling are checked with
-a small fixed rounding tolerance. **Client active time is only a claim**.
-The server cannot prove the duration of pauses or whether honest play occurred.
-A signed start token proves neither valid flaps nor a collision-free run.
-These checks hinder simple manipulation, not determined cheating. There is
-no replay verifier, account identity or fingerprinting.
-
-One browser profile can have one best value in each scope. Other devices,
-profiles or cleared storage can create more entries. Full player IDs/hashes
-are not publicly returned; `own` is a personalized boolean based on a header.
-There is no claim of complete anonymity.
-
-## Free-compatible abuse controls
-
-Minute/day rate counters are atomic D1 upserts keyed by scope and a daily HMAC
-of Cloudflare's `CF-Connecting-IP`. That header comes from Cloudflare in
-production; missing network identity fails closed. Raw IP is used briefly to
-calculate a digest, never stored by this application or logged. Cloudflare can
-process/log network metadata under its own policies. Changing player IDs does
-not bypass network counters. Shared networks share limits.
-
-| Scope | Per minute / per UTC day |
-|---|---|
-| Run starts | 10 / 200 |
-| Submissions, including retries | 8 / 200 |
-| Board reads | 40 / 1000 |
-
-An additional 20,000 API operations/day counter protects across networks. There
-is no polling. Rejected requests still use platform/DB resources; IP rotation,
-distributed attacks or health/preflight floods can exhaust the Free quotas.
-No application rate limit guarantees availability or makes the Free quota
-unlimited. Free plan exhaustion must fail locally, never trigger a paid upgrade.
-
-## Retention, moderation and key rotation
-
-The daily 03:17 UTC scheduled handler removes:
-
-- Run records 48 hours **after their expiry**, then at the next daily cleanup
-  (up to 72 hours after expiry). They contain keyed player hash, version/mode/
-  seed/day, times, consumed state and submitted alias/score/confirmation.
-- Daily scores older than the current UTC day plus 29 previous days (30 UTC
-  days retained, plus at most one cleanup interval).
-- Minute counters after their 2-minute expiry; daily/global counters after their
-  48-hour expiry; deletion occurs at the next daily cleanup (up to 24h later).
-
-All-time best values stay until operator deletion or an announced reset. This
-longer retention needs explicit privacy review before activation. Monitor Cron
-execution; a failed cron delays deletion. Cloudflare backup/Time Travel retention
-is separate from our live tables and must be disclosed from the actual plan.
-
-Moderation uses the authenticated Cloudflare dashboard or narrowly scoped
-Wrangler CLI only. No public admin endpoint exists. First inspect privately:
-
-```sql
-SELECT entry_id, alias, score, mode, day FROM scores ORDER BY achieved_at DESC LIMIT 100;
-```
-
-After verifying the offending random `entry_id` as a UUID, use an operator
-reviewed SQL file (never interpolate aliases or untrusted text into SQL):
-
-```sql
-DELETE FROM runs WHERE player_hash IN (SELECT player_hash FROM scores WHERE entry_id = 'VERIFIED-ENTRY-UUID');
-DELETE FROM scores WHERE entry_id = 'VERIFIED-ENTRY-UUID';
-```
-
-Apply it with `wrangler d1 execute packet-flight --remote --env= --file ...` only
-after operator approval. To fulfill a full profile deletion, delete **all** its
-scores by the privately resolved player hash too. Existing receipt retries
-cannot restore removed scores; a new run/profile can submit again. There is
-no durable ban/identity system. Keep audit records outside public application
-data and omit request bodies/keys.
-
-Rotate SIGNING_KEY to invalidate outstanding tokens. Rotate RATE_KEY to reset
-digest linkage/counters. PSEUDONYM_KEY rotation changes browser-to-score linkage;
-plan a reviewed reset/migration and deletion of old hashes, rather than silently
-duplicating existing players. Keep the three keys distinct. Retired rule versions
-must not be merged into the current board.
+Health now returns `retentionOverdue: boolean|null`: read-only existence queries
+for runs, Daily/Normal bests and rate buckets beyond their retention deadline
+plus one daily cleanup interval. It does not delete data and exposes no row data.
+The Secret-free `.github/workflows/pf2-retention.yml` reads health daily at
+04:47 UTC; GitHub schedules can be delayed. Unknown schema/status, overdue data
+or a disabled Worker fail the job. Existing daily cleanup still runs 03:17 UTC
+and propagates errors to scheduled invocation outcomes. Inspect failed/missing
+Actions and Cloudflare cron invocations; no notification preference is changed.
+Run the workflow once manually after activation and verify its actual result
+before connecting the frontend. A locally passing test is not an Actions proof.

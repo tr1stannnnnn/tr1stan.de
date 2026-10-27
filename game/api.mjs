@@ -1,4 +1,4 @@
-import { VERSION, dailySeed, validateAlias, rank, RULES } from './rules.mjs';
+import { VERSION, dailySeed, validateAlias, rank, RULES, scoreParts } from './rules.mjs?v=pf2-privacy1';
 export class LeaderboardAPI {
   constructor(base = '', fetcher = globalThis.fetch?.bind(globalThis)) { this.base = base.replace(/\/$/, ''); this.fetcher = fetcher; }
   get enabled() { return /^https:\/\/[^/]+$/.test(this.base); }
@@ -35,7 +35,8 @@ export class LeaderboardAPI {
 
 function validEntry(entry) {
   return !!entry && validateAlias(entry.alias).ok && Number.isSafeInteger(entry.score) && entry.score >= 0 && entry.score <= RULES.maxScore
-    && entry.rank === rank(entry.score) && Number.isSafeInteger(entry.position) && entry.position >= 1
+    && scoreParts(entry.gates, entry.fragments, entry.bonusPoints).score === entry.score
+    && entry.rank === rank(entry.gates) && Number.isSafeInteger(entry.position) && entry.position >= 1
     && validTime(entry.achievedAt) && typeof entry.own === 'boolean';
 }
 function validTime(ms) { return Number.isSafeInteger(ms) && ms >= 0 && ms <= 8640000000000000; }

@@ -269,54 +269,53 @@ python3 -m http.server 8000
 GitHub Pages liefert `main` aus dem Repository-Root aus. Kein Actions-Workflow,
 kein Build-Schritt: Push auf `main` genügt.
 
-## PACKET//FLIGHT
+## PACKET//FLIGHT pf-2
 
-`/game.html` ergänzt die Seite um ein eigenes Synthwave-Arcade-Spiel; Daily ist
-unter `/game.html?mode=daily` vorgewählt. Die Startseite verlinkt es sichtbar.
-Terminalbefehle: `play`, `play --daily`, `leaderboard`. Tab vervollständigt nur
-bei einer wirklichen Ergänzung, Shift+Tab und vollständige/unbekannte Befehle
-lassen den Fokus weiterziehen. Verlauf und Strg+L bleiben erhalten.
+Synthwave-Flucht mit gestohlenem Datenpaket: `/game.html`, Daily unter
+`/game.html?mode=daily`. Auf der Homepage bleibt der Zugang ausschließlich über
+Terminalbefehle `play`, `play --daily`, `leaderboard`. Kein neuer Homepage-Button.
 
-Die Spielregeln sind `pf-1`, der Daily-Generator `daily-1`. Es gibt ein festes
-480×720-Feld, 120-Hz-Simulationsschritte mit begrenzter Aufholzeit, gleiche
-Hitboxen bei jeder Darstellung und eine eigene Hindernis-Zufallsfolge. Start
-und Fortsetzen haben drei Sekunden Countdown. Verborgene Tabs pausieren; eine
-Rückkehr setzt nicht automatisch fort. Pointer-Eingaben verwenden nur
-`pointerdown`, Tasteneingaben nur die fokussierte Spielfläche.
+Eine Flap-Aktion per fokussierter Tastatur oder primärem Pointer/Touch. Das
+480×720-Feld simuliert in festen 120-Hz-Schritten mit begrenzter Aufholzeit.
+Start/Fortsetzen: 1,5 Sekunden Countdown. Verborgene Tabs pausieren vollständig;
+eine Rückkehr setzt nicht automatisch fort. Scrollen und Pinch-Zoom bleiben
+möglich; keine unterschiedlichen Hitboxen oder Physik für Skins/Reduced Motion.
 
-Normale und tägliche Rekorde, Sound, Skin-Fortschritt (10/25/50 Punkte) und eine
-zufällige Browserkennung liegen unter dem versionierten localStorage-Schlüssel
-`tr1stan.packet-flight.pf-1.storage-1`. Bei Ausfall wird sessionStorage oder
-flüchtiger Sitzungsspeicher verwendet. Ein eng begrenzter Service Worker hält
-die Spielseite samt benötigten lokalen Dateien nach dem ersten Laden offline
-bereit. Er speichert keine API-Antworten oder anderen HTML-Seiten. Keine Cookies,
-Analytics, Werbung oder Konten. Neue Spielmodule werden nur auf game.html geladen.
+- Anfangs statische, großzügige Firewalls; ab Gate 6 langsame bewegliche Gates,
+  später einzelne komprimierende Lücken. Geschwindigkeit und Lückengröße sind begrenzt.
+- TRACE//UNIT zuerst bei Gate 12: Warnung, Zielverfolgung, sichtbarer fester Lock,
+  dann Projektil auf diese Höhe. Der Schuss verfolgt das Paket nicht.
+- Laser zuerst bei Gate 20: markierte Warnzone, Aufladung, kurzer aktiver Strahl,
+  Abklingen. Breite statische Sicherheitskorridore verhindern überlagerte Engstellen.
+- Goldene Fragmente nach passierten Gates sind optional. 10 Punkte je Gate plus
+  2 × Combo je Fragment, maximal ×5; ein verpasstes angebotenes Fragment setzt
+  die Combo zurück. Rang, Schwierigkeit und Skins folgen Gatezahlen, nicht Bonuspunkten.
+- Getrennte RNG-Zustände für Welt, Gegner und Dekoration; Vergleichsversion pf-2,
+  Daily-Generator escape-1. Neue Bestwerte sind nicht mit pf-1 vergleichbar.
 
-Dateiaufteilung: `game/rules.mjs` (geteilte Regeln/Validierung), `physics.mjs`,
-`render.mjs`, `storage.mjs`, `audio.mjs`, `api.mjs`, `config.mjs`, `app.mjs` und
-`game.css`. Die öffentliche API-Adresse ist zentral in `game/config.mjs` **leer**.
-Dadurch entstehen keinerlei Cloudflare-Anfragen; LEADERBOARD OFFLINE ist der
-ehrliche Standard. Ein lokaler Run kann später nicht öffentlich nachgereicht
-werden. Scores werden nur nach ausdrücklicher Formularbestätigung gesendet,
-wenn ein gültiger Server-Run existiert. Es gibt keine Upload-Warteschlange.
+Lokale Daten: `tr1stan.packet-flight.pf-2.storage-1`, getrenntes pf-1-Archiv,
+Browserkennung, Sound, Skins, Gate-Fortschritt und kumulative Statistiken. Alte
+Rekorde/Skins/Kennung bleiben erhalten. Daily enthält höchstens 90 pf-2-Tageswerte.
+Bei blockiertem localStorage greift Sitzungs-/Arbeitsspeicher mit Hinweis. Der
+Service Worker hält nur die Spielhülle/Assets offline, keine API-Antworten.
 
-Das vollständige, noch deaktivierte Worker-/D1-Backend mit Free-kompatibler
-Konfiguration, Migration, Lockfile und Tests steht in `cloudflare-worker/`.
-[Dortige Anleitung](cloudflare-worker/README.md) beschreibt die späteren,
-separat freizugebenden Cloud-Schritte. Die
-[Datenschutz-Prüffassung](docs/leaderboard-privacy-draft.md) ist keine aktive
-Rechtserklärung. Nur der tatsächliche lokale Spielspeicher wurde in der
-bestehenden Datenschutzseite sachlich ergänzt. Das Impressum bleibt unverändert.
+API_URL bleibt **leer**, Worker ENABLED=false. Selbst bei später gesetzter API
+werden ohne bewusstes Online-START oder Laden der Rangliste keine Cloudflare-
+Requests ausgelöst. Online-Start übermittelt bereits Kennung, Modus und Version;
+Alias und Score erst nach ausdrücklichem Absenden. Kein nachträgliches Hochladen
+lokaler Runs, keine versteckte Warteschlange, keine automatischen Retries.
 
-Die [Cloud-Testanleitung](tests/README.md) enthält die ausgeführten Testwege und
-Grenzen. Die Social Preview ist eigenes Artwork als `social-preview.png`,
-1200×630 mit lokalen Fonts; Open Graph/Twitter verwenden Produktions-URLs.
+Der Worker prüft signierte Runs und berechnet Scores aus Komponenten selbst;
+Plausibilitätskontrollen sind kein Beweis ehrlichen Spiels. Eine Browserkennung
+ist keine Personenidentität. Neue Tabellen `runs_v2`/`scores_v2` entstehen nur
+durch eine später separat freizugebende additive Migration. Produktionsdaten und
+bestehende Worker-Secrets bleiben erhalten. Bestehendes GitHub-Pages-Hosting,
+DNS und Mail bleiben unverändert.
 
-GitHub Pages unterstützt in diesem Repository keine frei konfigurierbaren
-HTTP-Sicherheitsheader. Es wurden keine unwirksamen Header-Meta-Tags oder
-Cloudflare-/DNS-Umleitungen eingeführt. Der separate Worker setzt seine eigenen
-JSON-/Cache-/CORS-Header. Sein signierter Token und Plausibilitätscheck beweisen
-keinen ehrlich gespielten Run; pro Browserprofil ist keine Personenidentität.
+- [Testanleitung](tests/README.md)
+- [Prüfbericht und Spielaufnahmen](docs/PF2-REVIEW.md)
+- [Konkreter Veröffentlichungs- und Rückkehrplan](docs/PF2-RELEASE.md)
+- [Backendvertrag und spätere Freigabeschritte](cloudflare-worker/README.md)
+- [Datenschutzentwurf mit noch offenen Betreiberangaben](docs/leaderboard-privacy-draft.md)
 
-Dieser Entwurf wird nicht auf `main` gemergt und nicht veröffentlicht. GitHub
-Pages und die öffentliche Rangliste werden erst nach späterer Freigabe geändert.
+Kein Merge, keine produktive Migration und kein Deployment durch diese Arbeit.

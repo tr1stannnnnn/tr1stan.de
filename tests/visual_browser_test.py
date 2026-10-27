@@ -11,13 +11,13 @@ def inspect_effects(context):
     """Observe real inputs/RAF without changing gameplay or shipping debug hooks."""
     source = (ROOT / 'game/app.mjs').read_text()
     prefix = """
-import { Effects as ObservedEffects } from './effects.mjs';
+import { Effects as ObservedEffects } from './effects.mjs?v=pf2-privacy1';
 window.__visualEvents = {flap:0, point:0, collide:0, reset:0};
 window.__frameCalls = 0;
 for (const method of ['flap','point','collide','reset','advance']) {
   const original = ObservedEffects.prototype[method];
   ObservedEffects.prototype[method] = function(...args) {
-    if (method in window.__visualEvents) window.__visualEvents[method]++;
+    if (method in window.__visualEvents && (method !== 'point' || args[0])) window.__visualEvents[method]++;
     const result = original.apply(this, args);
     window.__effects = this;
     if (method === 'advance') window.__flight = args[1];
@@ -35,7 +35,7 @@ def steer(page, goal=2, frames=900, real_time=False):
         status = page.evaluate("""() => {
           const f = window.__flight;
           const gate = f?.gates.find(g => !g.passed);
-          return {state:document.body.dataset.gameState, score:f?.score || 0,
+          return {state:document.body.dataset.gameState, score:f?.gatesPassed || 0,
             flap:f && !f.dead && f.vy > 0 && f.y > (gate?.center || 360) + 18};
         }""")
         if status['state'] != 'running' or status['score'] >= goal:
@@ -69,7 +69,7 @@ class VisualBrowserTests(unittest.TestCase):
         self.page.wait_for_selector('#gameUI:not([hidden])')
         self.page.clock.pause_at(datetime.fromtimestamp((self.page.evaluate('Date.now()') + 100) / 1000, timezone.utc))
     def start(self):
-        self.page.locator('#start').click(); self.page.clock.run_for(3200)
+        self.page.locator('#start').click(); self.page.clock.run_for(1700)
         self.assertEqual(self.page.locator('body').get_attribute('data-game-state'), 'running')
     def test_jump_point_pause_collision_and_quiet_dialog(self):
         self.game(); self.start()
@@ -128,7 +128,7 @@ class VisualBrowserTests(unittest.TestCase):
         self.page.clock.run_for(3500)
         self.assertTrue(self.page.locator('#resultDialog').evaluate('d=>d.open'))
     def test_play_normal_and_daily_and_reload_separate_records(self):
-        self.game(); self.page.locator('[name="mode"][value="normal"]').check(); self.start()
+        self.game(); self.page.locator("#keepStorage").check(); self.page.locator('[name="mode"][value="normal"]').check(); self.start()
         self.assertEqual(steer(self.page, goal=2)['score'], 2)
         self.page.clock.run_for(4000)
         normal = int(self.page.locator('#resultScore').inner_text())
@@ -144,12 +144,12 @@ class VisualBrowserTests(unittest.TestCase):
         self.assertEqual(int(self.page.locator('#best').inner_text()), daily)
         self.page.locator('[name="mode"][value="normal"]').check()
         self.assertEqual(int(self.page.locator('#best').inner_text()), normal)
-    def test_home_has_only_typed_game_navigation(self):
+    def test_home_terminal_shortcuts_preserve_typed_navigation(self):
         self.page.goto(BASE + '/')
         self.assertEqual(self.page.locator('a[href*="game.html"]').count(), 0)
         self.assertEqual(self.page.locator('.home-actions').count(), 0)
         chips = self.page.locator('.term-chip').all_text_contents()
-        self.assertNotIn('play', chips); self.assertNotIn('leaderboard', chips)
+        self.assertIn('play', chips); self.assertIn('play --daily', chips); self.assertIn('leaderboard', chips)
         field = self.page.locator('#termIn'); field.fill('help'); field.press('Enter')
         self.page.wait_for_function("document.querySelector('#termOut').textContent.includes('leaderboard')")
         for command in ['play', 'play --daily', 'leaderboard']:
@@ -190,21 +190,32 @@ class VisualBrowserTests(unittest.TestCase):
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.clock.install(time=datetime(2026,10,11,12,tzinfo=timezone.utc))
         page.goto(BASE + '/')
-        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-1-shell-2');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
+        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-1');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
         page.goto(BASE + '/game.html')
-        page.wait_for_function('navigator.serviceWorker.controller !== null')
-        self.assertNotIn('tr1stan-packet-flight-pf-1-shell-2', page.evaluate('caches.keys()'))
-        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-1-shell-3')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
-        for asset in ['/game/effects.mjs','/game/render.mjs?v=2','/game/app.mjs?v=2','/game/game.css?v=2','/style.css?v=20','/script.js?v=20']:
+        page.locator('#keepStorage').check()
+        page.wait_for_function("document.querySelector('#offlineReady').textContent.includes('für Offline-Nutzung gespeichert')")
+        self.assertNotIn('tr1stan-packet-flight-pf-2-shell-1', page.evaluate('caches.keys()'))
+        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-3')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
+        for asset in ['/game/effects.mjs?v=pf2-privacy1','/game/render.mjs?v=pf2-privacy1','/game/app.mjs?v=pf2-privacy1','/game/game.css?v=pf2-privacy1','/style.css?v=31','/script.js?v=31']:
             self.assertIn(asset, paths)
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')
-        page.locator('#start').click(); page.clock.run_for(3200)
+        page.locator('#start').click(); page.clock.run_for(1700)
         self.assertEqual(page.locator('body').get_attribute('data-game-state'), 'running')
         page.locator('#flightCanvas').press('Space'); page.clock.run_for(50)
         self.assertEqual(page.locator('#score').inner_text(), '0')
         page.clock.run_for(4000)
         self.assertTrue(page.locator('#resultDialog').evaluate('d=>d.open'))
         self.assertEqual(errors, []); ctx.close()
+
+    def test_repeated_resize_preserves_paused_canvas_pixels(self):
+        self.game(); self.start(); self.page.locator('#pause').click()
+        before = self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()')
+        self.page.evaluate("""async () => {
+          const {Renderer}=await import('/game/render.mjs?v=pf2-privacy1');
+          const renderer=new Renderer(document.querySelector('#flightCanvas'));
+          renderer.resize(); renderer.resize();
+        }""")
+        self.assertEqual(self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()'), before)
 
 if __name__ == '__main__': unittest.main(verbosity=2)

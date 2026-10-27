@@ -1,4 +1,4 @@
-import { VERSION, RULES, dailySeed, utcDay, rank, validateAlias, validPlayerId, minimumActiveMs } from '../../game/rules.mjs';
+import { VERSION, RULES, dailySeed, utcDay, rank, validateAlias, validPlayerId, minimumActiveMs, scoreParts } from '../../game/rules.mjs';
 
 const encoder = new TextEncoder();
 const MAX_BODY = 2048;
@@ -15,7 +15,14 @@ function unb64(text) {
   try { return Uint8Array.from(atob(text.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - text.length % 4) % 4)), c => c.charCodeAt(0)); }
   catch { fail(401, 'Ungültiger Run-Token.'); }
 }
-async function key(secret) { return crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']); }
+const keyCache = new Map();
+async function key(secret) {
+  if (!keyCache.has(secret)) {
+    if (keyCache.size >= 3) keyCache.clear();
+    keyCache.set(secret, crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']));
+  }
+  return keyCache.get(secret);
+}
 async function hmac(secret, value) { return b64(await crypto.subtle.sign('HMAC', await key(secret), encoder.encode(value))); }
 async function digest(value) { return b64(await crypto.subtle.digest('SHA-256', encoder.encode(value))); }
 function secretsReady(env) {
@@ -24,14 +31,14 @@ function secretsReady(env) {
 }
 async function sign(env, claims) {
   const payload = b64(encoder.encode(JSON.stringify(claims)));
-  return `pf1.${payload}.${await hmac(env.SIGNING_KEY, 'pf1.' + payload)}`;
+  return `pf2.${payload}.${await hmac(env.SIGNING_KEY, 'pf2.' + payload)}`;
 }
 async function verify(env, token) {
   if (typeof token !== 'string' || token.length > 1024) fail(401, 'Ungültiger Run-Token.');
   const parts = token.split('.');
-  if (parts.length !== 3 || parts[0] !== 'pf1') fail(401, 'Ungültiger Run-Token.');
+  if (parts.length !== 3 || parts[0] !== 'pf2') fail(401, 'Ungültiger Run-Token.');
   const signature = unb64(parts[2]);
-  if (signature.length !== 32 || !await crypto.subtle.verify('HMAC', await key(env.SIGNING_KEY), signature, encoder.encode('pf1.' + parts[1]))) fail(401, 'Run-Signatur ungültig.');
+  if (signature.length !== 32 || !await crypto.subtle.verify('HMAC', await key(env.SIGNING_KEY), signature, encoder.encode('pf2.' + parts[1]))) fail(401, 'Run-Signatur ungültig.');
   let claims;
   try { claims = JSON.parse(new TextDecoder().decode(unb64(parts[1]))); } catch { fail(401, 'Ungültiger Run-Token.'); }
   keys(claims, ['runId', 'playerHash', 'version', 'mode', 'day', 'seed', 'startedAt', 'expiresAt']);
@@ -74,38 +81,43 @@ async function rateLimit(request, env, scope, now) {
 }
 async function start(request, env, now) {
   const data = await body(request); keys(data, ['mode', 'version', 'playerId']);
-  if (!['normal', 'daily'].includes(data.mode) || data.version !== VERSION || !validPlayerId(data.playerId)) fail(400, 'Modus, Version oder Spielerkennung ungültig.');
+  if (data.version !== VERSION) fail(409, 'Spielversion veraltet. Bitte game.html online neu laden.');
+  if (!['normal', 'daily'].includes(data.mode) || !validPlayerId(data.playerId)) fail(400, 'Modus, Version oder Spielerkennung ungültig.');
   const playerHash = await hmac(env.PSEUDONYM_KEY, data.playerId.toLowerCase());
   const day = data.mode === 'daily' ? utcDay(now) : '';
   const claims = { runId: crypto.randomUUID(), playerHash, version: VERSION, mode: data.mode, day, seed: data.mode === 'daily' ? dailySeed(day) : crypto.getRandomValues(new Uint32Array(1))[0] || 1, startedAt: now, expiresAt: now + RULES.tokenTtlMs };
   const token = await sign(env, claims);
-  await env.DB.prepare('INSERT INTO runs(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES(?,?,?,?,?,?,?,?)').bind(claims.runId, playerHash, VERSION, data.mode, day, claims.seed, now, claims.expiresAt).run();
+  await env.DB.prepare('INSERT INTO runs_v2(id,player_hash,version,mode,day,seed,started_at,expires_at) VALUES(?,?,?,?,?,?,?,?)').bind(claims.runId, playerHash, VERSION, data.mode, day, claims.seed, now, claims.expiresAt).run();
   return { token, runId: claims.runId, version: VERSION, mode: data.mode, day, seed: claims.seed, startedAt: now, expiresAt: claims.expiresAt };
 }
 // Same strict ordering for Top 20 and the requesting browser's position.
-const OWN_ENTRY = `SELECT s.alias,s.score,s.achieved_at,
-  1+(SELECT COUNT(*) FROM scores ahead WHERE ahead.version=s.version AND ahead.mode=s.mode AND ahead.day=s.day
+const OWN_ENTRY = `SELECT s.alias,s.score,s.achieved_at,s.gates,s.fragments,s.bonus_points,
+  1+(SELECT COUNT(*) FROM scores_v2 ahead WHERE ahead.version=s.version AND ahead.mode=s.mode AND ahead.day=s.day
     AND (ahead.score>s.score OR (ahead.score=s.score AND (ahead.achieved_at<s.achieved_at
       OR (ahead.achieved_at=s.achieved_at AND ahead.entry_id<s.entry_id))))) AS position
-  FROM scores s WHERE s.player_hash=? AND s.version=? AND s.mode=? AND s.day=?`;
+  FROM scores_v2 s WHERE s.player_hash=? AND s.version=? AND s.mode=? AND s.day=?`;
 function publicEntry(row, position, own) {
-  return { position, alias: row.alias, score: row.score, rank: rank(row.score), achievedAt: row.achieved_at, own };
+  return { position, alias: row.alias, score: row.score, rank: rank(row.gates), gates: row.gates, fragments: row.fragments, bonusPoints: row.bonus_points, achievedAt: row.achieved_at, own };
 }
 function receipt(text) {
   const data = JSON.parse(text);
-  if (data.ownEntry) data.ownEntry = { ...data.ownEntry, rank: rank(data.ownEntry.score), own: true };
+  if (data.ownEntry) data.ownEntry = { ...data.ownEntry, rank: rank(data.ownEntry.gates), own: true };
   return data;
 }
 async function submit(request, env, now) {
-  const data = await body(request); keys(data, ['token', 'playerId', 'alias', 'score', 'activeMs']);
+  const data = await body(request);
+  if (typeof data?.token === 'string' && data.token.startsWith('pf1.')) fail(409, 'pf-1 ist archiviert. Bitte die neue Spielversion laden.');
+  keys(data, ['token', 'playerId', 'alias', 'score', 'gates', 'fragments', 'bonusPoints', 'activeMs']);
   if (!validPlayerId(data.playerId) || !integer(data.score, 0, RULES.maxScore) || !integer(data.activeMs, 0, RULES.maxActiveMs)) fail(400, 'Score, aktive Zeit oder Spielerkennung ungültig.');
+  const parts = scoreParts(data.gates, data.fragments, data.bonusPoints);
+  if (!parts.ok || data.score !== parts.score) fail(422, 'Gate-Zahl, Fragmente, Combo-Bonus und Gesamtpunkte passen nicht zusammen.');
   const validation = validateAlias(data.alias); if (!validation.ok) fail(400, validation.error);
   const claims = await verify(env, data.token);
   const playerHash = await hmac(env.PSEUDONYM_KEY, data.playerId.toLowerCase());
   if (claims.playerHash !== playerHash) fail(403, 'Run gehört nicht zu dieser Spielerkennung.');
-  const stored = await env.DB.prepare('SELECT * FROM runs WHERE id=? AND player_hash=? AND version=? AND mode=? AND day=? AND started_at=? AND expires_at=? AND seed=?').bind(claims.runId, playerHash, VERSION, claims.mode, claims.day, claims.startedAt, claims.expiresAt, claims.seed).first();
+  const stored = await env.DB.prepare('SELECT * FROM runs_v2 WHERE id=? AND player_hash=? AND version=? AND mode=? AND day=? AND started_at=? AND expires_at=? AND seed=?').bind(claims.runId, playerHash, VERSION, claims.mode, claims.day, claims.startedAt, claims.expiresAt, claims.seed).first();
   if (!stored) fail(410, 'Run nicht verfügbar.');
-  const submissionHash = await digest(JSON.stringify([data.token, data.playerId, data.alias, data.score, data.activeMs]));
+  const submissionHash = await digest(JSON.stringify([data.token, data.playerId, data.alias, data.score, data.gates, data.fragments, data.bonusPoints, data.activeMs]));
   if (stored.consumed_at !== null) {
     if (stored.submission_hash !== submissionHash) fail(409, 'Run bereits anders eingereicht.');
     return receipt(stored.confirmation);
@@ -113,23 +125,23 @@ async function submit(request, env, now) {
   if (now > claims.expiresAt) fail(410, 'Run abgelaufen.');
   // activeMs is only a client claim, never proof of active play. Pauses are not
   // subtracted from wall time as if the server could independently verify them.
-  if (data.activeMs + 50 < minimumActiveMs(data.score) || data.activeMs > now - claims.startedAt - RULES.countdownMs + 500 || now < claims.startedAt + RULES.countdownMs - 500) fail(422, 'Score und Spielzeit passen nicht zu den Spielregeln.');
-  const confirmation = JSON.stringify({ accepted: true, receipt: claims.runId, score: data.score, mode: claims.mode, day: claims.day, version: VERSION, positionAsOf: now });
+  if (data.activeMs + 50 < minimumActiveMs(data.gates) || data.activeMs > now - claims.startedAt - RULES.countdownMs + 500 || now < claims.startedAt + RULES.countdownMs - 500) fail(422, 'Score und Spielzeit passen nicht zu den Spielregeln.');
+  const confirmation = JSON.stringify({ accepted: true, receipt: claims.runId, score: parts.score, gates: data.gates, fragments: data.fragments, bonusPoints: data.bonusPoints, mode: claims.mode, day: claims.day, version: VERSION, positionAsOf: now });
   // D1 batch is one transaction. The conditional write wins once; the INSERT
   // selects only that stored submission. A competing different body cannot upsert.
   const results = await env.DB.batch([
-    env.DB.prepare('UPDATE runs SET consumed_at=?,submission_hash=?,alias=?,score=?,confirmation=? WHERE id=? AND consumed_at IS NULL AND expires_at>=?').bind(now, submissionHash, validation.alias, data.score, confirmation, claims.runId, now),
-    env.DB.prepare(`INSERT INTO scores(entry_id,player_hash,version,mode,day,alias,score,achieved_at)
-      SELECT id,player_hash,version,mode,day,alias,score,consumed_at FROM runs WHERE id=? AND submission_hash=?
-      ON CONFLICT(player_hash,version,mode,day) DO UPDATE SET alias=excluded.alias,score=excluded.score,achieved_at=excluded.achieved_at WHERE excluded.score>scores.score`).bind(claims.runId, submissionHash),
+    env.DB.prepare('UPDATE runs_v2 SET consumed_at=?,submission_hash=?,alias=?,score=?,gates=?,fragments=?,bonus_points=?,confirmation=? WHERE id=? AND consumed_at IS NULL AND expires_at>=?').bind(now, submissionHash, validation.alias, parts.score, data.gates, data.fragments, data.bonusPoints, confirmation, claims.runId, now),
+    env.DB.prepare(`INSERT INTO scores_v2(entry_id,player_hash,version,mode,day,alias,score,gates,fragments,bonus_points,achieved_at)
+      SELECT id,player_hash,version,mode,day,alias,score,gates,fragments,bonus_points,consumed_at FROM runs_v2 WHERE id=? AND submission_hash=?
+      ON CONFLICT(player_hash,version,mode,day) DO UPDATE SET alias=excluded.alias,score=excluded.score,gates=excluded.gates,fragments=excluded.fragments,bonus_points=excluded.bonus_points,achieved_at=excluded.achieved_at WHERE excluded.score>scores_v2.score`).bind(claims.runId, submissionHash),
     // Save the best-value placement in the same transaction, including outside
     // Top 20. Do not recalculate an already stored receipt on an identical retry.
-    env.DB.prepare(`UPDATE runs SET confirmation=json_set(confirmation,'$.ownEntry',json((
-      SELECT json_object('position',position,'alias',alias,'score',score,'achievedAt',achieved_at)
+    env.DB.prepare(`UPDATE runs_v2 SET confirmation=json_set(confirmation,'$.ownEntry',json((
+      SELECT json_object('position',position,'alias',alias,'score',score,'achievedAt',achieved_at,'gates',gates,'fragments',fragments,'bonusPoints',bonus_points)
       FROM (${OWN_ENTRY})
     ))) WHERE id=? AND submission_hash=? AND json_type(confirmation,'$.ownEntry') IS NULL`)
       .bind(playerHash, VERSION, claims.mode, claims.day, claims.runId, submissionHash),
-    env.DB.prepare('SELECT submission_hash,confirmation FROM runs WHERE id=?').bind(claims.runId),
+    env.DB.prepare('SELECT submission_hash,confirmation FROM runs_v2 WHERE id=?').bind(claims.runId),
   ]);
   const consumed = results[3].results[0];
   if (consumed.submission_hash !== submissionHash) fail(409, 'Run bereits anders eingereicht.');
@@ -142,7 +154,7 @@ async function leaderboard(url, request, env, now) {
   if (playerId && !validPlayerId(playerId)) fail(400, 'Spielerkennung ungültig.');
   const ownHash = playerId ? await hmac(env.PSEUDONYM_KEY, playerId.toLowerCase()) : null;
   const scope = mode === 'daily' ? 'daily' : 'normal';
-  const queries = [env.DB.prepare('SELECT alias,score,achieved_at,player_hash FROM scores WHERE version=? AND mode=? AND day=? ORDER BY score DESC,achieved_at ASC,entry_id ASC LIMIT 20').bind(VERSION, scope, day)];
+  const queries = [env.DB.prepare('SELECT alias,score,gates,fragments,bonus_points,achieved_at,player_hash FROM scores_v2 WHERE version=? AND mode=? AND day=? ORDER BY score DESC,achieved_at ASC,entry_id ASC LIMIT 20').bind(VERSION, scope, day)];
   if (ownHash) queries.push(env.DB.prepare(OWN_ENTRY).bind(ownHash, VERSION, scope, day));
   const results = await env.DB.batch(queries);
   const own = results[1]?.results[0];
@@ -153,10 +165,22 @@ async function leaderboard(url, request, env, now) {
 export async function cleanup(env, now = Date.now()) {
   if (!env.DB || env.ENABLED !== 'true') return;
   await env.DB.batch([
-    env.DB.prepare('DELETE FROM runs WHERE expires_at<?').bind(now - 172800000),
-    env.DB.prepare("DELETE FROM scores WHERE mode='daily' AND day<?").bind(utcDay(now - 29 * 86400000)),
+    env.DB.prepare('DELETE FROM runs_v2 WHERE expires_at<?').bind(now - 172800000),
+    env.DB.prepare("DELETE FROM scores_v2 WHERE mode='daily' AND day<?").bind(utcDay(now - 29 * 86400000)),
+    env.DB.prepare("DELETE FROM scores_v2 WHERE mode='normal' AND achieved_at<?").bind(now - 365 * 86400000),
     env.DB.prepare('DELETE FROM rate_buckets WHERE expires_at<?').bind(now),
   ]);
+}
+// Only boolean retention state leaves D1. A grace period allows the daily cron.
+export async function retentionOverdue(env, now = Date.now()) {
+  const grace = 86400000;
+  const results = await env.DB.batch([
+    env.DB.prepare('SELECT 1 FROM runs_v2 WHERE expires_at<? LIMIT 1').bind(now - 172800000 - grace),
+    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='daily' AND day<? LIMIT 1").bind(utcDay(now - 30 * 86400000)),
+    env.DB.prepare("SELECT 1 FROM scores_v2 WHERE mode='normal' AND achieved_at<? LIMIT 1").bind(now - 366 * 86400000),
+    env.DB.prepare('SELECT 1 FROM rate_buckets WHERE expires_at<? LIMIT 1').bind(now - grace),
+  ]);
+  return results.some(result => result.results.length > 0);
 }
 export default {
   async fetch(request, env) {
@@ -172,7 +196,14 @@ export default {
         return response(null, 204, cors, { 'Access-Control-Allow-Methods': method, 'Access-Control-Allow-Headers': 'Content-Type, X-Player-ID', 'Access-Control-Max-Age': '600' });
       }
       if (request.method !== method) return response({ message: 'Methode nicht erlaubt.' }, 405, cors, { Allow: `${method}, OPTIONS` });
-      if (url.pathname === '/api/health') return response({ ok: true, enabled: env.ENABLED === 'true', configured: !!env.DB && secretsReady(env), version: VERSION }, 200, cors);
+      if (url.pathname === '/api/health') {
+        let schemaReady = false;
+        if (env.DB) try {
+          await env.DB.batch([env.DB.prepare('SELECT score,gates,fragments,bonus_points FROM scores_v2 LIMIT 1'), env.DB.prepare('SELECT submission_hash,confirmation FROM runs_v2 LIMIT 1'), env.DB.prepare('SELECT hits FROM rate_buckets LIMIT 1')]); schemaReady = true;
+        } catch {}
+        const overdue = schemaReady ? await retentionOverdue(env) : null;
+        return response({ ok: true, enabled: env.ENABLED === 'true', configured: !!env.DB && secretsReady(env), schemaReady, retentionOverdue: overdue, version: VERSION }, 200, cors);
+      }
       if (env.ENABLED !== 'true' || !env.DB || !secretsReady(env)) fail(503, 'Leaderboard noch nicht aktiviert.');
       if (method === 'POST' && !cors) fail(403, 'Origin erforderlich.');
       const now = Date.now();

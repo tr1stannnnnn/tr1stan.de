@@ -10,12 +10,16 @@ ENVIRONMENT = "production"
 [[d1_databases]]
 binding = "DB"
 database_name = "packet-flight"
-# Placeholder: replace with the ID returned by your own D1 creation. No account is configured.
+# Existing production D1, supplied by the operator. Runtime secrets are retained.
 database_id = "bc462466-1ed9-41d9-ab75-dc0197d50502"
 migrations_dir = "migrations"
 
 [triggers]
 crons = ["17 3 * * *"]
+
+[observability]
+# Aggregate Workers/D1 analytics remain available; do not retain invocation logs.
+enabled = false
 
 [env.local.vars]
 ENABLED = "true"

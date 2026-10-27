@@ -1,0 +1,30 @@
+name: PACKET FLIGHT retention monitor
+on:
+  schedule:
+    - cron: '47 4 * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: pf2-retention-monitor
+  cancel-in-progress: false
+jobs:
+  retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read public health and detect overdue cleanup
+        shell: bash
+        run: |
+          python3 - <<'PYTHON'
+          import json, urllib.request
+          url = 'https://packet-flight-leaderboard.polished-frost-d1f8.workers.dev/api/health'
+          request = urllib.request.Request(url, headers={'User-Agent': 'packet-flight-retention-monitor'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              health = json.load(response)
+          assert health.get('version') == 'pf-2' and health.get('schemaReady') is True, 'Unexpected version/schema'
+          assert health.get('configured') is True, 'Backend not configured'
+          if health.get('enabled') is not True:
+              raise SystemExit('::error::Worker disabled; scheduled deletion is paused. Investigate retention.')
+          assert health.get('retentionOverdue') is False, 'Deletion overdue or retention status unknown; investigate scheduled invocations'
+          print('No overdue application rows beyond the daily cleanup grace period.')
+          PYTHON

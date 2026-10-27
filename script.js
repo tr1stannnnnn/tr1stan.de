@@ -687,7 +687,7 @@
       try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
     });
 
-    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear"].forEach(function (name) {
+    ["help", "all", "about", "skills", "honest", "next", "contact", "neofetch", "clear", "play", "play --daily", "leaderboard"].forEach(function (name) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "term-chip";
@@ -695,7 +695,7 @@
       b.addEventListener("click", function () {
         skip();
         run(name);
-        try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
+        // Keep native button focus; tapping a shortcut must not open the keyboard.
       });
       chips.appendChild(b);
     });
