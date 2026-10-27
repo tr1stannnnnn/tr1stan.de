@@ -1,0 +1,200 @@
+{
+  "source_commit_before_documentation": "636b111fb63345d4d04aa3da6e53e801cc470ea2",
+  "manual_dashboard_confirmation": {
+    "source": "Operator message, 2026-10-27; not an independent API observation",
+    "worker": "packet-flight-leaderboard",
+    "production_branch": "main",
+    "root": "/",
+    "build_command": "npm ci --prefix cloudflare-worker",
+    "deploy_command": "./cloudflare-worker/node_modules/.bin/wrangler deploy --config cloudflare-worker/wrangler.toml --env= --keep-vars",
+    "disable_builds": false,
+    "preview_builds": "remain OFF per operator; previously manually confirmed OFF; not independently re-read",
+    "jobs": "only completed jobs visible; no new automatic build visible immediately after restoration",
+    "new_build_url": null,
+    "new_build_commit": null,
+    "active_version_prefix_reported": "663ffc76",
+    "secret_fields_changed": false,
+    "builds_api_limitation": "HTTP 403, Authentication error 10000"
+  },
+  "management_readonly": {
+    "checked_at_utc": "2026-10-27T12:12:25.323654+00:00",
+    "deployment": {
+      "id": "fc6ceecc-28b7-4025-adf7-6f66030de8db",
+      "source": "wrangler",
+      "strategy": "percentage",
+      "annotations": {
+        "workers/triggered_by": "deployment"
+      },
+      "versions": [
+        {
+          "version_id": "663ffc76-bb8b-4a40-94ac-a1d21563130f",
+          "percentage": 100
+        }
+      ],
+      "created_on": "2026-10-27T10:22:14.159457Z"
+    },
+    "enabled": true,
+    "secret_binding_names": [
+      "PSEUDONYM_KEY",
+      "RATE_KEY",
+      "SIGNING_KEY"
+    ],
+    "test_entries": [
+      {
+        "mode": "daily",
+        "day": "2026-10-27",
+        "alias": "Release_Check",
+        "score": 0,
+        "gates": 0,
+        "fragments": 0,
+        "bonus_points": 0,
+        "achieved_at": 1793096763781,
+        "position": 1
+      },
+      {
+        "mode": "normal",
+        "day": "",
+        "alias": "Release_Check",
+        "score": 10,
+        "gates": 1,
+        "fragments": 0,
+        "bonus_points": 0,
+        "achieved_at": 1793092811119,
+        "position": 1
+      }
+    ],
+    "board_counts": [
+      {
+        "mode": "daily",
+        "day": "2026-10-27",
+        "entries": 1
+      },
+      {
+        "mode": "normal",
+        "day": "",
+        "entries": 1
+      }
+    ],
+    "old_table_counts": [
+      {
+        "old_runs": 0,
+        "old_scores": 0
+      }
+    ],
+    "migrations": [
+      {
+        "name": "0001_initial.sql"
+      },
+      {
+        "name": "0002_escape_pf2.sql"
+      }
+    ],
+    "script_etag": "a2299103df32194e959ab935aa0fb510420e20ec3ad748a1c9bc90fa98f873fa"
+  },
+  "frontend_readonly": {
+    "checked_at_utc": "2026-10-27T12:13:50.192074+00:00",
+    "matches_checkout": true,
+    "api_connected": true,
+    "cache": "pf-2-shell-4",
+    "file_sha256": {
+      "index.html": "c505a4bc360675a78fc98c27391990bc75282cba2b61ee038989f0e7f4ecade0",
+      "game.html": "3622c41a8989c1b03f5e1e2c4c789fa536388aa7d16be296e44e7f9c0a1424d6",
+      "script.js": "f9decb217f3cc981324d947948b54496ea91a6292ab92dad93d1e76750a31dc8",
+      "style.css": "8892a62b4fb1ae903ce99b6a963e4cb7e14a4e291557473400d2a287568b4390",
+      "game/app.mjs": "3220624a8313a263d2dde0bff19ca05ea13b64ca7f08460c1b787192d22db694",
+      "game/config.mjs": "034e93590ffaeed48cd5b40db487edb1e335443be8b71e5607f23cab0a119714",
+      "game-sw.js": "ee658378018147ae691f97e122f99d445edf8146b11f1c3d0a6faed221795ed2",
+      "datenschutz.html": "57e1b2a52f335f49a87590bd39949179b1c1b4117214a2ccd03d58b83b5a0068"
+    }
+  },
+  "final_health": {
+    "http": 200,
+    "checked_at_utc": "2026-10-27T12:18:02.436261+00:00",
+    "body": {
+      "ok": true,
+      "enabled": true,
+      "configured": true,
+      "schemaReady": true,
+      "retentionOverdue": false,
+      "version": "pf-2"
+    },
+    "operations_used": 30,
+    "no_new_entries": true
+  },
+  "controlled_budget": {
+    "used": 30,
+    "maximum": 30,
+    "real_runs_consumed": [
+      "normal",
+      "daily"
+    ],
+    "reconstructed_from": "Repository commit 636b111fb63345d4d04aa3da6e53e801cc470ea2 and last confirmed conversation state; old detailed /tmp journal no longer present",
+    "new_requests": [
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "source": "reserved final health after manual Builds restoration",
+        "status": 200,
+        "checked_at_utc": "2026-10-27T12:18:02.436261+00:00"
+      }
+    ]
+  },
+  "new_runs": 0,
+  "new_scores": 0,
+  "post_documentation_ci_evidence": "Recorded in closure PR description and final report after merge; avoids self-triggering further main commits.",
+  "limitations": [
+    "Physical devices and Safari untested",
+    "Native Chromium TLS through cloud proxy unverified; live browser transport used actual responses via CA-validating Python",
+    "CPU quantiles sampled; earlier exact-count diagnostic reports 8 of 9 expected invocations, cause unknown; original min-5 and <8000us gate unchanged"
+  ],
+  "final_readonly_metrics": {
+    "since": "2026-10-27T10:22:11.336087+00:00",
+    "until": "2026-10-27T12:23:49.174987+00:00",
+    "cpu_unit": "microseconds",
+    "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+    "metrics": {
+      "accountD1": [
+        {
+          "sum": {
+            "rowsRead": 294,
+            "rowsWritten": 103
+          }
+        }
+      ],
+      "accountRequests": [
+        {
+          "sum": {
+            "errors": 0,
+            "requests": 33
+          }
+        }
+      ],
+      "project": [
+        {
+          "dimensions": {
+            "status": "success"
+          },
+          "quantiles": {
+            "cpuTimeP50": 4038,
+            "cpuTimeP99": 6291
+          },
+          "sum": {
+            "errors": 0,
+            "requests": 10
+          }
+        }
+      ],
+      "projectD1": [
+        {
+          "sum": {
+            "readQueries": 98,
+            "rowsRead": 294,
+            "rowsWritten": 103,
+            "writeQueries": 36
+          }
+        }
+      ]
+    },
+    "gate_failures": []
+  }
+}

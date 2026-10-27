@@ -1,9 +1,12 @@
-> **Aktuell nach Wiederherstellung:** Alle 79 Tests neu bestanden; aktive CPU-
-> Prüfung mit unverändertem 8-ms-Gate besteht. Beide freigegebenen Testeinträge
-> mit Reload-Readback erhalten. Frontend/API und Cache 4 sind live. 29/30
-> Operationen verbraucht; Build-Rückführung wegen Builds-API-403 noch manuell
-> auszuführen. Maßgeblicher Stand: [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md).
-> Ältere Zahlen und Pausen unten sind historische Zwischenstände.
+> **Abschluss 27.10.2026:** Spiel, API und Shell-Cache 4 sind live. Die
+> Build-Rückführung (inklusive `--keep-vars`, Disable builds AUS) ist vom Betreiber
+> manuell bestätigt; Preview-Builds bleiben AUS. Letzter Health-Aufruf HTTP 200,
+> enabled/configured/schemaReady=true, retentionOverdue=false. **30/30** kontrollierte
+> Operationen und beide erlaubten Runs verbraucht; keine weiteren Testeinträge.
+> Alle 79 Tests nach Wiederherstellung und Frontend-Anschluss erneut bestanden.
+> Maßgeblicher Abschluss samt Nachweisgrenzen:
+> [PF2-RELEASE-2026-10-27.md](PF2-RELEASE-2026-10-27.md).
+> Ältere Zahlen, Sperren und Kennungen unten sind historische Zwischenstände.
 
 > **Aktueller Release 27.10.2026:** Builds-Sperre und leere Job-Warteschlange
 > sind vom Betreiber bestätigt. Notice und Spiel live, additive Migration erfolgreich, Worker pf-2 deaktiviert;
