@@ -54,7 +54,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(data[:8],b'\x89PNG\r\n\x1a\n')
         self.assertEqual(struct.unpack('>II',data[16:24]),(1200,630))
         self.assertEqual((ROOT/'CNAME').read_text().strip(),'tr1stan.de')
-        self.assertIn((ROOT/'game/config.mjs').read_text().split('export const API_URL = ')[1].split(';')[0], ["''", "'https://packet-flight-leaderboard.polished-frost-d1f8.workers.dev'"])
+        self.assertEqual((ROOT/'game/config.mjs').read_text().split('export const API_URL = ')[1].split(';')[0],"''")
         sitemap=ET.parse(ROOT/'sitemap.xml')
         self.assertIn('https://tr1stan.de/game.html',[node.text for node in sitemap.findall('.//{*}loc')])
 

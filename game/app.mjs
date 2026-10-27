@@ -6,7 +6,7 @@ import { Sound } from './audio.mjs?v=pf2-privacy1';
 import { Renderer } from './render.mjs?v=pf2-privacy1';
 import { Effects } from './effects.mjs?v=pf2-privacy1';
 import { LeaderboardAPI } from './api.mjs?v=pf2-privacy1';
-import { API_URL } from './config.mjs?v=pf2-online1';
+import { API_URL } from './config.mjs?v=pf2-privacy1';
 
 const $ = id => document.getElementById(id);
 const canvas = $('flightCanvas'), renderer = new Renderer(canvas);
@@ -354,7 +354,7 @@ async function syncOffline(enabled) {
   }
   if (!registration) registration = await navigator.serviceWorker.register('/game-sw.js', { updateViaCache: 'none' });
   else try { await registration.update(); } catch {
-    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-4' })) return;
+    if (enabled && await caches.match('/game/.offline-choice', { cacheName: 'tr1stan-packet-flight-pf-2-shell-3' })) return;
     // Revocation must work with an already installed worker while offline.
   }
   // Upgrade pre-consent workers too: they must stop intercepting/caching requests.
