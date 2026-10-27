@@ -120,7 +120,7 @@ async function submit(request, env, now) {
   const claims = await verify(env, data.token);
   const playerHash = await hmac(env.PSEUDONYM_KEY, data.playerId.toLowerCase());
   if (claims.playerHash !== playerHash) fail(403, 'Run gehört nicht zu dieser Spielerkennung.');
-  const stored = await env.DB.prepare('SELECT * FROM runs_v2 WHERE id=? AND player_hash=? AND version=? AND mode=? AND day=? AND started_at=? AND expires_at=? AND seed=?').bind(claims.runId, playerHash, VERSION, claims.mode, claims.day, claims.startedAt, claims.expiresAt, claims.seed).first();
+  const stored = await env.DB.prepare('SELECT consumed_at,submission_hash,confirmation FROM runs_v2 WHERE id=? AND player_hash=? AND version=? AND mode=? AND day=? AND started_at=? AND expires_at=? AND seed=?').bind(claims.runId, playerHash, VERSION, claims.mode, claims.day, claims.startedAt, claims.expiresAt, claims.seed).first();
   if (!stored) fail(410, 'Run nicht verfügbar.');
   const submissionHash = await digest(JSON.stringify([data.token, data.playerId, data.alias, data.score, data.gates, data.fragments, data.bonusPoints, data.activeMs]));
   if (stored.consumed_at !== null) {
