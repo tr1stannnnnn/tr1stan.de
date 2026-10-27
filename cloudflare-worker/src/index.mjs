@@ -76,8 +76,13 @@ async function rateLimit(request, env, scope, now) {
   // Daily scoped keyed digests, no raw IPs or persistent cross-day IP identity in D1.
   const ipHash = await hmac(env.RATE_KEY, `${day}|${rawIP || 'isolated-local-test'}`);
   const buckets = [[`${scope}:m:${minute}:${ipHash}`, now + 120000, LIMITS[scope][0]], [`${scope}:d:${day}:${ipHash}`, now + 172800000, LIMITS[scope][1]], [`global:d:${day}`, now + 172800000, 20000]];
-  const result = await env.DB.batch(buckets.map(([bucket, expiry]) => env.DB.prepare('INSERT INTO rate_buckets(bucket,hits,expires_at) VALUES(?,1,?) ON CONFLICT(bucket) DO UPDATE SET hits=hits+1 RETURNING hits').bind(bucket, expiry)));
-  if (result.some((r, i) => r.results[0].hits > buckets[i][2])) fail(429, 'Zu viele Anfragen. Bitte später erneut versuchen.');
+  // One atomic statement retains all three counters while avoiding three D1
+  // statement/result envelopes on every request. RETURNING order is not assumed.
+  const result = await env.DB.prepare('INSERT INTO rate_buckets(bucket,hits,expires_at) VALUES(?,1,?),(?,1,?),(?,1,?) ON CONFLICT(bucket) DO UPDATE SET hits=hits+1 RETURNING bucket,hits')
+    .bind(...buckets.flatMap(([bucket, expiry]) => [bucket, expiry])).all();
+  const hits = new Map(result.results.map(row => [row.bucket, row.hits]));
+  if (hits.size !== buckets.length || buckets.some(([bucket]) => !Number.isSafeInteger(hits.get(bucket)) || hits.get(bucket) < 1)) fail(503, 'Ratenbegrenzung nicht verfügbar.');
+  if (buckets.some(([bucket, , limit]) => hits.get(bucket) > limit)) fail(429, 'Zu viele Anfragen. Bitte später erneut versuchen.');
 }
 async function start(request, env, now) {
   const data = await body(request); keys(data, ['mode', 'version', 'playerId']);
