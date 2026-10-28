@@ -1,0 +1,153 @@
+{
+  "checked_at_utc": "2026-10-28T08:09:35.859372+00:00",
+  "stage": "compat",
+  "worker_get_requests": 5,
+  "run_starts": 0,
+  "score_submissions": 0,
+  "load_test": false,
+  "requests": [
+    {
+      "path": "/api/health",
+      "http": 200,
+      "data": {
+        "ok": true,
+        "enabled": true,
+        "configured": true,
+        "schemaReady": true,
+        "retentionOverdue": false,
+        "version": "pf-2",
+        "supportedVersions": [
+          "pf-2",
+          "pf-3"
+        ]
+      },
+      "body_sha256": "6fd3bb0a0b5fb6272419a81fec7e447650758ca3c426c8aa090e1f0f43aa777b"
+    },
+    {
+      "path": "/api/leaderboard?mode=alltime&version=pf-2",
+      "http": 200,
+      "data": {
+        "version": "pf-2",
+        "mode": "alltime",
+        "day": "",
+        "entries": [
+          {
+            "position": 1,
+            "alias": "theo",
+            "score": 3306,
+            "rank": "ROOT",
+            "gates": 286,
+            "fragments": 72,
+            "bonusPoints": 446,
+            "achievedAt": 1793116771283,
+            "own": false
+          },
+          {
+            "position": 2,
+            "alias": "Cozzmonaut",
+            "score": 3016,
+            "rank": "ROOT",
+            "gates": 274,
+            "fragments": 57,
+            "bonusPoints": 276,
+            "achievedAt": 1793116747933,
+            "own": false
+          },
+          {
+            "position": 3,
+            "alias": "Elle",
+            "score": 1520,
+            "rank": "ROOT",
+            "gates": 124,
+            "fragments": 34,
+            "bonusPoints": 280,
+            "achievedAt": 1793112994354,
+            "own": false
+          },
+          {
+            "position": 4,
+            "alias": "cozzmonaut",
+            "score": 692,
+            "rank": "ROOT",
+            "gates": 62,
+            "fragments": 16,
+            "bonusPoints": 72,
+            "achievedAt": 1793113762614,
+            "own": false
+          },
+          {
+            "position": 5,
+            "alias": "tester",
+            "score": 192,
+            "rank": "PACKET ROUTER",
+            "gates": 15,
+            "fragments": 7,
+            "bonusPoints": 42,
+            "achievedAt": 1793107095535,
+            "own": false
+          },
+          {
+            "position": 6,
+            "alias": "Test",
+            "score": 82,
+            "rank": "SCRIPT KIDDIE",
+            "gates": 7,
+            "fragments": 3,
+            "bonusPoints": 12,
+            "achievedAt": 1793110461947,
+            "own": false
+          },
+          {
+            "position": 7,
+            "alias": "Release_Check",
+            "score": 10,
+            "rank": "SCRIPT KIDDIE",
+            "gates": 1,
+            "fragments": 0,
+            "bonusPoints": 0,
+            "achievedAt": 1793092811119,
+            "own": false
+          }
+        ],
+        "ownEntry": null
+      },
+      "body_sha256": "6bb24b07c9ac607f948a77d7e65460783282fef182d67d5016689c3dbbdad59f"
+    },
+    {
+      "path": "/api/leaderboard?mode=daily&version=pf-2",
+      "http": 200,
+      "data": {
+        "version": "pf-2",
+        "mode": "daily",
+        "day": "2026-10-28",
+        "entries": [],
+        "ownEntry": null
+      },
+      "body_sha256": "1ff2f2bdf1b8dd51962f08863e1932a4cde3e4fdf908c4c1479d4340a00c4150"
+    },
+    {
+      "path": "/api/leaderboard?mode=alltime&version=pf-3",
+      "http": 200,
+      "data": {
+        "version": "pf-3",
+        "mode": "alltime",
+        "day": "",
+        "entries": [],
+        "ownEntry": null
+      },
+      "body_sha256": "ef6179bbc2d72dd9a5b5fada4956646f480a0e09855e1529eb87634460508cfb"
+    },
+    {
+      "path": "/api/leaderboard?mode=daily&version=pf-3",
+      "http": 200,
+      "data": {
+        "version": "pf-3",
+        "mode": "daily",
+        "day": "2026-10-28",
+        "entries": [],
+        "ownEntry": null
+      },
+      "body_sha256": "d01e6777b5ce54062430429666a966874f20b2942129cd6035dc74cc06cc5884"
+    }
+  ]
+}

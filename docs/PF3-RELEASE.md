@@ -188,3 +188,27 @@ unchanged, oldpf-1 tables still empty, v3runs/scores empty, and the same three
 secret binding names/D1binding. [Preservation evidence](packet-flight-pf3/migration-preservation.json).
 Automatic Worker Build and Pages are running for that exact merge SHA. This
 is not yet the pf-3 frontend activation.
+
+Compatibility confirmed: Worker`844c4fe0-83ec-477b-8ca1-85088cad7102`,
+deployment`270cc0c1-6e3e-4dd3-9f51-0b82bdb49df9` at08:08:39UTC.
+Automatic Worker Build/check122702806037 and Pages run40654664912 succeeded
+for`ea8d474…`; actual game.html/SW/root modules still match oldpf-2 bytes.
+Flags read from production arepf-2/false/true as planned. Five bounded GETs
+(health plus four version/mode boards), no new runs/scores. Old Normal has7
+entries, old Daily today0, both new boards0. Eight old public rows remain exact.
+
+First analytics query had no project samples and did not pass. At08:11:09UTC,
+all five successful invocations are reported: CPU P50=3194µs,P99=4625µs,errors0.
+Account7requests;D1read195/write44. Unchanged8ms/min5/50%quota gate passes.
+These are small functional samples, not maximum CPU guarantees or a production
+loadtest. [Metrics](packet-flight-pf3/compat-metrics-2.json) and
+[actual settings/data preservation](packet-flight-pf3/production-compat.json).
+
+The following final PR now sets ACTIVE_RULESET=pf-3/PF3_STARTS=true/
+LEGACY_STARTS=false and tightens the retention monitor back to exactlypf-3.
+Issued old tokens remain valid; no legacy data is copied. Final activation
+awaits this PR's actual automatic builds and live checks.
+
+Final activation configuration additionally passed27/27backend cases after the
+flag change, six HTML validations and2/2site integrity checks. No game physics,
+generator or rendering modules changed after the aggregate/preflight/video.

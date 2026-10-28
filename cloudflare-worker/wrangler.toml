@@ -6,10 +6,10 @@ workers_dev = true
 [vars]
 ENABLED = "true"
 ENVIRONMENT = "production"
-# Compatibility stage: no pf-3 tokens issued until backend checks pass.
-ACTIVE_RULESET = "pf-2"
-PF3_STARTS = "false"
-LEGACY_STARTS = "true"
+# pf-3 activated after the compatible backend/schema/CPU checks passed.
+ACTIVE_RULESET = "pf-3"
+PF3_STARTS = "true"
+LEGACY_STARTS = "false"
 
 [[d1_databases]]
 binding = "DB"

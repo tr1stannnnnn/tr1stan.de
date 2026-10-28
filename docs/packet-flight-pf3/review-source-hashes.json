@@ -12,8 +12,10 @@
   "game/pf3/rules.mjs": "0d60d58baa25b4afd65d07f75c823482d77404dc151afedda563d9a08704368d",
   "game/pf3/api.mjs": "ee6978d039611718bbf1e80d3cd9a4089f5b692067bfeb0782697891ea7daf36",
   "game-sw.js": "2015dbcc59e9a2d65873e96f940915042aed5eccc00fca0397845f66044cd55d",
-  "game.html": "c5b85afdda90a21d9acd285ac106981dae0260a5a0a02f79107a9637d15790f1",
+  "game.html": "12c4890fc1bf25682f58037252b3a8a0c4972e4f780b1cdff080f6457d6857b0",
   "datenschutz.html": "fcb5c69c11082292dd6b8152b9edcef2d607f2c611e71649797da063a6b9136b",
   "cloudflare-worker/src/index.mjs": "e15c0c0e0989f23c904468ac7efca51957ad7ff7489e16b59014f4dd6559b9ba",
-  "cloudflare-worker/migrations/0003_pf3.sql": "7d4c85e3b0c5c24e563cd1b49ab69226cc4621358a7e97982c4eab3794ba056f"
+  "cloudflare-worker/migrations/0003_pf3.sql": "7d4c85e3b0c5c24e563cd1b49ab69226cc4621358a7e97982c4eab3794ba056f",
+  "cloudflare-worker/wrangler.toml": "ff650238ccf8f6ab95ba7ad0668b869b39a25599d3f027e782fdbfb461cd6913",
+  ".github/workflows/pf2-retention.yml": "8c4dcddc6667de1e70d1c84333b8c8e4884a0d9e19b593ff255b895af035170b"
 }

@@ -1,0 +1,50 @@
+{
+  "since": "2026-10-28T08:08:39.751848+00:00",
+  "until": "2026-10-28T08:11:09.320907+00:00",
+  "cpu_unit": "microseconds",
+  "note": "Absent samples are not a pass. Quantiles are not maximum CPU guarantees.",
+  "metrics": {
+    "accountD1": [
+      {
+        "sum": {
+          "rowsRead": 195,
+          "rowsWritten": 44
+        }
+      }
+    ],
+    "accountRequests": [
+      {
+        "sum": {
+          "errors": 0,
+          "requests": 7
+        }
+      }
+    ],
+    "project": [
+      {
+        "dimensions": {
+          "status": "success"
+        },
+        "quantiles": {
+          "cpuTimeP50": 3194,
+          "cpuTimeP99": 4625
+        },
+        "sum": {
+          "errors": 0,
+          "requests": 5
+        }
+      }
+    ],
+    "projectD1": [
+      {
+        "sum": {
+          "readQueries": 15,
+          "rowsRead": 195,
+          "rowsWritten": 44,
+          "writeQueries": 7
+        }
+      }
+    ]
+  },
+  "gate_failures": []
+}
