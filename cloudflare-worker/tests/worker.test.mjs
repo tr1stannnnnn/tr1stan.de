@@ -38,7 +38,7 @@ const submission = (run, gates = 10, alias = 'Tester', activeMs = 100000) => ({ 
 before(async () => {
   mf = new Miniflare({ modules: true, script: await readFile(new URL('../.test-build/index.js', import.meta.url), 'utf8'), compatibilityDate: '2026-06-11', d1Databases: { DB: 'packet-flight-isolated-test' }, bindings: { ENABLED: 'true', ENVIRONMENT: 'production', ...secrets } });
   DB = await mf.getD1Database('DB');
-  const sql = (await readFile(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8') + await readFile(new URL('../migrations/0002_escape_pf2.sql', import.meta.url), 'utf8')).replace(/^--.*$/gm, '');
+  const sql = (await readFile(new URL('../migrations/0001_initial.sql', import.meta.url), 'utf8') + await readFile(new URL('../migrations/0002_escape_pf2.sql', import.meta.url), 'utf8') + await readFile(new URL('../migrations/0003_pf3.sql', import.meta.url), 'utf8')).replace(/^--.*$/gm, '');
   await DB.batch(sql.split(';').map(s => s.trim()).filter(Boolean).map(s => DB.prepare(s)));
   env = { DB, ENABLED: 'true', ENVIRONMENT: 'production', ...secrets };
 });
@@ -148,6 +148,7 @@ test('Additive migration preserves pf-1 rows; health detects missing pf-2 schema
     assert.equal(health.status, 200); assert.equal(health.data.configured, true); assert.equal(health.data.schemaReady, false);
     assert.equal((await request('/api/run/start', { targetEnv, method: 'POST', body: { mode: 'normal', version: VERSION, playerId: player() } })).status, 503);
     await apply('0002_escape_pf2.sql'); await apply('0002_escape_pf2.sql');
+    await apply('0003_pf3.sql'); await apply('0003_pf3.sql');
     const after = await db.batch([db.prepare('SELECT * FROM scores'), db.prepare('SELECT * FROM runs')]);
     assert.deepEqual(after.map(r => r.results), legacy.map(r => r.results));
     health = await request('/api/health', { targetEnv }); assert.equal(health.data.schemaReady, true);
@@ -312,6 +313,8 @@ test('Health still rejects missing required columns in empty tables after probe 
     let health = await request('/api/health', { targetEnv });
     assert.equal(health.data.schemaReady, false); assert.equal(health.data.retentionOverdue, null);
     await db.prepare('ALTER TABLE scores_v2 ADD COLUMN bonus_points INTEGER').run();
+    const v3sql=(await readFile(new URL('../migrations/0003_pf3.sql',import.meta.url),'utf8')).replace(/^--.*$/gm,'');
+    await db.batch(v3sql.split(';').map(s=>s.trim()).filter(Boolean).map(s=>db.prepare(s)));
     health = await request('/api/health', { targetEnv });
     assert.equal(health.data.schemaReady, true); assert.equal(health.data.retentionOverdue, false);
   } finally { await isolated.dispose(); }

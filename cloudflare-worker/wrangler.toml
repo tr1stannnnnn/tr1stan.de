@@ -6,6 +6,10 @@ workers_dev = true
 [vars]
 ENABLED = "true"
 ENVIRONMENT = "production"
+# Compatibility stage: no pf-3 tokens issued until backend checks pass.
+ACTIVE_RULESET = "pf-2"
+PF3_STARTS = "false"
+LEGACY_STARTS = "true"
 
 [[d1_databases]]
 binding = "DB"
@@ -24,6 +28,9 @@ enabled = false
 [env.local.vars]
 ENABLED = "true"
 ENVIRONMENT = "development"
+ACTIVE_RULESET = "pf-3"
+PF3_STARTS = "true"
+LEGACY_STARTS = "true"
 DEV_ORIGINS = "http://127.0.0.1:8000,http://localhost:8000"
 
 [[env.local.d1_databases]]
