@@ -1,0 +1,22 @@
+{
+  "source": "ea8d47413ea7fd2799cac35affd2dd483a519a81",
+  "old_game_shell_unchanged": true,
+  "files": [
+    {
+      "file": "game.html",
+      "sha256": "b98b0c6524b994e590687df4fb6496dc6198341ab7592f3625375e1e38f2353f"
+    },
+    {
+      "file": "game-sw.js",
+      "sha256": "9a95b8c7a093fc89b4809886d24289bf7ff91939241e593cd4370cbf31c896ce"
+    },
+    {
+      "file": "game/app.mjs",
+      "sha256": "ca98fa56593e4635941ea4e495b13eb994da282dd5ff54e970bf4e848da06ed0"
+    },
+    {
+      "file": "game/rules.mjs",
+      "sha256": "8656ab02d07cbd1c06e3be4a89447473047a5582b7ea79d8959c892d5239436d"
+    }
+  ]
+}

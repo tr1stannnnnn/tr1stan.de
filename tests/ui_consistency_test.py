@@ -34,7 +34,7 @@ class UIConsistencyTests(unittest.TestCase):
     def fixture(self):
         # Explicit synthetic *local* result to test the reported exact192 HUD bug.
         # Actual physics/input and authenticated scoring are covered in other suites.
-        source=(ROOT/'game/app.mjs').read_text()+'''
+        source=(ROOT/'game/pf3/app.mjs').read_text()+'''
 window.__uiFixture = {
   prior() { records.data.daily[currentDay]=73; records.data.highest=50; records.data.skin='root'; records.data.muted=true; skins(); best(); },
   finish192() {
@@ -45,7 +45,7 @@ window.__uiFixture = {
   snapshot() { return {score:flight.score,gates:flight.gatesPassed,combo:flight.combo,hazard:flight.hazard,alarm:flight.alarm,y:flight.y,ticks:flight.ticks,dead:flight.dead,effects:{time:effects.time,broken:effects.broken,counts:[effects.particles.length,effects.trail.length,effects.rings.length,effects.labels.length,effects.gates.length]},records:{normal:records.data.normal,daily:records.data.daily,highest:records.data.highest,skin:records.data.skin,muted:records.data.muted}}; }
 };
 '''
-        self.context.route('**/game/app.mjs*',lambda r:r.fulfill(content_type='text/javascript',body=source))
+        self.context.route('**/game/pf3/app.mjs*',lambda r:r.fulfill(content_type='text/javascript',body=source))
     def finish192(self,dialog=True):
         self.fixture();self.clock();self.game();self.page.evaluate('__uiFixture.prior()')
         self.page.locator('#start').click();self.page.clock.run_for(1700)
@@ -121,7 +121,7 @@ window.__uiFixture = {
     def board_entry(self,alias):
         return {'position':1,'alias':alias,'score':10,'gates':1,'fragments':0,'bonusPoints':0,'rank':'SCRIPT KIDDIE','achievedAt':1791720000000,'own':False}
     def fulfill_board(self,route,mode,alias,day='2026-10-11'):
-        route.fulfill(status=200,headers={'Access-Control-Allow-Origin':BASE,'Content-Type':'application/json'},body=json.dumps({'version':'pf-2','mode':mode,'day':day if mode=='daily' else '','entries':[self.board_entry(alias)],'ownEntry':None}))
+        route.fulfill(status=200,headers={'Access-Control-Allow-Origin':BASE,'Content-Type':'application/json'},body=json.dumps({'version':'pf-3','mode':mode,'day':day if mode=='daily' else '','entries':[self.board_entry(alias)],'ownEntry':None}))
     def test_late_daily_reply_never_paints_under_normal_and_final_reload_wins(self):
         self.online();self.clock();self.game();held=[];loads=[]
         def route_api(route):

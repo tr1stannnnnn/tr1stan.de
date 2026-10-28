@@ -27,7 +27,7 @@
   <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/style.css?v=31" />
-  <link rel="stylesheet" href="/game/game.css?v=pf2-ui3" />
+  <link rel="stylesheet" href="/game/pf3/game.css?v=pf3-1" />
 </head>
 <body class="arcade-page">
   <a class="skip" href="#content">Zum Spiel springen</a>
@@ -87,7 +87,7 @@
       <aside class="arcade-side">
         <section aria-labelledby="routeGuideTitle">
           <p class="arcade-kicker">ESCAPE BRIEFING</p><h2 id="routeGuideTitle">Ein Impuls. Deine Route.</h2>
-          <p class="arcade-small">Bewegliche Firewalls langsam anfliegen. TRACE//UNIT erfasst deine Höhe: Nach LOCKED ausweichen, der Schuss folgt dir nicht. Beim Laser die markierte Zone verlassen.</p>
+          <p class="arcade-small">Früh auf die nächste Lücke ausrichten. Tempo und Druck steigen nach passierten Gates; Bonuspunkte ändern die Schwierigkeit nicht. Bewegliche Firewalls beginnen ab Gate 4. TRACE//UNIT erfasst deine Höhe: Nach LOCKED ausweichen, der Schuss folgt dir nicht. Beim Laser die markierte Zone verlassen.</p>
           <p class="arcade-small">Jedes Gate zählt 10 Punkte. Goldene Fragmente danach sind optional: 2 × Combo, bis ×5. Ein verpasstes Fragment setzt die Combo zurück. Überleben geht vor Bonus.</p>
         </section>
         <section aria-labelledby="skinsTitle">
@@ -109,9 +109,10 @@
           <ol id="boardEntries" class="board-entries"></ol>
           <p id="ownPosition" class="arcade-notice"></p>
           <button type="button" id="refreshBoard" class="arcade-button quiet" disabled>AKTUALISIEREN</button>
+          <p class="arcade-small"><strong>Neue Wertung pf-3.</strong> Frühere Scores bleiben getrennt: <a href="/game/archive.html">Alte öffentliche Wertung pf-2 ansehen</a>.</p>
           <p class="arcade-small" id="boardExplanation">Das Backend ist noch nicht aktiviert. Spiel und lokale Rekorde funktionieren; öffentliche Eintragung ist deaktiviert. Keine Upload-Warteschlange.</p>
         </section>
-        <p class="arcade-small" id="legacyRecords" hidden></p>
+        <section class="arcade-small" id="legacyRecords" aria-label="Frühere lokale Rekorde" hidden></section>
         <section aria-labelledby="dailyTitle"><h2 id="dailyTitle">Ghost protocol</h2><p class="arcade-small">Gate: 10 Punkte. Optionales Fragment dahinter: 2 × Combo (bis ×5). Ein verpasstes angebotenes Fragment beendet die Combo. Warnung ist noch ungefährlich; solide rote Strahlen und Projektile sind tödlich.</p>
           <p class="arcade-small">Daily wechselt um 00:00 UTC. Derselbe UTC-Tag und dieselbe Spielversion ergeben dieselben Gates. Ein Online-Run behält seinen Server-Starttag, auch über Mitternacht.</p>
           <p class="arcade-small">Dieses visuelle Echtzeitspiel ist nicht vollständig barrierefrei. Reduzierte Bewegung beruhigt die Dekoration; die Spielbewegung bleibt für die Mechanik erforderlich.</p>
@@ -144,8 +145,8 @@
     <label for="copyFallback" id="copyLabel" hidden>Score auswählen und kopieren</label>
     <textarea id="copyFallback" readonly hidden></textarea>
   </dialog>
-  <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-2</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
+  <footer class="arcade-shell arcade-footer"><span>PACKET//FLIGHT · pf-3</span><nav aria-label="Rechtliches"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></nav></footer>
   <script src="/script.js?v=31" defer></script>
-  <script type="module" src="/game/app.mjs?v=pf2-ui3"></script>
+  <script type="module" src="/game/pf3/app.mjs?v=pf3-1"></script>
 </body>
 </html>

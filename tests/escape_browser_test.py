@@ -19,17 +19,17 @@ def observe(page, lead=0):
       if (fragment) target=fragment.baseCenter+fragment.fragmentOffset;
       if(h?.kind==='trace'&&h.locked!==null) target=h.locked>=360?Math.max(252,h.locked-82):Math.min(452,h.locked+100);
       if(h?.kind==='laser') target=h.side>0?310:420;
-      return {state:document.body.dataset.gameState, flap:!f.dead&&f.y+Math.max(0,f.vy)*lead>target+18&&f.vy>0,
+      return {state:document.body.dataset.gameState, flap:window.__bot(lead||.016,window.__collectFragments!==false),time:f.time,
         gates:f.gatesPassed, score:f.score, fragments:f.fragments, bonus:f.bonusPoints, combo:f.combo,
         ticks:f.ticks, y:f.y, vy:f.vy, reason:f.reason, phase:h?`${h.kind}-${h.phase}`:null,
         locked:h?.locked, gateType:f.gates.find(g=>!g.passed)?.type};
     }""", lead)
 
-def fly(page, goal=30, touch=False, pause_phases=False, captures=None, real_time=False):
-    phases=set(); types=set(); max_combo=0; paused=set(); frames=0
+def fly(page, goal=30, touch=False, pause_phases=False, captures=None, real_time=False,input_lead=.04,tap_interval=.14):
+    phases=set(); types=set(); max_combo=0; paused=set(); frames=0; last_tap=-10
     while frames < 15000:
         frames+=1
-        sample=observe(page, .1 if real_time else 0)
+        sample=observe(page, input_lead if real_time else 0)
         if sample['state'] != 'running' or sample['gates'] >= goal:
             break
         phase=sample['phase']
@@ -55,11 +55,12 @@ def fly(page, goal=30, touch=False, pause_phases=False, captures=None, real_time
             for label in sorted(labels):
                 dest=captures/(label+'.png')
                 if not dest.exists(): page.locator('.flight-panel').screenshot(path=str(dest))
-        if sample['flap']:
+        if sample['flap'] and sample['time']-last_tap>=tap_interval:
+            last_tap=sample['time']
             if touch: page.locator('#flightCanvas').tap()
             else: page.keyboard.press('Space')
         if real_time: time.sleep(.025)
-        else: page.clock.run_for(33)
+        else: page.clock.run_for(17)
     sample=observe(page)
     return {**sample,'phases':sorted(phases),'types':sorted(types),'maxCombo':max_combo,'paused':sorted(paused)}
 

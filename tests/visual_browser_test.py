@@ -9,9 +9,12 @@ BASE = 'http://127.0.0.1:8000'
 
 def inspect_effects(context):
     """Observe real inputs/RAF without changing gameplay or shipping debug hooks."""
-    source = (ROOT / 'game/app.mjs').read_text()
+    source = (ROOT / 'game/pf3/app.mjs').read_text()
     prefix = """
-import { Effects as ObservedEffects } from './effects.mjs?v=pf2-privacy1';
+import { Effects as ObservedEffects } from './effects.mjs?v=pf3-1';
+import {shouldFlap as botFlap,preview as botPreview,targetHeight as botTarget} from '/tests/pf3-controller.mjs';
+window.__bot=(lead=0,collect=false)=>window.__flight&&botFlap(lead?botPreview(window.__flight,lead):window.__flight,collect,window.__botPolicy||{});
+window.__botTarget=()=>window.__flight&&botTarget(window.__flight,false,window.__botPolicy||{});
 window.__visualEvents = {flap:0, point:0, collide:0, reset:0};
 window.__frameCalls = 0;
 for (const method of ['flap','point','collide','reset','advance']) {
@@ -26,27 +29,20 @@ for (const method of ['flap','point','collide','reset','advance']) {
 }
 """
     source = prefix + source.replace('function frame(time) {', 'function frame(time) { window.__frameCalls++;')
-    context.route('**/game/app.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body=source))
+    context.route('**/game/pf3/app.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body=source))
 
-def steer(page, goal=2, frames=900, real_time=False):
-    """Play with actual Space inputs. Reads positions but never writes physics."""
+def steer(page, goal=2, frames=1600, real_time=False):
+    """Actual inputs only, with test-only read-only controller observations."""
     import time
+    last_tap=-10
     for _ in range(frames):
-        status = page.evaluate("""() => {
-          const f = window.__flight;
-          const gate = f?.gates.find(g => !g.passed);
-          return {state:document.body.dataset.gameState, score:f?.gatesPassed || 0,
-            flap:f && !f.dead && f.vy > 0 && f.y > (gate?.center || 360) + 18};
-        }""")
-        if status['state'] != 'running' or status['score'] >= goal:
-            return status
-        if status['flap']:
-            page.locator('#flightCanvas').press('Space')
-        if real_time:
-            time.sleep(.017)
-        else:
-            page.clock.run_for(17)
-    raise AssertionError('Run did not reach the expected score')
+        status=page.evaluate("""() => {const f=window.__flight;return{state:document.body.dataset.gameState,score:f?.gatesPassed||0,time:f?.time||0,flap:window.__bot(.016)}}""")
+        if status['state']!='running' or status['score']>=goal:return status
+        if status['flap'] and status['time']-last_tap>=.16:
+            page.locator('#flightCanvas').press('Space');last_tap=status['time']
+        if real_time:time.sleep(.017)
+        else:page.clock.run_for(17)
+    raise AssertionError('Run did not reach expected score')
 
 class VisualBrowserTests(unittest.TestCase):
     @classmethod
@@ -190,14 +186,14 @@ class VisualBrowserTests(unittest.TestCase):
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.clock.install(time=datetime(2026,10,11,12,tzinfo=timezone.utc))
         page.goto(BASE + '/')
-        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-1');await c.put('/game/render.mjs',new Response('stale-renderer'));}")
+        page.evaluate("async()=>{const c=await caches.open('tr1stan-packet-flight-pf-2-shell-1');await c.put('/game/pf3/render.mjs',new Response('stale-renderer'));}")
         page.goto(BASE + '/game.html')
         page.locator('#keepStorage').check()
         page.wait_for_function("document.querySelector('#offlineReady').textContent.includes('für Offline-Nutzung gespeichert')")
         self.assertNotIn('tr1stan-packet-flight-pf-2-shell-1', page.evaluate('caches.keys()'))
-        self.assertEqual(page.evaluate('caches.keys()'), ['tr1stan-packet-flight-pf-2-shell-6'])
-        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-2-shell-6')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
-        for asset in ['/game/effects.mjs?v=pf2-privacy1','/game/render.mjs?v=pf2-privacy1','/game/app.mjs?v=pf2-ui3','/game/api.mjs?v=pf2-start2','/game/game.css?v=pf2-ui3','/style.css?v=31','/script.js?v=31']:
+        self.assertEqual(page.evaluate('caches.keys()'), ['tr1stan-packet-flight-pf-3-shell-1'])
+        paths = page.evaluate("async () => (await (await caches.open('tr1stan-packet-flight-pf-3-shell-1')).keys()).map(r=>new URL(r.url).pathname+new URL(r.url).search)")
+        for asset in ['/game/pf3/effects.mjs?v=pf3-1','/game/pf3/render.mjs?v=pf3-1','/game/pf3/app.mjs?v=pf3-1','/game/pf3/api.mjs?v=pf3-1','/game/pf3/game.css?v=pf3-1','/style.css?v=31','/script.js?v=31']:
             self.assertIn(asset, paths)
         ctx.set_offline(True); page.reload(wait_until='load')
         page.wait_for_selector('#gameUI:not([hidden])')
@@ -213,7 +209,7 @@ class VisualBrowserTests(unittest.TestCase):
         self.game(); self.start(); self.page.locator('#pause').click()
         before = self.page.locator('#flightCanvas').evaluate('c=>c.toDataURL()')
         self.page.evaluate("""async () => {
-          const {Renderer}=await import('/game/render.mjs?v=pf2-privacy1');
+          const {Renderer}=await import('/game/pf3/render.mjs?v=pf3-1');
           const renderer=new Renderer(document.querySelector('#flightCanvas'));
           renderer.resize(); renderer.resize();
         }""")

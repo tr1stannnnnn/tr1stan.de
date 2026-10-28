@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,follow" />
+  <title>PACKET//FLIGHT — alte Wertung pf-2</title>
+  <link rel="icon" href="/favicon.svg?v=18" type="image/svg+xml" />
+  <link rel="stylesheet" href="/style.css?v=31" />
+  <link rel="stylesheet" href="/game/pf3/game.css?v=pf3-1" />
+</head>
+<body class="arcade-page">
+  <a class="skip" href="#content">Zur alten Wertung springen</a>
+  <header class="arcade-header arcade-shell"><a class="brand" href="/index.html">tr1stan.de</a><a href="/game.html">Zur neuen Wertung pf-3</a></header>
+  <main id="content" tabindex="-1" class="arcade-shell">
+    <div class="arcade-intro"><p class="arcade-kicker">PACKET//FLIGHT / ALTE WERTUNG</p>
+    <h1>Archiv pf-2</h1>
+    <p>Die neue Schwierigkeit pf-3 hat eigene Scores. Diese alten pf-2-Bestwerte wurden nicht übernommen. Normale Runs und Daily bleiben getrennt. Es gelten weiterhin die Aufbewahrungsfristen: Normal 365 Tage ab Bestwert, Daily 30 UTC-Tage.</p>
+    </div>
+    <form id="archiveForm">
+      <label for="archiveMode">Alter Ranglistenbereich</label>
+      <select id="archiveMode"><option value="alltime">NORMAL · ALLZEIT · pf-2</option><option value="daily">DAILY · UTC-TAG · pf-2</option></select>
+      <div id="archiveDayChoice" hidden><label for="archiveDay">UTC-Tag der alten Daily-Wertung (letzte 30 UTC-Tage)</label><input id="archiveDay" type="date" /></div>
+      <p id="archiveExplanation" class="arcade-small">Normale pf-2-Runs aller Tage innerhalb der Aufbewahrungsfrist. Die Liste lädt erst nach deinem Klick.</p>
+      <button type="submit" class="arcade-button primary" id="loadArchive">ALTE WERTUNG LADEN</button>
+    </form>
+    <p id="archiveStatus" class="arcade-notice" role="status">Noch keine Anfrage an den Ranglisten-Server.</p>
+    <ol id="archiveEntries" class="board-entries"></ol>
+    <p class="arcade-small">Der Abruf sendet keine Browserkennung und speichert keine Spielstände oder Offline-Kopie der Rangliste. <a href="/datenschutz.html#rangliste">Datenschutzhinweise</a></p>
+    <p><a href="/game.html">PACKET//FLIGHT pf-3 spielen</a></p>
+  </main>
+  <footer class="arcade-shell arcade-footer"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></footer>
+  <script type="module" src="/game/pf3/archive.mjs?v=pf3-1"></script>
+</body>
+</html>

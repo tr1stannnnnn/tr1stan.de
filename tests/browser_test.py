@@ -119,7 +119,7 @@ class BrowserTests(unittest.TestCase):
     def online(self, score_failure=False, start_failure=False, populated=False):
         self.scores = []; self.starts = []; self.mockOnline = True; self.failed_once = False; self.own_entry = None; self.receipt = None
         self.start_failure = start_failure; self.submit_status = None; self.start_override = {}
-        self.context.route('**/game/config.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
+        self.context.route('**/game/pf3/config.mjs*', lambda route: route.fulfill(status=200, content_type='text/javascript', body="export const API_URL='https://packet-flight.test';"))
         def api(route):
             req = route.request; path = urlparse(req.url).path
             headers = {'access-control-allow-origin': BASE, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Content-Type, X-Player-ID', 'content-type': 'application/json'}
@@ -131,22 +131,22 @@ class BrowserTests(unittest.TestCase):
                 self.run_mode = req.post_data_json['mode']
                 self.run_day = datetime.fromtimestamp(time/1000, timezone.utc).date().isoformat() if self.run_mode == 'daily' else ''
                 seed = 2166136261
-                for char in 'pf-2|escape-1|' + self.run_day: seed = ((seed ^ ord(char)) * 16777619) & 0xffffffff
-                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-2','mode':self.run_mode,'day':self.run_day,'seed':(seed or 1) if self.run_mode == 'daily' else 1,'startedAt':time,'expiresAt':time+1800000}
+                for char in 'pf-3|escape-2|' + self.run_day: seed = ((seed ^ ord(char)) * 16777619) & 0xffffffff
+                data = {'token':f'isolated-test-token-{len(self.starts)}','runId':'test','version':'pf-3','mode':self.run_mode,'day':self.run_day,'seed':(seed or 1) if self.run_mode == 'daily' else 1,'startedAt':time,'expiresAt':time+1800000}
                 data.update(self.start_override)
             elif path == '/api/score':
                 self.scores.append(req.post_data_json)
                 if self.submit_status: route.fulfill(status=self.submit_status, headers=headers, body='{"message":"Run abgelaufen."}'); return
                 if self.receipt is None:
                     self.own_entry = {'position':22 if populated else 1,'alias':req.post_data_json['alias'],'score':req.post_data_json['score'],'gates':req.post_data_json['gates'],'fragments':req.post_data_json['fragments'],'bonusPoints':req.post_data_json['bonusPoints'],'rank':'SCRIPT KIDDIE','achievedAt':self.page.evaluate('Date.now()'),'own':True}
-                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-2','mode':self.run_mode,'day':self.run_day,'positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
+                    self.receipt = {'accepted':True,'score':req.post_data_json['score'],'version':'pf-3','mode':self.run_mode,'day':self.run_day,'positionAsOf':self.page.evaluate('Date.now()'),'ownEntry':self.own_entry}
                 if score_failure and not self.failed_once:
                     self.failed_once = True; route.fulfill(status=503, headers=headers, body='{"message":"Antwort verloren"}'); return
                 data = self.receipt
             else:
                 entries = [{'position':i+1,'alias':f'Änne_Router_{i:02}','score':250,'gates':25,'fragments':0,'bonusPoints':0,'rank':'SYSADMIN','achievedAt':1791720000000,'own':False} for i in range(20)] if populated else []
                 requested = 'daily' if 'mode=daily' in req.url else 'alltime'
-                data = {'version':'pf-2','mode':requested,'day':datetime.fromtimestamp(self.page.evaluate('Date.now()')/1000,timezone.utc).date().isoformat() if requested == 'daily' else '','entries':entries,'ownEntry':self.own_entry}
+                data = {'version':'pf-3','mode':requested,'day':datetime.fromtimestamp(self.page.evaluate('Date.now()')/1000,timezone.utc).date().isoformat() if requested == 'daily' else '','entries':entries,'ownEntry':self.own_entry}
             route.fulfill(status=200, headers=headers, body=json.dumps(data))
         self.context.route('https://packet-flight.test/**', api)
     def test_enabled_api_stays_unused_until_explicit_online_action(self):
@@ -171,7 +171,7 @@ class BrowserTests(unittest.TestCase):
         self.page.locator('#todayBoard').click(); self.page.locator('#alltimeBoard').click()
         self.assertEqual(len(held),1)
         held[0].fulfill(status=200,headers={'access-control-allow-origin':BASE,'content-type':'application/json'},
-            body=json.dumps({'version':'pf-2','mode':'alltime','day':'','entries':[],'ownEntry':None}))
+            body=json.dumps({'version':'pf-3','mode':'alltime','day':'','entries':[],'ownEntry':None}))
         self.page.wait_for_function("document.querySelector('#boardStatus').textContent.includes('Noch keine')",timeout=2000)
         self.assertEqual(len(loads),2)
         self.assertFalse(self.page.locator('#refreshBoard').is_disabled())

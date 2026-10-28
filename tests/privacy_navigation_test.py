@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 BASE = 'http://127.0.0.1:8000'
 CHOICE = 'tr1stan.packet-flight.storage-choice-1'
-KEY = 'tr1stan.packet-flight.pf-2.storage-1'
+KEY = 'tr1stan.packet-flight.pf-3.storage-1'
 LEGACY = 'tr1stan.packet-flight.pf-1.storage-1'
 
 class PrivacyNavigationTests(unittest.TestCase):
@@ -64,7 +64,7 @@ class PrivacyNavigationTests(unittest.TestCase):
         self.assertEqual(self.page.evaluate('caches.keys()'),[])
         # Old controlled tab must not recreate a deleted shell on failed fetch.
         self.ctx.set_offline(True)
-        self.assertTrue(self.page.evaluate("fetch('/game/render.mjs?v=pf2-privacy1',{cache:'no-store'}).then(()=>false,()=>true)"))
+        self.assertTrue(self.page.evaluate("fetch('/game/pf3/render.mjs?v=pf3-1',{cache:'no-store'}).then(()=>false,()=>true)"))
         self.assertEqual(self.page.evaluate('caches.keys()'),[])
         self.ctx.set_offline(False)
         self.page.locator('#keepStorage').check(); self.ready_cache()
@@ -137,7 +137,7 @@ class PrivacyNavigationTests(unittest.TestCase):
             self.page.reload();self.ready_cache()
             self.assertEqual(self.page.locator('#onlineRun').count(),0)
             self.assertEqual(self.page.locator('#startOnline').inner_text(),'MIT RANGLISTE STARTEN · EMPFOHLEN')
-            self.assertEqual(self.page.evaluate('caches.keys()'),['tr1stan-packet-flight-pf-2-shell-6'])
+            self.assertEqual(self.page.evaluate('caches.keys()'),['tr1stan-packet-flight-pf-3-shell-1'])
             self.assertEqual(self.page.evaluate('(k)=>JSON.parse(localStorage.getItem(k)).legacy.normal',KEY),73)
             self.ctx.set_offline(True);self.page.reload(wait_until='load')
             self.page.wait_for_selector('#gameUI:not([hidden])')
@@ -150,6 +150,8 @@ class PrivacyNavigationTests(unittest.TestCase):
         self.upgrade_published_shell('7ab097c',4,1)
     def test_published_shell5_upgrades_with_records_and_offline_shell6(self):
         self.upgrade_published_shell('d018eef',5,0)
+    def test_published_shell6_upgrades_to_pf3_and_preserves_pf2_records(self):
+        self.upgrade_published_shell('8445785',6,0)
     def test_terminal_touch_reflow_targets_and_keyboard(self):
         out=Path('/tmp/packet-flight-review');out.mkdir(exist_ok=True)
         for width in [320,390]:
