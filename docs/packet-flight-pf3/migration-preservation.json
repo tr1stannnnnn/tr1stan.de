@@ -1,0 +1,89 @@
+{
+  "checked_at_utc": "2026-10-28T08:08:08.518477+00:00",
+  "deployment_id": "d423ba02-632a-485a-9af3-ad0fd650bd4a",
+  "deployment_created_on": "2026-10-27T13:53:05.434577Z",
+  "versions": [
+    {
+      "version_id": "03b8a198-ed4f-4913-9838-43fb88a2c233",
+      "percentage": 100,
+      "etag": "a2299103df32194e959ab935aa0fb510420e20ec3ad748a1c9bc90fa98f873fa",
+      "runtime": {
+        "compatibility_date": "2026-06-11",
+        "usage_model": "standard"
+      },
+      "annotations": {
+        "workers/triggered_by": "version_upload"
+      }
+    }
+  ],
+  "vars": {
+    "ENABLED": "true",
+    "ENVIRONMENT": "production"
+  },
+  "secret_binding_names": [
+    "PSEUDONYM_KEY",
+    "RATE_KEY",
+    "SIGNING_KEY"
+  ],
+  "d1_binding_ids": [
+    "bc462466-1ed9-41d9-ab75-dc0197d50502"
+  ],
+  "public_scores_count": 8,
+  "public_scores_sha256": "84b9b2085b367e4f406e080f6ca87f536dc2d070587172fecd3027f5c99754ef",
+  "public_row_fingerprints": [
+    "d7c92554bcef97c20ffae41160f64f23004ce33617caf853de9eee57a743ba75",
+    "7539a0e52fa3986ee571019f58d9a86b7ec622813c6f28ce27d8d89f20193dff",
+    "d161b7ea867b020708d58c418af17f9427fb1eac1ac5a3541fe3d8313350b1ea",
+    "ef44624402a65a4c90e2768c9d6564230f3b155db7b0ddf6f90fa63e8567fc0e",
+    "026536a92b45c581dbaa83d794c0fdd771b0159b40e2d8375fe70da5be72d00b",
+    "aa765785cc944861a1f66ec82afb7213494ab2010d78c64241c19bd7e7d4a6c3",
+    "35f8dd8ff408b1d08f9ec5b6e7c17cc0b563d3970a24b2b8ed6c67f00f04f0da",
+    "1cc7dd2219190de1f205632c1d1e98dc5c77b21b75ac6e7dcd7871e4ecfb4490"
+  ],
+  "counts": [
+    {
+      "old_runs": 0,
+      "old_scores": 0,
+      "pf2_runs": 13,
+      "pf2_scores": 8
+    }
+  ],
+  "migrations": [
+    {
+      "name": "0001_initial.sql"
+    },
+    {
+      "name": "0002_escape_pf2.sql"
+    },
+    {
+      "name": "0003_pf3.sql"
+    }
+  ],
+  "legacy_table_schema_sha256": "dbea846b96f18616982b5051d888efe1d290cb8e8f898a59a310fe4adc987433",
+  "query_meta": [
+    {
+      "rows_written": 0,
+      "changed_db": false
+    },
+    {
+      "rows_written": 0,
+      "changed_db": false
+    },
+    {
+      "rows_written": 0,
+      "changed_db": false
+    },
+    {
+      "rows_written": 0,
+      "changed_db": false
+    }
+  ],
+  "same_public_scores": true,
+  "all_previous_public_rows_present": true,
+  "pf3_counts": [
+    {
+      "pf3_runs": 0,
+      "pf3_scores": 0
+    }
+  ]
+}

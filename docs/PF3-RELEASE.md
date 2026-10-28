@@ -175,3 +175,16 @@ deploymentd423ba02-632a-485a-9af3-ad0fd650bd4a. Eightpf-2 public score rows,
 13old-version runs, pf-1 tables empty; migrations0001/0002. SELECT metadata
 confirms rows_written0/changed_dbfalse. Three existing secret binding names
 and existing D1 UUID recorded, no credential values.
+
+## Compatibility progress
+
+PR#16 merged at08:08:22UTC as
+`ea8d47413ea7fd2799cac35affd2dd483a519a81` (head
+`eb8c87d33c717ab56f8489bbfee75309d8ff1ae5`). Only migration0003 was pending
+and applied successfully(6commands,1.31msD1 reported). A TimeTravel bookmark
+was saved privately; no restoration was performed. Subsequent authenticated
+SELECT proves all eight publicpf-2 row fingerprints and old table schema hashes
+unchanged, oldpf-1 tables still empty, v3runs/scores empty, and the same three
+secret binding names/D1binding. [Preservation evidence](packet-flight-pf3/migration-preservation.json).
+Automatic Worker Build and Pages are running for that exact merge SHA. This
+is not yet the pf-3 frontend activation.
