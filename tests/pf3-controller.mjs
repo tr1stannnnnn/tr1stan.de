@@ -24,7 +24,7 @@ export function preview(f,seconds) {
  const ticks=f.ticks+Math.round(seconds*120);
  return {...f,y:f.y+f.vy*seconds+450*seconds*seconds,vy:Math.min(520,f.vy+900*seconds),gates:f.gates.map(g=>{const x=g.x-f.speed*seconds;return{...g,...gateShape(g,ticks),x,passed:g.passed||x+64<109}})};
 }
-export function play(Flight,seed,goal=80,{collect=false,reaction=0,tapInterval=.16,latency=0,policy={},replay=null,recordInputs=false}={}) {
+export function play(Flight,seed,goal=80,{collect=false,reaction=0,tapInterval=.16,latency=0,policy={},replay=null,recordInputs=false,onStep=null}={}) {
  const f=new Flight(seed);let pending=null,nextTap=0,nextRead=0,decision=false,minClearance=Infinity,taps=0,maxCombo=0;
  const phases=new Set(),stats=[],inputs=[];
  const replayTicks=replay?new Set(replay.ticks):null;
@@ -38,7 +38,7 @@ export function play(Flight,seed,goal=80,{collect=false,reaction=0,tapInterval=.
     if(pending!==null&&time>=pending){apply=true;pending=null;}
   }
   if(apply){if(recordInputs)inputs.push(f.ticks);f.flap();nextTap=time+tapInterval;taps++;}
-  f.step();f.drainEvents();maxCombo=Math.max(maxCombo,f.combo);
+  f.step();if(onStep)onStep(f);f.drainEvents();minClearance=Math.min(minClearance,f.y-9-40,672-f.y-9);maxCombo=Math.max(maxCombo,f.combo);
   if(f.hazard)phases.add(`${f.hazard.kind}:${f.hazard.phase}`);
   for(const g of f.gates) if(120+11>g.x&&120-11<g.x+64)minClearance=Math.min(minClearance,g.gap/2-Math.abs(f.y-g.center)-9);
   for(const p of f.projectiles)if(p.x-p.width/2<131&&p.x+p.width/2>109)minClearance=Math.min(minClearance,Math.abs(f.y-p.y)-9-p.height/2);

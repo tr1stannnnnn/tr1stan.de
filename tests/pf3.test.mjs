@@ -1,4 +1,5 @@
 import test from 'node:test';
+import{createHash}from'node:crypto';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile}from'node:fs/promises';
 import{performance}from'node:perf_hooks';
@@ -20,11 +21,14 @@ test('pf-3 curve is gated, smooth and distinct; familiar impulse, gravity and hi
  assert.equal(dailySeed('2026-10-27'),dailySeed('2026-10-27'));assert.notEqual(dailySeed('2026-10-27'),old.dailySeed('2026-10-27'));assert.notEqual(dailySeed('2026-10-28'),dailySeed('2026-10-27'));
 });
 test('1000 seeded routes use real height, show early stairs and reject long flat or mechanical alternation',()=>{
- let minimumSpan=Infinity,maxFlat=0,maxAlternation=0,moving=0,compress=0;
+ let minimumSpan=Infinity,maxFlat=0,maxAlternation=0,maxConstantRoute=0,moving=0,compress=0;
  for(let seed=1;seed<=1000;seed++){
   const route=plans(seed);const first=route.slice(0,5).map(g=>g.baseCenter),span=Math.max(...first)-Math.min(...first);minimumSpan=Math.min(minimumSpan,span);assert(span>=230);
   assert.equal(route[0].type,'static');assert.equal(route[3].type,'moving');
   assert(Math.max(...route.map(g=>g.baseCenter))-Math.min(...route.map(g=>g.baseCenter))>=300);
+  // A comfortable horizontal tube needs40units after subtracting the hitbox.
+  // This generous check ignores moving phases/hazards, which further restrict it.
+  for(let start=0;start<route.length;start++){let lo=-Infinity,hi=Infinity;for(let end=start;end<route.length;end++){const g=route[end];lo=Math.max(lo,g.baseCenter-g.baseGap/2+R.halfHeight);hi=Math.min(hi,g.baseCenter+g.baseGap/2-R.halfHeight);if(hi-lo<40)break;maxConstantRoute=Math.max(maxConstantRoute,end-start+1);}}
   let flat=0,alternating=0,last=0;
   for(let i=1;i<route.length;i++){
    const g=route[i],delta=g.baseCenter-route[i-1].baseCenter,dir=Math.sign(delta);
@@ -34,7 +38,7 @@ test('1000 seeded routes use real height, show early stairs and reject long flat
    if(g.type==='moving')moving++;if(g.type==='compress')compress++;
   }
  }
- assert(minimumSpan>=230);assert(maxFlat<=4);assert(maxAlternation<=8);assert(moving>20000&&compress>10000);
+ assert(minimumSpan>=230);assert(maxFlat<=4);assert(maxAlternation<=8);assert(maxConstantRoute<=8);assert(moving>20000&&compress>10000);
 });
 test('Moving/closing apertures stay clear of ceiling and floor throughout each cycle',()=>{
  for(let seed=1;seed<=200;seed++)for(const g of plans(seed,80))for(let tick=0;tick<=600;tick+=30){const s=gateShape({...g,spawnTick:0},tick);assert(s.center-s.gap/2>=R.ceiling+18-1e-8);assert(s.center+s.gap/2<=R.floor-18+1e-8);assert(s.gap>=150-1e-8);}
@@ -102,4 +106,18 @@ test('Local pf-2 archives retain values/identity/settings without copying bests 
 });
 test('Missing archives do not create undefined entries during explicit persistence choice',()=>{
  const a=new Records(memoryStorage()),b=new Records(memoryStorage());mergeRecords(a,b);assert.deepEqual(a.data.archives,{});
+});
+
+test('Cached pf-2 module URLs remain byte-identical to the previously published release',async()=>{
+ const hashes=JSON.parse(await readFile(new URL('./pf2-frozen-sha256.json',import.meta.url)));
+ for(const[path,hash]of Object.entries(hashes))assert.equal(createHash('sha256').update(await readFile(new URL('../'+path,import.meta.url))).digest('hex'),hash,path);
+});
+test('Actual tick replay accelerates continuously and freezes each visible aperture profile',()=>{
+ const w=play(Flight,dailySeed('2026-10-27'),80,{latency:.04,tapInterval:.14,recordInputs:true});assert.equal(w.f.gatesPassed,80);
+ let speed=190,spawns=1;const seen=new Map();
+ const replay=play(Flight,dailySeed('2026-10-27'),80,{replay:{ticks:w.inputs,until:w.stopTick},onStep:f=>{
+  assert(f.speed>=speed&&f.speed-speed<=R.acceleration*R.step+1e-8);assert(f.speed<=difficulty(f.gatesPassed).speed+1e-8);speed=f.speed;
+  for(const g of f.gates){const fixed=[g.baseGap,g.baseCenter,g.amplitude,g.type];if(seen.has(g.ordinal))assert.deepEqual(fixed,seen.get(g.ordinal));else seen.set(g.ordinal,fixed);}
+  if(f.spawned!==spawns){assert.equal(f.spawned,spawns+1);spawns=f.spawned;assert.equal(f.gates.at(-1).interval,difficulty(f.gatesPassed).interval);}
+ }});assert.equal(replay.f.gatesPassed,80);assert.equal(speed,310);
 });

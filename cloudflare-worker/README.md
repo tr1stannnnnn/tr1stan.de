@@ -1,4 +1,41 @@
-# PACKET//FLIGHT pf-2 backend
+# PACKET//FLIGHT versioned backend (pf-2 / pf-3)
+
+The pf-3 upgrade, test commands, compatibility release order, parameters, evidence
+and rollback are documented in [PF3-RELEASE](../docs/PF3-RELEASE.md). Read its
+actual release status before operating. GitHub Pages and the same Free Worker/D1
+remain in use. Build command/root/branch and `--keep-vars` are preserved.
+
+The new Worker accepts both signed `pf2.` and `pf3.` tokens. Each version uses
+its own immutable shared rules, Daily seed, minimum-time bound and SQL namespace.
+No records are copied between comparisons. Optional `version` on GET leaderboard
+defaults to pf-2 for cached clients; pf-3 clients send it explicitly. The archive
+may request pf-2 Daily `day=YYYY-MM-DD` within the current30 UTC calendar days.
+It sends no browser ID. No board request occurs on page load.
+
+`PF3_STARTS=false` holds only new pf-3 starts; `LEGACY_STARTS=false` returns an
+explicit update message for new pf-2 starts. Both retain regular valid issued
+runs and identical retained receipt retries. `ACTIVE_RULESET` describes the
+release in health. Global/minute/day rate limits remain atomic and shared across
+versions. The8-ms CPU gate and quota thresholds are unchanged.
+
+Migration0003 is necessary because existing v2 tables have `CHECK(version='pf-2')`.
+It only adds v3 tables/indexes; old tables, rows, indexes and secrets remain.
+Retention applies independently to both versions with the same30/365/48h policy.
+Never reverse this upgrade by dropping tables or restoring a database backup.
+
+New isolated checks: `npm test` runs27 backend tests, including independent old
+signed-token compatibility, distinct time bounds, max19980 and mixed-version
+parallel rate limits. `tests/start_integration_test.py` exercises the actual
+bundled Worker with ephemeral test D1, browser inputs, voluntary submission and
+readback. Use fake test keys; never create public test scores for this task.
+
+The remaining pf-2 description below is historical. In particular its1000-gate
+minimum exceeds25 minutes only for pf-2: pf-3's distance-derived bound is lower.
+The19980 component bound,25-minute active cap and30-minute token TTL still apply.
+
+---
+
+# Historical pf-2 backend documentation
 
 GitHub Pages remains the static host. The existing Cloudflare Worker/D1 backend
 is active; the approved workers.dev API is connected in game/config.mjs.

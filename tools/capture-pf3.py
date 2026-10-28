@@ -1,5 +1,6 @@
 """Real wall-clock input-automated local pf3 run; no state/score/seed/time writes."""
 import json,time,hashlib,sys,subprocess
+from datetime import datetime,timezone
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
@@ -7,8 +8,17 @@ sys.path.insert(0,str(ROOT/'tests'))
 from escape_browser_test import fly
 from visual_browser_test import inspect_effects
 attempt=int(sys.argv[1]) if len(sys.argv)>1 else 1
-OUT=Path(f'/tmp/pf3-work/video-attempt-{attempt}');OUT.mkdir(parents=True,exist_ok=True)
-chosen=json.loads(Path('/tmp/pf3-work/video-policy.json').read_text())
+OUT=Path(f'/workspace/pf3-evidence/video-attempt-{attempt}');OUT.mkdir(parents=True,exist_ok=True)
+day=datetime.now(timezone.utc).date().isoformat()
+# Select an input policy against the same deterministic Daily, without changing
+# the browser clock or any game state. Playback below still uses real keypresses.
+program="""
+import{Flight}from'./game/pf3/physics.mjs';import{dailySeed}from'./game/pf3/rules.mjs';import{play}from'./tests/pf3-controller.mjs';
+const day=process.argv[1],seed=dailySeed(day);let chosen;
+for(const policy of[{}, {escape:90},{escape:70},{threshold:12},{threshold:18}]){for(const tapInterval of[.14,.16,.12,.18]){const w=play(Flight,seed,35,{policy,tapInterval,latency:.04});if(w.summary.gates===35&&w.summary.minClearance>=5){chosen={day,seed,policy,tapInterval};break;}}if(chosen)break;}
+if(!chosen)throw Error('No input policy for this Daily; do not manipulate gameplay');console.log(JSON.stringify(chosen));
+"""
+chosen=json.loads(subprocess.check_output(['node','--input-type=module','-e',program,day],cwd=ROOT,text=True))
 policy=chosen['policy'];tap=chosen['tapInterval'];lead=.04
 errors=[];external=[]
 with sync_playwright() as pw:
@@ -28,7 +38,7 @@ with sync_playwright() as pw:
  if outcome['gates']>=35:page.locator('#flightCanvas').press('Escape')
  page.screenshot(path=str(OUT/'end.png'),full_page=True)
  video=page.video;ctx.close();video_path=Path(video.path());browser.close()
-metadata={'input_automation':True,'actual_wall_clock':True,'wall_seconds':elapsed,'outcome':outcome,'state':state,'controller_policy':policy,'min_tap_interval':tap,'input_lead':lead,'day':chosen['day'],'expected_daily_seed':chosen['seed'],'no_physics_score_seed_or_time_writes':True,'public_api_requests':len(external),'page_errors':errors,'video_webm':str(video_path),'source_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'game/pf3').glob('*.mjs')}}
+metadata={'input_automation':True,'actual_wall_clock':True,'wall_seconds':elapsed,'outcome':outcome,'state':state,'controller_policy':policy,'min_tap_interval':tap,'input_lead':lead,'day':chosen['day'],'expected_daily_seed':chosen['seed'],'seed_observation':'Daily seed derived from displayed UTC day and unchanged shared rules; Flight exposes no seed field','no_physics_score_seed_or_time_writes':True,'public_api_requests':len(external),'page_errors':errors,'video_webm':str(video_path),'source_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'game/pf3').glob('*.mjs')}}
 (OUT/'metadata.json').write_text(json.dumps(metadata,indent=2)+'\n')
 assert errors==[] and external==[],metadata
 assert outcome['gates']>=35 and outcome['state']=='running',outcome
