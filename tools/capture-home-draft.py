@@ -59,7 +59,9 @@ with sync_playwright()as pw:
   recorded_seconds=time.monotonic()-started
   v=p.video;ctx.close();original=Path(v.path());dest=OUT/'interactions.mp4'
   with open(scratch/'encode.log','w')as log:subprocess.run(['ffmpeg','-y','-i',str(original),'-an','-c:v','libx264','-preset','veryfast','-crf','29','-pix_fmt','yuv420p','-movflags','+faststart',str(dest)],check=True,stdout=log,stderr=log)
-  video_result={'file':str(dest.relative_to(ROOT)),'real_wall_seconds':recorded_seconds,'input_automation':True,'no_fake_state':True,'events':events}
+  gif=OUT/'interactions.gif'
+  with open(scratch/'gif-encode.log','w')as log:subprocess.run(['ffmpeg','-y','-i',str(dest),'-filter_complex','fps=6,scale=800:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=48:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4','-loop','-1',str(gif)],check=True,stdout=log,stderr=log)
+  video_result={'gif_preview':str(gif.relative_to(ROOT)),'file':str(dest.relative_to(ROOT)),'real_wall_seconds':recorded_seconds,'input_automation':True,'no_fake_state':True,'events':events}
  browser.close()
 assert errors==[] and external==[],(errors,external)
 result={'screenshots':records,'video':video_result,'page_errors':errors,'external_requests':external,'physical_devices':'not tested','Safari':'not tested','browser':'Cloud Chromium; optional 3D via software WebGL'}

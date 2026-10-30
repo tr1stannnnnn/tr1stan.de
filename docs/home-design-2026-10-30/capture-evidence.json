@@ -259,7 +259,15 @@
       }
     ],
     "media_duration_seconds": 33.56,
-    "real_wall_seconds_note": "Helper elapsed time includes final encoding; media_duration_seconds is the actual clip length. No virtual clock or playback acceleration was used."
+    "real_wall_seconds_note": "Helper elapsed time includes final encoding; media_duration_seconds is the actual clip length. No virtual clock or playback acceleration was used.",
+    "gif_preview": {
+      "file": "docs/home-design-2026-10-30/interactions.gif",
+      "fps": 6,
+      "width": 800,
+      "duration_seconds": 33.5,
+      "loops": false,
+      "source": "same MP4, frame-rate/size/palette conversion only"
+    }
   },
   "page_errors": [],
   "external_requests": [],

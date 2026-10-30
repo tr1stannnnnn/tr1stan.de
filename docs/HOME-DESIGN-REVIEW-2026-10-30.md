@@ -126,7 +126,12 @@ auf diesem Reviewbranch und sind direkt über GitHub überprüfbar.
 - [Tablet](home-design-2026-10-30/home-tablet-768.png) /
   [Querformat](home-design-2026-10-30/home-landscape-844.png) /
   [200%CSS-Zoom](home-design-2026-10-30/home-zoom200.png)
-- [Interaktionsaufnahme](home-design-2026-10-30/interactions.mp4)
+- [Interaktionsaufnahme im Browser (GIF)](home-design-2026-10-30/interactions.gif) /
+  [MP4 in voller Auflösung](home-design-2026-10-30/interactions.mp4)
+
+GitHub liefert Repository-MP4s als application/octet-stream aus. Deshalb liegt
+zusätzlich eine einmal ablaufende GIF-Vorschau(800px/6fps) derselben Aufnahme
+für die direkte Browser-Review bei; keine private Installation nötig.
 
 Die Aufnahme zeigt reale Cloud-Browserbedienung in echter Zeit: Terminalchip,
 Übersicht/Details, native Videowiedergabe, Rückweg/Log, Browser-Zurück und
