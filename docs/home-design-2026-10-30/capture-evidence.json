@@ -1,0 +1,269 @@
+{
+  "screenshots": [
+    {
+      "file": "home-desktop-1440.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "no-preference",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": true,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-desktop-1280.png",
+      "viewport": [
+        1280,
+        720
+      ],
+      "motion": "no-preference",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": true,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-mobile-320.png",
+      "viewport": [
+        320,
+        568
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-mobile-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "motion": "no-preference",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": true,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-mobile-430.png",
+      "viewport": [
+        430,
+        932
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-tablet-768.png",
+      "viewport": [
+        768,
+        1024
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-landscape-844.png",
+      "viewport": [
+        844,
+        390
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-zoom200.png",
+      "viewport": [
+        1280,
+        720
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "projects-desktop.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#projects",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "projects-mobile-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#projects",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "project-detail-desktop.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#project-packet-flight",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "project-detail-mobile-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#project-packet-flight",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "log-desktop.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#log",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "log-mobile-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#log",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "about-desktop.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "reduce",
+      "javascript": true,
+      "hash": "#about",
+      "webgl_disabled": false,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "home-css-fallback.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "motion": "no-preference",
+      "javascript": true,
+      "hash": "",
+      "webgl_disabled": true,
+      "renderer": false,
+      "no_horizontal_overflow": true
+    },
+    {
+      "file": "projects-no-js-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "motion": "reduce",
+      "javascript": false,
+      "hash": "#projects",
+      "webgl_disabled": false,
+      "renderer": "no JS",
+      "no_horizontal_overflow": "not measured with JS"
+    }
+  ],
+  "video": {
+    "file": "docs/home-design-2026-10-30/interactions.mp4",
+    "real_wall_seconds": 35.21590929001104,
+    "input_automation": true,
+    "no_fake_state": true,
+    "events": [
+      {
+        "action": "Terminal",
+        "hash": "#projects"
+      },
+      {
+        "action": "Projektdetails",
+        "hash": "#project-packet-flight"
+      },
+      {
+        "action": "Video per Tastatur",
+        "playing": true
+      },
+      {
+        "action": "Zur \u00dcbersicht",
+        "hash": "#projects",
+        "video_paused": true
+      },
+      {
+        "action": "Log",
+        "hash": "#log"
+      },
+      {
+        "action": "Browser zur\u00fcck",
+        "hash": "#projects"
+      },
+      {
+        "action": "Tab-Vervollst\u00e4ndigung",
+        "value": "projects packet-flight"
+      }
+    ],
+    "media_duration_seconds": 33.56,
+    "real_wall_seconds_note": "Helper elapsed time includes final encoding; media_duration_seconds is the actual clip length. No virtual clock or playback acceleration was used."
+  },
+  "page_errors": [],
+  "external_requests": [],
+  "physical_devices": "not tested",
+  "Safari": "not tested",
+  "browser": "Cloud Chromium; optional 3D via software WebGL"
+}
