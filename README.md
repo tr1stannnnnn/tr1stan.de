@@ -1,5 +1,10 @@
 # tr1stan.de
 
+> **Homepage-Entwurf (30.10.2026, nur Reviewbranch):** Neue Netzwerklandschaft,
+> `projects` und `log`; noch nicht gemergt oder veröffentlicht. Aktuelle
+> Architektur, Aufnahmen und Tests: [Reviewbericht](docs/HOME-DESIGN-REVIEW-2026-10-30.md).
+> Die ältere Designbeschreibung unten dokumentiert den Ausgangsstand.
+
 Statische private Website für `tr1stan.de` — eine kurze persönliche Seite im
 Synthwave-Stil. Das Frontend braucht kein Framework, keinen Build-Step und kein npm.
 Im ausgelieferten Standardzustand gibt es keine externen Laufzeit-Requests.

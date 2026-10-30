@@ -163,7 +163,9 @@ class PrivacyNavigationTests(unittest.TestCase):
                 boxes=page.locator('.term-chip').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().toJSON())')
                 self.assertGreater(len(set(round(b['top']) for b in boxes)),1)
                 self.assertTrue(all(b['height']>=44 and b['width']>=44 and b['right']<=width for b in boxes))
-                self.assertEqual(page.locator('#termChips button').count(),12)
+                self.assertEqual(page.locator('#termChips button').count(),15)
+                for added in ['projects','projects packet-flight','log']:
+                    self.assertIn(added,page.locator('#termChips button').all_text_contents())
                 self.assertEqual(page.locator('a[href*="game.html"], .home-actions').count(),0)
                 # All chips execute, retain native focus and never focus the input.
                 page.locator('.term-chip').filter(has_text='about').tap()

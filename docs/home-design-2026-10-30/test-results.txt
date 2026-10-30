@@ -1,0 +1,180 @@
+
+final-all-python.log
+test_board_round_trip_while_loading_finishes_the_last_explicit_selection (browser_test.BrowserTests.test_board_round_trip_while_loading_finishes_the_last_explicit_selection) ... ok
+test_countdown_pause_visibility_resize_restart (browser_test.BrowserTests.test_countdown_pause_visibility_resize_restart) ... ok
+test_daily_utc_rollover_and_no_global_keys (browser_test.BrowserTests.test_daily_utc_rollover_and_no_global_keys) ... ok
+test_enabled_api_stays_unused_until_explicit_online_action (browser_test.BrowserTests.test_enabled_api_stays_unused_until_explicit_online_action) ... ok
+test_expired_form_is_reset_for_new_valid_run_and_reopening (browser_test.BrowserTests.test_expired_form_is_reset_for_new_valid_run_and_reopening) ... ok
+test_failed_start_local_choice_remains_unverifiable (browser_test.BrowserTests.test_failed_start_local_choice_remains_unverifiable) ... ok
+test_failed_start_never_begins_a_run_and_explicit_retry_succeeds (browser_test.BrowserTests.test_failed_start_never_begins_a_run_and_explicit_retry_succeeds) ... ok
+test_local_to_next_online_and_daily_restart_prepare_new_tokens (browser_test.BrowserTests.test_local_to_next_online_and_daily_restart_prepare_new_tokens) ... ok
+test_manual_immutable_retry_after_expiry_and_new_run_reset (browser_test.BrowserTests.test_manual_immutable_retry_after_expiry_and_new_run_reset) ... ok
+test_mobile_two_choices_error_and_next_online_normal_and_daily (browser_test.BrowserTests.test_mobile_two_choices_error_and_next_online_normal_and_daily) ... ok
+test_offline_reload (browser_test.BrowserTests.test_offline_reload) ... ok
+test_populated_leaderboard_mobile_rank_time_and_own_position (browser_test.BrowserTests.test_populated_leaderboard_mobile_rank_time_and_own_position) ... ok
+test_server_expiry_response_stops_fresh_publication (browser_test.BrowserTests.test_server_expiry_response_stops_fresh_publication) ... ok
+test_storage_audio_failure_and_copy_fallback (browser_test.BrowserTests.test_storage_audio_failure_and_copy_fallback) ... ok
+test_surface_requires_choice_and_buttons_work_with_tab_enter_space (browser_test.BrowserTests.test_surface_requires_choice_and_buttons_work_with_tab_enter_space) ... ok
+test_terminal_completion_history_and_safe_text (browser_test.BrowserTests.test_terminal_completion_history_and_safe_text) ... ok
+test_terminal_navigation_and_skip_focus (browser_test.BrowserTests.test_terminal_navigation_and_skip_focus) ... ok
+test_timeout_and_invalid_start_response_do_not_fall_back (browser_test.BrowserTests.test_timeout_and_invalid_start_response_do_not_fall_back) ... ok
+test_visual_layouts_zoom_reduced_motion_and_navigation (browser_test.BrowserTests.test_visual_layouts_zoom_reduced_motion_and_navigation) ... ok
+test_voluntary_submission_validation_cancel_and_identical_retry (browser_test.BrowserTests.test_voluntary_submission_validation_cancel_and_identical_retry) ... ok
+test_keyboard_full_route_and_pause_every_attack_phase (escape_browser_test.EscapeBrowserTests.test_keyboard_full_route_and_pause_every_attack_phase) ... ok
+test_touch_full_route_with_reduced_motion (escape_browser_test.EscapeBrowserTests.test_touch_full_route_with_reduced_motion) ... ok
+test_3d_lifecycle_reduced_motion_hidden_tab_offscreen_and_context_loss (home_design_test.HomeDesignTests.test_3d_lifecycle_reduced_motion_hidden_tab_offscreen_and_context_loss) ... ok
+test_all_existing_commands_and_validation (home_design_test.HomeDesignTests.test_all_existing_commands_and_validation) ... ok
+test_copy_contact (home_design_test.HomeDesignTests.test_copy_contact) ... ok
+test_help_ls_cat_all_are_short_and_safe_and_keep_personal_content (home_design_test.HomeDesignTests.test_help_ls_cat_all_are_short_and_safe_and_keep_personal_content) ... ok
+test_keyboard_chips_enter_space_and_skip_focus (home_design_test.HomeDesignTests.test_keyboard_chips_enter_space_and_skip_focus) ... ok
+test_no_js_and_failed_home_js_keep_real_content_and_native_detail_links (home_design_test.HomeDesignTests.test_no_js_and_failed_home_js_keep_real_content_and_native_detail_links) ... ok
+test_no_persistence_api_or_background_fetches_and_media_lazy (home_design_test.HomeDesignTests.test_no_persistence_api_or_background_fetches_and_media_lazy) ... ok
+test_projects_log_commands_deep_links_history_and_view_focus (home_design_test.HomeDesignTests.test_projects_log_commands_deep_links_history_and_view_focus) ... ok
+test_protected_game_backend_shared_files_unchanged (home_design_test.HomeDesignTests.test_protected_game_backend_shared_files_unchanged) ... ok
+test_reading_old_output_is_not_pulled_to_new_lines (home_design_test.HomeDesignTests.test_reading_old_output_is_not_pulled_to_new_lines) ... ok
+test_reduced_motion_webgl_and_module_failure_fallback (home_design_test.HomeDesignTests.test_reduced_motion_webgl_and_module_failure_fallback) ... ok
+test_responsive_matrix_zoom_touch_sizes_and_terminal_peek (home_design_test.HomeDesignTests.test_responsive_matrix_zoom_touch_sizes_and_terminal_peek) ... ok
+test_semantic_sources_single_place_and_no_hidden_focusable_store (home_design_test.HomeDesignTests.test_semantic_sources_single_place_and_no_hidden_focusable_store) ... ok
+test_tab_completion_history_clear_and_focus_exit (home_design_test.HomeDesignTests.test_tab_completion_history_clear_and_focus_exit) ... ok
+test_touch_chips_execute_without_keyboard_including_all_navigation_targets (home_design_test.HomeDesignTests.test_touch_chips_execute_without_keyboard_including_all_navigation_targets) ... ok
+test_archive_late_response_and_wrong_date_cannot_paint_another_scope (pf3_archive_test.ArchiveTests.test_archive_late_response_and_wrong_date_cannot_paint_another_scope) ... ok
+test_archive_normal_daily_dates_are_explicit_separate_and_lazy_without_storage (pf3_archive_test.ArchiveTests.test_archive_normal_daily_dates_are_explicit_separate_and_lazy_without_storage) ... ok
+test_archive_reflow_mobile_desktop_zoom_and_native_keys (pf3_archive_test.ArchiveTests.test_archive_reflow_mobile_desktop_zoom_and_native_keys) ... ok
+test_persisted_pf2_best_is_archive_only_preserving_original_raw_value_and_settings (pf3_archive_test.ArchiveTests.test_persisted_pf2_best_is_archive_only_preserving_original_raw_value_and_settings) ... ok
+test_initial_ram_only_does_not_read_existing_records (privacy_navigation_test.PrivacyNavigationTests.test_initial_ram_only_does_not_read_existing_records) ... ok
+test_old_automatic_service_worker_is_upgraded_without_consent (privacy_navigation_test.PrivacyNavigationTests.test_old_automatic_service_worker_is_upgraded_without_consent) ... ok
+test_published_shell4_upgrades_with_records_and_offline_shell6 (privacy_navigation_test.PrivacyNavigationTests.test_published_shell4_upgrades_with_records_and_offline_shell6) ... ok
+test_published_shell5_upgrades_with_records_and_offline_shell6 (privacy_navigation_test.PrivacyNavigationTests.test_published_shell5_upgrades_with_records_and_offline_shell6) ... ok
+test_published_shell6_upgrades_to_pf3_and_preserves_pf2_records (privacy_navigation_test.PrivacyNavigationTests.test_published_shell6_upgrades_to_pf3_and_preserves_pf2_records) ... ok
+test_restore_revoke_reenable_keeps_records_and_removes_cache (privacy_navigation_test.PrivacyNavigationTests.test_restore_revoke_reenable_keeps_records_and_removes_cache) ... ok
+test_revoke_propagates_to_another_open_tab (privacy_navigation_test.PrivacyNavigationTests.test_revoke_propagates_to_another_open_tab) ... ok
+test_terminal_touch_reflow_targets_and_keyboard (privacy_navigation_test.PrivacyNavigationTests.test_terminal_touch_reflow_targets_and_keyboard) ... ok
+test_absent_or_insufficient_samples_do_not_pass (release_metrics_test.ReleaseMetricsTests.test_absent_or_insufficient_samples_do_not_pass) ... ok
+test_cpu_threshold_is_in_microseconds (release_metrics_test.ReleaseMetricsTests.test_cpu_threshold_is_in_microseconds) ... ok
+test_each_account_quota_has_a_fifty_percent_margin (release_metrics_test.ReleaseMetricsTests.test_each_account_quota_has_a_fifty_percent_margin) ... ok
+test_errors_and_non_success_status_stop_release (release_metrics_test.ReleaseMetricsTests.test_errors_and_non_success_status_stop_release) ... ok
+test_good_samples_below_every_threshold (release_metrics_test.ReleaseMetricsTests.test_good_samples_below_every_threshold) ... ok
+test_missing_account_dataset_does_not_pass (release_metrics_test.ReleaseMetricsTests.test_missing_account_dataset_does_not_pass) ... ok
+test_missing_cpu_is_not_zero (release_metrics_test.ReleaseMetricsTests.test_missing_cpu_is_not_zero) ... ok
+test_html_links_ids_labels_assets (site_test.SiteTests.test_html_links_ids_labels_assets) ... ok
+test_modules_css_fonts_social_and_hosting (site_test.SiteTests.test_modules_css_fonts_social_and_hosting) ... ok
+test_daily_real_signed_run_submit_readback_and_restart (start_integration_test.StartIntegrationTests.test_daily_real_signed_run_submit_readback_and_restart) ... ok
+test_normal_real_signed_run_submit_readback_and_restart (start_integration_test.StartIntegrationTests.test_normal_real_signed_run_submit_readback_and_restart) ... ok
+test_192_result_escape_and_native_close_return_to_fresh_ready (ui_consistency_test.UIConsistencyTests.test_192_result_escape_and_native_close_return_to_fresh_ready) ... ok
+test_192_result_skip_resets_scene_and_preserves_records_skins (ui_consistency_test.UIConsistencyTests.test_192_result_skip_resets_scene_and_preserves_records_skins) ... ok
+test_existing_decline_and_blocked_storage_remain_ram_without_auto_opt_in (ui_consistency_test.UIConsistencyTests.test_existing_decline_and_blocked_storage_remain_ram_without_auto_opt_in) ... ok
+test_initial_normal_daily_urls_and_game_modes_keep_board_lazy (ui_consistency_test.UIConsistencyTests.test_initial_normal_daily_urls_and_game_modes_keep_board_lazy) ... ok
+test_late_daily_reply_never_paints_under_normal_and_final_reload_wins (ui_consistency_test.UIConsistencyTests.test_late_daily_reply_never_paints_under_normal_and_final_reload_wins) ... ok
+test_mode_switch_in_result_reveal_clears_192_and_separates_bests (ui_consistency_test.UIConsistencyTests.test_mode_switch_in_result_reveal_clears_192_and_separates_bests) ... ok
+test_old_reply_after_game_mode_change_uses_current_daily_scope (ui_consistency_test.UIConsistencyTests.test_old_reply_after_game_mode_change_uses_current_daily_scope) ... ok
+test_recommendations_reflow_mobile_desktop_zoom_and_keyboard (ui_consistency_test.UIConsistencyTests.test_recommendations_reflow_mobile_desktop_zoom_and_keyboard) ... ok
+test_restart_clears_current_score_pause_resume_keeps_progress (ui_consistency_test.UIConsistencyTests.test_restart_clears_current_score_pause_resume_keeps_progress) ... ok
+test_utc_rollover_clears_old_day_and_rejects_late_daily_response (ui_consistency_test.UIConsistencyTests.test_utc_rollover_clears_old_day_and_rejects_late_daily_response) ... ok
+test_home_and_game_layouts_landscape_and_zoom (visual_browser_test.VisualBrowserTests.test_home_and_game_layouts_landscape_and_zoom) ... ok
+test_home_terminal_shortcuts_preserve_typed_navigation (visual_browser_test.VisualBrowserTests.test_home_terminal_shortcuts_preserve_typed_navigation) ... ok
+test_jump_point_pause_collision_and_quiet_dialog (visual_browser_test.VisualBrowserTests.test_jump_point_pause_collision_and_quiet_dialog) ... ok
+test_new_assets_are_cached_and_playable_after_offline_reload (visual_browser_test.VisualBrowserTests.test_new_assets_are_cached_and_playable_after_offline_reload) ... ok
+test_play_normal_and_daily_and_reload_separate_records (visual_browser_test.VisualBrowserTests.test_play_normal_and_daily_and_reload_separate_records) ... ok
+test_reduced_motion_and_runtime_preference_change (visual_browser_test.VisualBrowserTests.test_reduced_motion_and_runtime_preference_change) ... ok
+test_repeated_resize_preserves_paused_canvas_pixels (visual_browser_test.VisualBrowserTests.test_repeated_resize_preserves_paused_canvas_pixels) ... ok
+test_twelve_restarts_clear_effects_and_keep_one_frame_loop (visual_browser_test.VisualBrowserTests.test_twelve_restarts_clear_effects_and_keep_one_frame_loop) ... ok
+
+----------------------------------------------------------------------
+Ran 78 tests in 277.149s
+
+OK
+
+
+existing-node.log
+✔ Moving and closing gates have bounded continuous edges; safety corridors suppress them (93.990954ms)
+✔ Projectile collision matches its rectangle; trace lock never follows input (1.08698ms)
+✔ Laser warnings and charge are harmless; active strip hits; safe route exists (1.490659ms)
+✔ Fragments are after complete gates, score once, raise capped combo; misses reset (1.045878ms)
+✔ Score formula rejects forged components and accepts the full new maximum (0.389508ms)
+✔ pf-1 archive, UUID, mute and unlocked skins survive without point-based early unlocks (6.740251ms)
+✔ Persisted pf-1 archive survives deletion of the separate legacy key and another reload (0.726977ms)
+✔ Fixed-step replay includes reactive enemies at all cadences; pause and reset own all clocks (98.294047ms)
+✔ 100 deterministic seed samples: an input-only safe-route controller passes 35 gates (297.028385ms)
+✔ 1000 sampled routes remain traversable with optional fragments through maximum difficulty (3879.215136ms)
+✔ Daily deterministic, versioned and changes at UTC midnight (33.293067ms)
+✔ Fixed physics at 60/120/144/240Hz and mixed frames (38.61412ms)
+✔ Score only after entire hitbox passes, once; gate and floor collisions (2.845063ms)
+✔ Reset and pause clock preserve a run without duplicate ticks (2.432019ms)
+✔ Storage: modes/day separation, unlocks, selection, corrupt and blocked storage (16.012782ms)
+✔ Unicode aliases and ranks (1.223075ms)
+✔ Empty API performs no requests; error and timeout are explicit (4061.929088ms)
+✔ Audio failure never blocks play (0.948471ms)
+✔ Leaderboard projections: rank/time/own position and malformed API dates (8.837599ms)
+✔ Daily physics/sequence, hitboxes and score unchanged by rendering, skins or cosmetic RNG (2037.426944ms)
+✔ Effects are bounded, expire and restart without accumulated particles or clocks (23.799019ms)
+✔ Pause freezes effects; Reduced Motion prunes trail, rings and particle count (0.531062ms)
+✔ Collision breaks the packet once, settles, and dead-flight flap produces no new effect (0.178369ms)
+✔ Opt-in merges preserved bests with RAM progress without duplicating cumulative stats after revocation (0.48365ms)
+✔ Daily deterministic, versioned and changes at UTC midnight (12.530577ms)
+✔ Fixed physics at 60/120/144/240Hz and mixed frames (80.021877ms)
+✔ Score only after entire hitbox passes, once; gate and floor collisions (0.436409ms)
+✔ Reset and pause clock preserve a run without duplicate ticks (0.409978ms)
+✔ Storage: modes/day separation, unlocks, selection, corrupt and blocked storage (14.835746ms)
+✔ Unicode aliases and ranks (1.562267ms)
+✔ Empty API performs no requests; error and timeout are explicit (4113.159533ms)
+✔ Audio failure never blocks play (0.78205ms)
+✔ Leaderboard projections: rank/time/own position and malformed API dates (5.233188ms)
+✔ Daily physics/sequence, hitboxes and score unchanged by rendering, skins or cosmetic RNG (2076.439973ms)
+✔ Effects are bounded, expire and restart without accumulated particles or clocks (25.913424ms)
+✔ Pause freezes effects; Reduced Motion prunes trail, rings and particle count (0.609159ms)
+✔ Collision breaks the packet once, settles, and dead-flight flap produces no new effect (0.249346ms)
+✔ Opt-in merges preserved bests with RAM progress without duplicating cumulative stats after revocation (0.59612ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6506.191139
+
+
+final-home-verified.log
+test_3d_lifecycle_reduced_motion_hidden_tab_offscreen_and_context_loss (__main__.HomeDesignTests.test_3d_lifecycle_reduced_motion_hidden_tab_offscreen_and_context_loss) ... ok
+test_all_existing_commands_and_validation (__main__.HomeDesignTests.test_all_existing_commands_and_validation) ... ok
+test_copy_contact (__main__.HomeDesignTests.test_copy_contact) ... ok
+test_help_ls_cat_all_are_short_and_safe_and_keep_personal_content (__main__.HomeDesignTests.test_help_ls_cat_all_are_short_and_safe_and_keep_personal_content) ... ok
+test_keyboard_chips_enter_space_and_skip_focus (__main__.HomeDesignTests.test_keyboard_chips_enter_space_and_skip_focus) ... ok
+test_no_js_and_failed_home_js_keep_real_content_and_native_detail_links (__main__.HomeDesignTests.test_no_js_and_failed_home_js_keep_real_content_and_native_detail_links) ... ok
+test_no_persistence_api_or_background_fetches_and_media_lazy (__main__.HomeDesignTests.test_no_persistence_api_or_background_fetches_and_media_lazy) ... ok
+test_projects_log_commands_deep_links_history_and_view_focus (__main__.HomeDesignTests.test_projects_log_commands_deep_links_history_and_view_focus) ... ok
+test_protected_game_backend_shared_files_unchanged (__main__.HomeDesignTests.test_protected_game_backend_shared_files_unchanged) ... ok
+test_reading_old_output_is_not_pulled_to_new_lines (__main__.HomeDesignTests.test_reading_old_output_is_not_pulled_to_new_lines) ... ok
+test_reduced_motion_webgl_and_module_failure_fallback (__main__.HomeDesignTests.test_reduced_motion_webgl_and_module_failure_fallback) ... ok
+test_responsive_matrix_zoom_touch_sizes_and_terminal_peek (__main__.HomeDesignTests.test_responsive_matrix_zoom_touch_sizes_and_terminal_peek) ... ok
+test_semantic_sources_single_place_and_no_hidden_focusable_store (__main__.HomeDesignTests.test_semantic_sources_single_place_and_no_hidden_focusable_store) ... ok
+test_tab_completion_history_clear_and_focus_exit (__main__.HomeDesignTests.test_tab_completion_history_clear_and_focus_exit) ... ok
+test_touch_chips_execute_without_keyboard_including_all_navigation_targets (__main__.HomeDesignTests.test_touch_chips_execute_without_keyboard_including_all_navigation_targets) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 20.960s
+
+OK
+
+
+final-terminal-after-dedup.log
+test_terminal_completion_history_and_safe_text (browser_test.BrowserTests.test_terminal_completion_history_and_safe_text) ... ok
+test_terminal_navigation_and_skip_focus (browser_test.BrowserTests.test_terminal_navigation_and_skip_focus) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 4.243s
+
+OK
+
+
+html-final.log
+
+
+site-final.log
+test_html_links_ids_labels_assets (__main__.SiteTests.test_html_links_ids_labels_assets) ... ok
+test_modules_css_fonts_social_and_hosting (__main__.SiteTests.test_modules_css_fonts_social_and_hosting) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.070s
+
+OK

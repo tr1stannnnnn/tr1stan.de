@@ -229,6 +229,12 @@ export function start(canvas, options) {
   var opts = options || {};
   var onFail = opts.onFail || function () {};
   var quality = opts.quality || "high";
+  var landscape = opts.composition === "landscape";
+  function viewport() {
+    return { width: landscape ? canvas.clientWidth : window.innerWidth,
+      height: landscape ? canvas.clientHeight : window.innerHeight };
+  }
+  var size = viewport();
 
   var renderer, scene, camera;
   var tiles = [];
@@ -245,7 +251,7 @@ export function start(canvas, options) {
       canvas: canvas,
       antialias: (window.devicePixelRatio || 1) < 1.5 && quality !== "low",
       alpha: false,
-      powerPreference: "high-performance",
+      powerPreference: quality === "low" ? "low-power" : "high-performance",
       stencil: false,
       depth: true
     });
@@ -255,7 +261,7 @@ export function start(canvas, options) {
   }
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPixelRatio));
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  renderer.setSize(size.width, size.height, false);
 
   scene = new THREE.Scene();
   var sky = skyTexture();
@@ -263,7 +269,7 @@ export function start(canvas, options) {
   scene.background = sky;
   scene.fog = new THREE.Fog(C.fog, FOG_NEAR, FOG_FAR);
 
-  camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 1, 2600);
+  camera = new THREE.PerspectiveCamera(62, size.width / size.height, 1, 2600);
   camera.position.set(0, CAM_Y, 0);
   scene.add(camera);
 
@@ -345,13 +351,14 @@ export function start(canvas, options) {
   disposables.push(sunTex, glowTex, sunMat, glowMat, quad);
 
   var sun = new THREE.Mesh(quad, sunMat);
-  sun.scale.set(SUN_R * 2, SUN_R * 2, 1);
-  sun.position.set(0, SUN_Y, SUN_Z);
+  var sunScale = landscape ? 0.74 : 1;
+  sun.scale.set(SUN_R * 2 * sunScale, SUN_R * 2 * sunScale, 1);
+  sun.position.set(0, landscape ? 210 : SUN_Y, SUN_Z);
   scene.add(sun);
 
   var glow = new THREE.Mesh(quad, glowMat);
-  glow.scale.set(SUN_R * 4.2, SUN_R * 4.2, 1);
-  glow.position.set(0, SUN_Y, SUN_Z - 12);
+  glow.scale.set(SUN_R * 4.2 * sunScale, SUN_R * 4.2 * sunScale, 1);
+  glow.position.set(0, landscape ? 210 : SUN_Y, SUN_Z - 12);
   scene.add(glow);
 
   /* Sterne: Punkte im oberen Bereich, leicht unterschiedlich hell, ohne Nebel
@@ -575,7 +582,9 @@ export function start(canvas, options) {
     starMat.opacity = 0.9 - (0.9 - STAR_FADE_TO) * e;
 
     var halfW = Math.abs(SUN_Z) * Math.tan((camera.fov * Math.PI) / 360) * camera.aspect;
-    var sx = Math.min(SUN_DRIFT_NDC * halfW, SUN_DRIFT_MAX) * e;
+    var sx = landscape
+      ? Math.min((0.48 + SUN_DRIFT_NDC * e) * halfW, SUN_DRIFT_MAX)
+      : Math.min(SUN_DRIFT_NDC * halfW, SUN_DRIFT_MAX) * e;
     sun.position.x = sx;
     glow.position.x = sx;
 
@@ -624,7 +633,8 @@ export function start(canvas, options) {
   /* --- Fenstergröße, gedrosselt -------------------------------------------- */
   var resizeTimer = 0;
   function resize() {
-    var w = window.innerWidth, h = window.innerHeight;
+    var currentSize = viewport();
+    var w = currentSize.width, h = currentSize.height;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);

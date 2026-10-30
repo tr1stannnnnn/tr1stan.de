@@ -1,0 +1,54 @@
+{
+  "baseline": "5cb45b8fbe18ed9fee6d538c8929d04b03fa89b5",
+  "branch": "codex/network-landscape-draft",
+  "date": "2026-10-30",
+  "python_aggregate": {
+    "passed": 78,
+    "failed": 0,
+    "existing": 63,
+    "new_home": 15
+  },
+  "node": {
+    "passed": 38,
+    "failed": 0
+  },
+  "post_polish_home": {
+    "passed": 15,
+    "failed": 0
+  },
+  "post_semantic_terminal": {
+    "passed": 2,
+    "failed": 0
+  },
+  "html": {
+    "pages": 6,
+    "errors": 0
+  },
+  "site": {
+    "passed": 2,
+    "failed": 0
+  },
+  "unique_cases": 116,
+  "note": "Repeated targeted runs are not added to unique count. Post-polish home test observes actual renderer pause callback before testing stability; initial fixed150ms assumption was corrected.",
+  "log_sha256": {
+    "final-all-python.log": "7a3978957097031fb9ad63d42ad200442f148a0fbcbc1639d61469917b89f581",
+    "existing-node.log": "2e09b2fa0774cb29b94bbac0fa39598e4d753c9379b3e6630028938fab5b9389",
+    "final-home-verified.log": "8ef4f1ea15bc0bf355ca121d4c0468d6504665078d00ff41775ede9f4cf1640c",
+    "final-terminal-after-dedup.log": "dc42acbf0614a8e7560fe153f965324c26a5e1cee5692bebefd00c939c9a39e5",
+    "html-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "site-final.log": "993ee1569435b7bcb737cb4a7ecf0877bb6ca9a1c60eddc23ea9bbb2254ed5cc"
+  },
+  "protected_files_verified": 58,
+  "public_worker_requests": 0,
+  "public_score_submissions": 0,
+  "production_changes": 0,
+  "hosting": "existing GitHub Pages, unchanged; draft only",
+  "preview_url": null,
+  "limitations": [
+    "Cloud Chromium and emulated touch only",
+    "3D uses software WebGL in cloud",
+    "Physical devices/Safari/actual screenreader not tested",
+    "No new production backend CPU/quota/load test",
+    "Long pf3 seed sweep and27 backend unit cases not rerun because their source is unchanged"
+  ]
+}

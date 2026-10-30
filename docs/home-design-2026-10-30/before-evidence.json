@@ -1,0 +1,24 @@
+{
+  "source": "5cb45b8fbe18ed9fee6d538c8929d04b03fa89b5",
+  "transport": "Actual live bytes via CA-validating Python, no native Chromium trust changes",
+  "screens": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "has3d": true,
+      "terminal_top": 1002.25,
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "has3d": true,
+      "terminal_top": 889.640625,
+      "errors": []
+    }
+  ]
+}
